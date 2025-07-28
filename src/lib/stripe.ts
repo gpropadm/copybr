@@ -1,12 +1,16 @@
 import Stripe from 'stripe'
 
-if (!process.env.STRIPE_SECRET_KEY) {
-  throw new Error('STRIPE_SECRET_KEY não encontrada nas variáveis de ambiente')
-}
+// Durante o build, o Stripe pode não estar configurado
+const STRIPE_SECRET_KEY = process.env.STRIPE_SECRET_KEY || 'sk_test_dummy_key_for_build'
 
-export const stripe = new Stripe(process.env.STRIPE_SECRET_KEY, {
+export const stripe = new Stripe(STRIPE_SECRET_KEY, {
   apiVersion: '2025-06-30.basil',
 })
+
+// Helper para verificar se o Stripe está configurado corretamente
+export const isStripeConfigured = () => {
+  return process.env.STRIPE_SECRET_KEY && process.env.STRIPE_SECRET_KEY.startsWith('sk_')
+}
 
 export const PLANS = {
   free: {
@@ -57,6 +61,10 @@ export async function createCheckoutSession(
   userId: string,
   userEmail: string
 ) {
+  if (!isStripeConfigured()) {
+    throw new Error('Stripe não está configurado corretamente')
+  }
+
   const plan = PLANS[planType]
   
   if (planType === 'free') {
@@ -92,6 +100,10 @@ export async function createCheckoutSession(
 }
 
 export async function createBillingPortalSession(customerId: string) {
+  if (!isStripeConfigured()) {
+    throw new Error('Stripe não está configurado corretamente')
+  }
+
   const session = await stripe.billingPortal.sessions.create({
     customer: customerId,
     return_url: `${process.env.NEXT_PUBLIC_APP_URL}/dashboard`,
