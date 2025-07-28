@@ -1,3 +1,4 @@
+/* eslint-disable react/no-unescaped-entities */
 import { Briefcase, Users, FileText, BarChart3, ArrowRight, CheckCircle, Star, Building } from 'lucide-react'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/Card'
 import Button from '@/components/ui/Button'
