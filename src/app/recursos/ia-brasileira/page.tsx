@@ -185,7 +185,7 @@ export default function IABrasileiraPage() {
                     <div>
                       <p className="text-red-800 font-medium mb-2">Problemas:</p>
                       <ul className="text-red-700 text-sm space-y-1">
-                        {example.problems.map((problem, i) => (
+                        {example.problems?.map((problem, i) => (
                           <li key={i}>• {problem}</li>
                         ))}
                       </ul>
@@ -195,7 +195,7 @@ export default function IABrasileiraPage() {
                     <div>
                       <p className="text-green-800 font-medium mb-2">Por que funciona:</p>
                       <ul className="text-green-700 text-sm space-y-1">
-                        {example.benefits.map((benefit, i) => (
+                        {example.benefits?.map((benefit, i) => (
                           <li key={i}>• {benefit}</li>
                         ))}
                       </ul>
