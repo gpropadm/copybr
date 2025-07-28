@@ -39,7 +39,7 @@ export default function EmpresarialPage() {
     before: {
       title: 'Comunicado: Nova Política de Home Office',
       content: 'Informamos que a partir de segunda-feira, dia 15/01, haverá mudanças na política de trabalho remoto conforme diretrizes da diretoria...',
-      problems: ['Linguagem muito formal', 'Começo chato', 'Não explica o "porquê"', 'Funcionários não se importam']
+      problems: ['Linguagem muito formal', 'Começo chato', 'Não explica o \"porquê\"', 'Funcionários não se importam']
     },
     after: {
       title: '🏠 Novidade que vocês pediram: Home Office mais flexível!',
@@ -52,7 +52,7 @@ export default function EmpresarialPage() {
     {
       tip: 'Seja Humano',
       description: 'Escreva como você falaria pessoalmente',
-      example: 'Ao invés de "Comunicamos que..." use "Pessoal, uma novidade..."'
+      example: 'Ao invés de \"Comunicamos que...\" use \"Pessoal, uma novidade...\"'
     },
     {
       tip: 'Explique o Porquê',
@@ -62,7 +62,7 @@ export default function EmpresarialPage() {
     {
       tip: 'Use Dados Simples',
       description: 'Números que qualquer um entende',
-      example: 'Ao invés de "ROI de 23,7%" use "Economizamos R$ 50 mil"'
+      example: 'Ao invés de \"ROI de 23,7%\" use \"Economizamos R$ 50 mil\"'
     },
     {
       tip: 'Call-to-Action Claro',
