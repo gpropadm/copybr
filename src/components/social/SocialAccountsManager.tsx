@@ -65,10 +65,10 @@ export default function SocialAccountsManager({ userId, onAccountChange }: Socia
 
         const user = JSON.parse(userData)
         
-        // URL de OAuth do Facebook
+        // URL de OAuth do Facebook com redirect URI fixo
         const facebookAuthUrl = new URL('https://www.facebook.com/v18.0/dialog/oauth')
         facebookAuthUrl.searchParams.set('client_id', process.env.NEXT_PUBLIC_FACEBOOK_APP_ID || '1256183002680390')
-        facebookAuthUrl.searchParams.set('redirect_uri', `${window.location.origin}/api/auth/facebook/callback`)
+        facebookAuthUrl.searchParams.set('redirect_uri', 'https://copybr.vercel.app/api/auth/facebook/callback')
         facebookAuthUrl.searchParams.set('scope', 'pages_manage_posts,pages_read_engagement,publish_to_groups')
         facebookAuthUrl.searchParams.set('state', user.id) // User ID para identificar após callback
         facebookAuthUrl.searchParams.set('response_type', 'code')

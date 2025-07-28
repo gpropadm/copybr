@@ -20,7 +20,7 @@ export async function GET(request: NextRequest) {
       body: new URLSearchParams({
         client_id: process.env.FACEBOOK_APP_ID!,
         client_secret: process.env.FACEBOOK_APP_SECRET!,
-        redirect_uri: `${process.env.NEXTAUTH_URL}/api/auth/facebook/callback`,
+        redirect_uri: 'https://copybr.vercel.app/api/auth/facebook/callback',
         code,
       }),
     })
