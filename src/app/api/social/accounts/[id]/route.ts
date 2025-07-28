@@ -4,9 +4,10 @@ import { prisma } from '@/lib/prisma'
 // DELETE /api/social/accounts/[id] - Desconectar conta social
 export async function DELETE(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  context: { params: Promise<{ id: string }> }
 ) {
   try {
+    const params = await context.params
     const userId = request.headers.get('x-user-id')
     const accountId = params.id
     
@@ -62,9 +63,10 @@ export async function DELETE(
 // PUT /api/social/accounts/[id] - Atualizar conta social
 export async function PUT(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  context: { params: Promise<{ id: string }> }
 ) {
   try {
+    const params = await context.params
     const userId = request.headers.get('x-user-id')
     const accountId = params.id
     
