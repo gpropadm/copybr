@@ -56,25 +56,11 @@ export default function SocialAccountsManager({ userId, onAccountChange }: Socia
     
     try {
       if (platform.toLowerCase() === 'facebook') {
-        // OAuth real do Facebook
-        const userData = localStorage.getItem('auth_user')
-        if (!userData) {
-          alert('Você precisa estar logado para conectar contas sociais')
-          return
-        }
-
-        const user = JSON.parse(userData)
-        
-        // URL de OAuth do Facebook com redirect URI fixo
-        const facebookAuthUrl = new URL('https://www.facebook.com/v18.0/dialog/oauth')
-        facebookAuthUrl.searchParams.set('client_id', process.env.NEXT_PUBLIC_FACEBOOK_APP_ID || '614229324684892')
-        facebookAuthUrl.searchParams.set('redirect_uri', 'https://copybr.vercel.app/api/auth/facebook/callback')
-        facebookAuthUrl.searchParams.set('scope', '')
-        facebookAuthUrl.searchParams.set('state', user.id) // User ID para identificar após callback
-        facebookAuthUrl.searchParams.set('response_type', 'code')
-
-        // Abrir popup ou redirecionar
-        window.location.href = facebookAuthUrl.toString()
+        // Simulação temporária até resolver app mode
+        alert('Facebook em desenvolvimento - simulando conexão...')
+        await simulateOAuthConnection(platform)
+        await fetchAccounts()
+        if (onAccountChange) onAccountChange()
       } else {
         // Simulação para outras plataformas
         await simulateOAuthConnection(platform)
