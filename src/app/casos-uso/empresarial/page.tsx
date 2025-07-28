@@ -1,4 +1,4 @@
-import { Briefcase, Users, FileText, PresentationChart, ArrowRight, CheckCircle, Star, Building } from 'lucide-react'
+import { Briefcase, Users, FileText, BarChart3, ArrowRight, CheckCircle, Star, Building } from 'lucide-react'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/Card'
 import Button from '@/components/ui/Button'
 import Link from 'next/link'
@@ -21,7 +21,7 @@ export default function EmpresarialPage() {
     },
     {
       title: 'Apresentações Corporativas',
-      icon: <PresentationChart className="h-8 w-8 text-purple-600" />,
+      icon: <BarChart3 className="h-8 w-8 text-purple-600" />,
       description: 'Slides que mantêm a audiência acordada e engajada',
       examples: ['Pitch para investidores', 'Reunião de resultados', 'Treinamento de equipe'],
       result: '+180% aprovação de projetos'
@@ -159,7 +159,7 @@ export default function EmpresarialPage() {
               <div>
                 <h3 className="text-lg font-semibold text-red-900 mb-3">❌ Erros que toda empresa comete:</h3>
                 <ul className="text-red-800 space-y-2">
-                  <li>• <strong>Muito formal:</strong> "Comunicamos que..." - ninguém se conecta</li>
+                  <li>• <strong>Muito formal:</strong> &quot;Comunicamos que...&quot; - ninguém se conecta</li>
                   <li>• <strong>Informação demais:</strong> Emails gigantes que ninguém lê até o fim</li>
                   <li>• <strong>Sem contexto:</strong> Não explica por que é importante</li>
                   <li>• <strong>Linguagem difícil:</strong> Jargões que só a diretoria entende</li>
@@ -168,9 +168,9 @@ export default function EmpresarialPage() {
               <div>
                 <h3 className="text-lg font-semibold text-green-900 mb-3">✅ Como nossa IA corrige:</h3>
                 <ul className="text-green-800 space-y-2">
-                  <li>• <strong>Tom humano:</strong> "Pessoal, novidade boa aqui!"</li>
+                  <li>• <strong>Tom humano:</strong> &quot;Pessoal, novidade boa aqui!&quot;</li>
                   <li>• <strong>Direto ao ponto:</strong> Informação importante primeiro</li>
-                  <li>• <strong>Explica o "porquê":</strong> Conecta com impacto real</li>
+                  <li>• <strong>Explica o &quot;porquê&quot;:</strong> Conecta com impacto real</li>
                   <li>• <strong>Linguagem simples:</strong> Todo mundo entende</li>
                 </ul>
               </div>
@@ -247,7 +247,7 @@ export default function EmpresarialPage() {
                     😴
                   </div>
                   <h3 className="ml-3 text-lg font-semibold text-red-900">
-                    Comunicação "Normal" (Que ninguém lê)
+                    Comunicação &quot;Normal&quot; (Que ninguém lê)
                   </h3>
                 </div>
                 
@@ -368,7 +368,7 @@ export default function EmpresarialPage() {
                   Informe o Contexto
                 </h3>
                 <p className="text-gray-600">
-                  "Mudança de política", "resultado do trimestre", "novo projeto"... 
+                  &quot;Mudança de política&quot;, &quot;resultado do trimestre&quot;, &quot;novo projeto&quot;... 
                   Conte o assunto e nossa IA cria a mensagem perfeita.
                 </p>
               </CardContent>
