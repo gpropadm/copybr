@@ -4,9 +4,10 @@ import { prisma } from '@/lib/prisma'
 // GET /api/projects/[id] - Buscar projeto específico
 export async function GET(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  context: { params: Promise<{ id: string }> }
 ) {
   try {
+    const params = await context.params
     const projectId = params.id
     const userId = request.headers.get('x-user-id')
     
@@ -70,9 +71,10 @@ export async function GET(
 // PUT /api/projects/[id] - Atualizar projeto
 export async function PUT(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  context: { params: Promise<{ id: string }> }
 ) {
   try {
+    const params = await context.params
     const projectId = params.id
     const userId = request.headers.get('x-user-id')
     
@@ -150,9 +152,10 @@ export async function PUT(
 // DELETE /api/projects/[id] - Deletar projeto
 export async function DELETE(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  context: { params: Promise<{ id: string }> }
 ) {
   try {
+    const params = await context.params
     const projectId = params.id
     const userId = request.headers.get('x-user-id')
     
