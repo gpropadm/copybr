@@ -15,6 +15,9 @@ export default function RootLayout({
 }) {
   return (
     <html lang="pt-BR">
+      <head>
+        <meta name="facebook-domain-verification" content="1256183002680390" />
+      </head>
       <body className="font-sans antialiased">
         <AuthProvider>
           <ConditionalNavbar />
