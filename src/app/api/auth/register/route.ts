@@ -55,18 +55,6 @@ export async function POST(request: NextRequest) {
         plan: 'FREE'
       }
     })
-
-    // Criar registro de usage inicial
-    const now = new Date()
-    await prisma.usage.create({
-      data: {
-        userId: user.id,
-        month: now.getMonth() + 1,
-        year: now.getFullYear(),
-        generations: 0,
-        tokensUsed: 0
-      }
-    })
     
     return NextResponse.json({ 
       success: true,
