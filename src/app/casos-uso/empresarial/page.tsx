@@ -430,8 +430,8 @@ export default function EmpresarialPage() {
                   ))}
                 </div>
                 <blockquote className="text-xl text-gray-700 italic mb-6">
-                  "Nossa comunicação interna mudou completamente! Antes os funcionários ignoravam nossos emails, 
-                  agora todos leem e participam. O CopyBR tornou nossa empresa mais unida e produtiva."
+                  &quot;Nossa comunicação interna mudou completamente! Antes os funcionários ignoravam nossos emails, 
+                  agora todos leem e participam. O CopyBR tornou nossa empresa mais unida e produtiva.&quot;
                 </blockquote>
                 <div className="flex items-center justify-center space-x-4">
                   <div className="w-12 h-12 bg-gray-600 rounded-full flex items-center justify-center text-white font-bold">
