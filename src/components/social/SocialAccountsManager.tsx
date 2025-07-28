@@ -55,14 +55,35 @@ export default function SocialAccountsManager({ userId, onAccountChange }: Socia
     setConnecting(platform)
     
     try {
-      // Por enquanto, vamos simular a conexão
-      // Na implementação real, isso abriria o popup de OAuth
-      await simulateOAuthConnection(platform)
-      
-      await fetchAccounts()
-      if (onAccountChange) onAccountChange()
+      if (platform.toLowerCase() === 'facebook') {
+        // OAuth real do Facebook
+        const userData = localStorage.getItem('auth_user')
+        if (!userData) {
+          alert('Você precisa estar logado para conectar contas sociais')
+          return
+        }
+
+        const user = JSON.parse(userData)
+        
+        // URL de OAuth do Facebook
+        const facebookAuthUrl = new URL('https://www.facebook.com/v18.0/dialog/oauth')
+        facebookAuthUrl.searchParams.set('client_id', process.env.NEXT_PUBLIC_FACEBOOK_APP_ID || '1256183002680390')
+        facebookAuthUrl.searchParams.set('redirect_uri', `${window.location.origin}/api/auth/facebook/callback`)
+        facebookAuthUrl.searchParams.set('scope', 'pages_manage_posts,pages_read_engagement,publish_to_groups')
+        facebookAuthUrl.searchParams.set('state', user.id) // User ID para identificar após callback
+        facebookAuthUrl.searchParams.set('response_type', 'code')
+
+        // Abrir popup ou redirecionar
+        window.location.href = facebookAuthUrl.toString()
+      } else {
+        // Simulação para outras plataformas
+        await simulateOAuthConnection(platform)
+        await fetchAccounts()
+        if (onAccountChange) onAccountChange()
+      }
     } catch (error) {
       console.error('Erro ao conectar conta:', error)
+      alert('Erro ao conectar conta. Tente novamente.')
     } finally {
       setConnecting(null)
     }
