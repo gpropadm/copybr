@@ -164,7 +164,7 @@ export default function ImageToPromptPage() {
                   : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
               }`}
             >
-              Apenas Prompt
+              Quero um Prompt
             </button>
             <button
               onClick={() => setAnalysisMode('copy+prompt')}
@@ -174,7 +174,7 @@ export default function ImageToPromptPage() {
                   : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
               }`}
             >
-              Copy + Prompt
+              Quero uma Copy
             </button>
           </div>
         </div>
