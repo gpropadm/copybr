@@ -129,11 +129,11 @@ export default function PlanosPage() {
     <div className="min-h-screen p-4 sm:p-6">
       <div className="max-w-7xl mx-auto">
         {/* Header */}
-        <div className="text-center mb-8">
-          <h1 className="text-3xl sm:text-4xl font-bold text-gray-900 mb-4">
+        <div className="text-center mb-6">
+          <h1 className="text-2xl sm:text-3xl font-bold text-gray-900 mb-3">
             Escolha o Plano Ideal
           </h1>
-          <p className="text-lg text-gray-600 mb-6">
+          <p className="text-base text-gray-600 mb-4">
             Transforme suas ideias em copies poderosas com IA
           </p>
 
@@ -168,7 +168,7 @@ export default function PlanosPage() {
         </div>
 
         {/* Plans Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-12">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
           {plans.map((plan) => (
             <Card 
               key={plan.id} 
@@ -191,20 +191,20 @@ export default function PlanosPage() {
                   <plan.icon className={`h-6 w-6 ${plan.color}`} />
                 </div>
                 
-                <CardTitle className="text-xl font-bold text-gray-900">
+                <CardTitle className="text-lg font-bold text-gray-900">
                   {plan.name}
                 </CardTitle>
                 
-                <div className="mt-2">
-                  <span className="text-4xl font-bold text-gray-900">
+                <div className="mt-1">
+                  <span className="text-3xl font-bold text-gray-900">
                     {plan.price === 0 ? 'Grátis' : `R$${plan.price}`}
                   </span>
                   {plan.price > 0 && (
-                    <span className="text-gray-600 ml-1">{plan.period}</span>
+                    <span className="text-gray-600 ml-1 text-sm">{plan.period}</span>
                   )}
                 </div>
                 
-                <p className="text-sm text-gray-600 mt-2">
+                <p className="text-xs text-gray-600 mt-1">
                   {plan.description}
                 </p>
               </CardHeader>
@@ -257,59 +257,59 @@ export default function PlanosPage() {
         </div>
 
         {/* FAQ */}
-        <div className="max-w-3xl mx-auto">
-          <h2 className="text-2xl font-bold text-gray-900 text-center mb-8">
+        <div className="max-w-6xl mx-auto">
+          <h2 className="text-xl font-bold text-gray-900 text-center mb-6">
             Perguntas Frequentes
           </h2>
           
-          <div className="space-y-6">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <Card>
-              <CardHeader>
-                <CardTitle className="text-lg">
+              <CardHeader className="pb-2">
+                <CardTitle className="text-sm font-medium">
                   Posso cancelar minha assinatura a qualquer momento?
                 </CardTitle>
               </CardHeader>
               <CardContent>
-                <p className="text-gray-600">
+                <p className="text-xs text-gray-600">
                   Sim! Você pode cancelar sua assinatura a qualquer momento. Não há multas ou taxas de cancelamento.
                 </p>
               </CardContent>
             </Card>
 
             <Card>
-              <CardHeader>
-                <CardTitle className="text-lg">
+              <CardHeader className="pb-2">
+                <CardTitle className="text-sm font-medium">
                   O que acontece se eu exceder meu limite mensal?
                 </CardTitle>
               </CardHeader>
               <CardContent>
-                <p className="text-gray-600">
-                  Quando você atingir o limite, receberá uma notificação para fazer upgrade. Nos planos pagos, oferecemos um buffer de segurança antes de qualquer bloqueio.
+                <p className="text-xs text-gray-600">
+                  Quando você atingir o limite, receberá uma notificação para fazer upgrade. Nos planos pagos, oferecemos um buffer de segurança.
                 </p>
               </CardContent>
             </Card>
 
             <Card>
-              <CardHeader>
-                <CardTitle className="text-lg">
+              <CardHeader className="pb-2">
+                <CardTitle className="text-sm font-medium">
                   Posso fazer upgrade ou downgrade do meu plano?
                 </CardTitle>
               </CardHeader>
               <CardContent>
-                <p className="text-gray-600">
-                  Claro! Você pode alterar seu plano a qualquer momento. As mudanças entram em vigor imediatamente e o faturamento é ajustado proporcionalmente.
+                <p className="text-xs text-gray-600">
+                  Claro! Você pode alterar seu plano a qualquer momento. As mudanças entram em vigor imediatamente.
                 </p>
               </CardContent>
             </Card>
 
             <Card>
-              <CardHeader>
-                <CardTitle className="text-lg">
+              <CardHeader className="pb-2">
+                <CardTitle className="text-sm font-medium">
                   Há garantia de reembolso?
                 </CardTitle>
               </CardHeader>
               <CardContent>
-                <p className="text-gray-600">
+                <p className="text-xs text-gray-600">
                   Oferecemos garantia de 7 dias para todos os planos pagos. Se não ficar satisfeito, devolvemos 100% do valor pago.
                 </p>
               </CardContent>
@@ -318,16 +318,16 @@ export default function PlanosPage() {
         </div>
 
         {/* CTA Final */}
-        <div className="text-center mt-12 p-8 bg-gradient-to-r from-blue-50 to-purple-50 rounded-2xl">
-          <h2 className="text-2xl font-bold text-gray-900 mb-4">
+        <div className="text-center mt-8 p-6 bg-gradient-to-r from-blue-50 to-purple-50 rounded-xl">
+          <h2 className="text-xl font-bold text-gray-900 mb-3">
             Pronto para Revolucionar suas Copies?
           </h2>
-          <p className="text-gray-600 mb-6">
+          <p className="text-sm text-gray-600 mb-4">
             Junte-se a milhares de profissionais que já usam o CopyBR para criar conteúdo incrível
           </p>
-          <Button size="lg" className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700">
+          <Button className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700">
             Começar Agora Grátis
-            <ArrowRight className="h-5 w-5 ml-2" />
+            <ArrowRight className="h-4 w-4 ml-2" />
           </Button>
         </div>
       </div>
