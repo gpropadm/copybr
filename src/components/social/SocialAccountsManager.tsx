@@ -1,11 +1,10 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import { Plus, X, Check, AlertTriangle, Settings, ExternalLink, Key } from 'lucide-react'
+import { Plus, X, Check, AlertTriangle, Settings, ExternalLink } from 'lucide-react'
 import Button from '@/components/ui/Button'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/Card'
 import { SOCIAL_PLATFORMS } from '@/lib/social-apis'
-import { setAyrshareInstance, getAyrshareInstance } from '@/services/ayrshare'
 
 interface SocialAccount {
   id: string
@@ -24,58 +23,10 @@ export default function SocialAccountsManager({ userId, onAccountChange }: Socia
   const [accounts, setAccounts] = useState<SocialAccount[]>([])
   const [loading, setLoading] = useState(true)
   const [connecting, setConnecting] = useState<string | null>(null)
-  const [ayrshareApiKey, setAyrshareApiKey] = useState<string>('')
-  const [showApiKeyForm, setShowApiKeyForm] = useState(false)
-  const [isAyrshareConnected, setIsAyrshareConnected] = useState(false)
 
   useEffect(() => {
     fetchAccounts()
-    checkAyrshareConnection()
   }, [userId])
-
-  const checkAyrshareConnection = () => {
-    const savedApiKey = localStorage.getItem('ayrshare_api_key')
-    if (savedApiKey) {
-      setAyrshareApiKey(savedApiKey)
-      setAyrshareInstance(savedApiKey)
-      setIsAyrshareConnected(true)
-    }
-  }
-
-  const handleConnectAyrshare = async () => {
-    if (!ayrshareApiKey.trim()) {
-      alert('Por favor, insira sua API Key da Ayrshare')
-      return
-    }
-
-    try {
-      // Testa a conexão com Ayrshare
-      setAyrshareInstance(ayrshareApiKey)
-      const ayrshare = getAyrshareInstance()
-      
-      if (ayrshare) {
-        // Testa a API fazendo uma chamada para obter contas conectadas
-        await ayrshare.getConnectedAccounts()
-        
-        // Salva a API key se a conexão funcionou
-        localStorage.setItem('ayrshare_api_key', ayrshareApiKey)
-        setIsAyrshareConnected(true)
-        setShowApiKeyForm(false)
-        alert('Ayrshare conectada com sucesso!')
-      }
-    } catch (error) {
-      console.error('Erro ao conectar com Ayrshare:', error)
-      alert('Erro ao conectar com Ayrshare. Verifique sua API Key.')
-    }
-  }
-
-  const handleDisconnectAyrshare = () => {
-    localStorage.removeItem('ayrshare_api_key')
-    setAyrshareApiKey('')
-    setIsAyrshareConnected(false)
-    setShowApiKeyForm(false)
-    alert('Ayrshare desconectada')
-  }
 
   const fetchAccounts = async () => {
     try {
@@ -101,18 +52,10 @@ export default function SocialAccountsManager({ userId, onAccountChange }: Socia
   }
 
   const handleConnect = async (platform: string) => {
-    // Se Ayrshare não estiver conectada, pede para conectar primeiro
-    if (!isAyrshareConnected) {
-      setShowApiKeyForm(true)
-      alert('Primeiro conecte sua conta Ayrshare para gerenciar suas redes sociais!')
-      return
-    }
-
     setConnecting(platform)
     
     try {
-      // Com Ayrshare conectada, simula conexão bem-sucedida
-      alert(`Conectando ${platform} via Ayrshare...`)
+      alert(`Conectando ${platform}... (simulação)`)
       await simulateOAuthConnection(platform)
       await fetchAccounts()
       if (onAccountChange) onAccountChange()
@@ -231,101 +174,6 @@ export default function SocialAccountsManager({ userId, onAccountChange }: Socia
 
   return (
     <div className="space-y-6">
-      {/* Ayrshare Configuration Card */}
-      <Card>
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <Key className="h-5 w-5" />
-            Configuração Ayrshare
-          </CardTitle>
-          <CardDescription>
-            Conecte sua conta Ayrshare para gerenciar todas as suas redes sociais em um só lugar
-          </CardDescription>
-        </CardHeader>
-        <CardContent>
-          {!isAyrshareConnected ? (
-            <div className="space-y-4">
-              <div className="p-4 bg-blue-50 border border-blue-200 rounded-lg">
-                <p className="text-sm text-blue-800 mb-2">
-                  <strong>Por que usar Ayrshare?</strong>
-                </p>
-                <ul className="text-sm text-blue-700 space-y-1">
-                  <li>• Conecte Facebook, Instagram, LinkedIn, Twitter e mais</li>
-                  <li>• Sem aprovação complexa de apps</li>
-                  <li>• Agende posts para múltiplas redes</li>
-                  <li>• Analytics incluídos</li>
-                </ul>
-              </div>
-              
-              {!showApiKeyForm ? (
-                <div className="flex gap-2">
-                  <Button onClick={() => setShowApiKeyForm(true)}>
-                    Conectar Ayrshare
-                  </Button>
-                  <Button 
-                    variant="outline"
-                    onClick={() => window.open('https://www.ayrshare.com/', '_blank')}
-                  >
-                    <ExternalLink className="h-4 w-4 mr-2" />
-                    Criar conta Ayrshare
-                  </Button>
-                </div>
-              ) : (
-                <div className="space-y-3">
-                  <div>
-                    <label className="block text-sm font-medium mb-1">
-                      API Key da Ayrshare
-                    </label>
-                    <input
-                      type="password"
-                      value={ayrshareApiKey}
-                      onChange={(e) => setAyrshareApiKey(e.target.value)}
-                      placeholder="Cole sua API Key aqui..."
-                      className="w-full p-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-[#693ee0] focus:border-[#693ee0]"
-                    />
-                    <p className="text-xs text-gray-500 mt-1">
-                      Encontre sua API Key em: Ayrshare Dashboard → Settings → API Keys
-                    </p>
-                  </div>
-                  <div className="flex gap-2">
-                    <Button onClick={handleConnectAyrshare}>
-                      Conectar
-                    </Button>
-                    <Button 
-                      variant="outline"
-                      onClick={() => setShowApiKeyForm(false)}
-                    >
-                      Cancelar
-                    </Button>
-                  </div>
-                </div>
-              )}
-            </div>
-          ) : (
-            <div className="flex items-center justify-between p-4 bg-green-50 border border-green-200 rounded-lg">
-              <div className="flex items-center gap-3">
-                <Check className="h-5 w-5 text-green-600" />
-                <div>
-                  <p className="text-sm font-medium text-green-800">
-                    Ayrshare conectada
-                  </p>
-                  <p className="text-sm text-green-600">
-                    Pronto para conectar suas redes sociais
-                  </p>
-                </div>
-              </div>
-              <Button 
-                variant="outline" 
-                size="sm"
-                onClick={handleDisconnectAyrshare}
-              >
-                Desconectar
-              </Button>
-            </div>
-          )}
-        </CardContent>
-      </Card>
-
       <Card>
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
