@@ -9,6 +9,7 @@ export default function ImageToPromptPage() {
   const [image, setImage] = useState<string | null>(null)
   const [prompt, setPrompt] = useState('')
   const [copy, setCopy] = useState('')
+  const [copies, setCopies] = useState<string[]>([])
   const [loading, setLoading] = useState(false)
   const [dragActive, setDragActive] = useState(false)
   const [analysisMode, setAnalysisMode] = useState<'prompt' | 'copy+prompt'>('prompt')
@@ -53,6 +54,7 @@ export default function ImageToPromptPage() {
       setImage(e.target?.result as string)
       setPrompt('')
       setCopy('')
+      setCopies([])
     }
     reader.readAsDataURL(file)
   }
@@ -84,38 +86,34 @@ export default function ImageToPromptPage() {
           alert('Erro ao gerar prompt: ' + result.error)
         }
       } else {
-        // Gerar copy + prompt
-        const [promptResponse, copyResponse] = await Promise.all([
-          // Prompt para IA
+        // Gerar 5 copies para redes sociais
+        const copyPromises = Array.from({ length: 5 }, (_, i) => 
           fetch('/api/gemini-vision', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({
               image: base64Data,
-              prompt: 'INSTRUÇÕES: Você deve responder EXCLUSIVAMENTE em português brasileiro. Analise esta imagem em detalhes e crie uma descrição completa em português que serve como prompt para gerar uma imagem similar com IA. Inclua: estilo artístico, cores predominantes, composição, iluminação, atmosfera, elementos principais e secundários. Seja muito específico e detalhado. IMPORTANTE: Toda sua resposta deve estar em português do Brasil, sem nenhuma palavra em inglês.'
-            })
-          }),
-          // Copy para redes sociais
-          fetch('/api/gemini-vision', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-              image: base64Data,
-              prompt: 'INSTRUÇÕES: Você deve responder EXCLUSIVAMENTE em português brasileiro. Analise esta imagem e crie uma copy promocional para redes sociais. A copy deve ser: PERSUASIVA, ENVOLVENTE e PRONTA PARA USAR. Inclua: gancho inicial impactante, benefícios do produto, call-to-action forte, emojis estratégicos, hashtags relevantes. Foque em despertar DESEJO e URGÊNCIA. Máximo 300 caracteres. Exemplo de estrutura: "🔥 [Gancho] + [Benefício] + [CTA] + [Hashtags]". IMPORTANTE: Responda apenas a copy final, sem explicações adicionais.'
+              prompt: `INSTRUÇÕES: Você deve responder EXCLUSIVAMENTE em português brasileiro. Analise esta imagem e crie uma copy promocional para redes sociais. A copy deve ser: PERSUASIVA, ENVOLVENTE e PRONTA PARA USAR. 
+
+VARIAÇÃO ${i + 1}: ${i === 0 ? 'Foque em URGÊNCIA e escassez' : i === 1 ? 'Foque em BENEFÍCIOS e valor' : i === 2 ? 'Foque em EMOÇÃO e desejo' : i === 3 ? 'Foque em AUTORIDADE e qualidade' : 'Foque em CURIOSIDADE e mistério'}
+
+Inclua: gancho inicial impactante, benefícios do produto, call-to-action forte, emojis estratégicos, hashtags relevantes. Máximo 280 caracteres. IMPORTANTE: Responda apenas a copy final, sem explicações adicionais.`
             })
           })
-        ])
+        )
 
-        const [promptResult, copyResult] = await Promise.all([
-          promptResponse.json(),
-          copyResponse.json()
-        ])
+        const copyResponses = await Promise.all(copyPromises)
+        const copyResults = await Promise.all(copyResponses.map(r => r.json()))
         
-        if (promptResult.success && copyResult.success) {
-          setPrompt(promptResult.text)
-          setCopy(copyResult.text)
+        const successfulCopies = copyResults
+          .filter(result => result.success)
+          .map(result => result.text)
+        
+        if (successfulCopies.length > 0) {
+          setCopies(successfulCopies)
+          setPrompt('') // Limpar prompt no modo copy
         } else {
-          alert('Erro ao gerar conteúdo: ' + (promptResult.error || copyResult.error))
+          alert('Erro ao gerar copies: ' + copyResults[0]?.error)
         }
       }
     } catch (error) {
@@ -140,6 +138,7 @@ export default function ImageToPromptPage() {
     setImage(null)
     setPrompt('')
     setCopy('')
+    setCopies([])
   }
 
   return (
@@ -247,7 +246,7 @@ export default function ImageToPromptPage() {
                     ) : (
                       <>
                         <Sparkles className="h-4 w-4 mr-2" />
-                        {analysisMode === 'prompt' ? 'Gerar Prompt' : 'Gerar Copy + Prompt'}
+                        {analysisMode === 'prompt' ? 'Gerar Prompt' : 'Gerar 5 Copies'}
                       </>
                     )}
                   </Button>
@@ -258,17 +257,71 @@ export default function ImageToPromptPage() {
 
           {/* Result Area */}
           <div className="space-y-6">
-            {/* Copy Card */}
-            {analysisMode === 'copy+prompt' && (
+            {/* Copy Mode - 5 Copies */}
+            {analysisMode === 'copy+prompt' ? (
+              <Card>
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2">
+                    <Copy className="h-5 w-5" />
+                    5 Copies para Redes Sociais
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  {copies.length === 0 ? (
+                    <div className="text-center text-gray-500 py-12">
+                      <Copy className="h-12 w-12 text-gray-300 mx-auto mb-4" />
+                      <p>Faça upload de uma imagem para gerar 5 copies promocionais</p>
+                    </div>
+                  ) : (
+                    <div className="space-y-4">
+                      {copies.map((copyText, index) => (
+                        <div key={index} className="border border-blue-200 rounded-lg overflow-hidden">
+                          <div className="bg-blue-50 px-4 py-2 border-b border-blue-200">
+                            <h4 className="font-medium text-blue-900 text-sm">
+                              Copy #{index + 1} - {
+                                index === 0 ? 'Urgência' : 
+                                index === 1 ? 'Benefícios' : 
+                                index === 2 ? 'Emoção' : 
+                                index === 3 ? 'Autoridade' : 'Curiosidade'
+                              }
+                            </h4>
+                          </div>
+                          <div className="p-4 bg-white">
+                            <p className="text-gray-800 leading-relaxed whitespace-pre-wrap mb-3">
+                              {copyText}
+                            </p>
+                            <Button 
+                              size="sm" 
+                              onClick={() => {
+                                navigator.clipboard.writeText(copyText)
+                                alert(`Copy #${index + 1} copiada!`)
+                              }}
+                              className="w-full"
+                            >
+                              <Copy className="h-3 w-3 mr-2" />
+                              Copiar Copy #{index + 1}
+                            </Button>
+                          </div>
+                        </div>
+                      ))}
+                      <Button variant="outline" onClick={clearAll} className="w-full mt-4">
+                        Nova Imagem
+                      </Button>
+                    </div>
+                  )}
+                </CardContent>
+              </Card>
+            ) : (
+              /* Prompt Mode */
               <Card>
                 <CardHeader>
                   <CardTitle className="flex items-center justify-between">
                     <span className="flex items-center gap-2">
-                      <Copy className="h-5 w-5" />
-                      Copy para Redes Sociais
+                      <Sparkles className="h-5 w-5" />
+                      Prompt Gerado
                     </span>
-                    {copy && (
-                      <Button size="sm" variant="outline" onClick={copyCopy}>
+                    {prompt && (
+                      <Button size="sm" variant="outline" onClick={copyPrompt}>
                         <Copy className="h-4 w-4 mr-1" />
                         Copiar
                       </Button>
@@ -276,70 +329,32 @@ export default function ImageToPromptPage() {
                   </CardTitle>
                 </CardHeader>
                 <CardContent>
-                  {!copy && analysisMode === 'copy+prompt' ? (
-                    <div className="text-center text-gray-500 py-8">
-                      <Sparkles className="h-8 w-8 text-gray-300 mx-auto mb-2" />
-                      <p className="text-sm">Copy será gerada junto com o prompt</p>
+                  {!prompt ? (
+                    <div className="text-center text-gray-500 py-12">
+                      <Sparkles className="h-12 w-12 text-gray-300 mx-auto mb-4" />
+                      <p>Faça upload de uma imagem para gerar o prompt</p>
                     </div>
-                  ) : copy ? (
+                  ) : (
                     <div className="space-y-4">
-                      <div className="bg-blue-50 p-4 rounded-lg border border-blue-200">
-                        <p className="text-blue-900 leading-relaxed whitespace-pre-wrap font-medium">
-                          {copy}
+                      <div className="bg-gray-50 p-4 rounded-lg">
+                        <p className="text-gray-800 leading-relaxed whitespace-pre-wrap">
+                          {prompt}
                         </p>
                       </div>
-                      <Button onClick={copyCopy} className="w-full">
-                        <Copy className="h-4 w-4 mr-2" />
-                        Copiar Copy
-                      </Button>
+                      <div className="flex gap-2">
+                        <Button onClick={copyPrompt} className="flex-1">
+                          <Copy className="h-4 w-4 mr-2" />
+                          Copiar Prompt
+                        </Button>
+                        <Button variant="outline" onClick={clearAll}>
+                          Nova Imagem
+                        </Button>
+                      </div>
                     </div>
-                  ) : null}
+                  )}
                 </CardContent>
               </Card>
             )}
-
-            {/* Prompt Card */}
-            <Card>
-              <CardHeader>
-                <CardTitle className="flex items-center justify-between">
-                  <span className="flex items-center gap-2">
-                    <Sparkles className="h-5 w-5" />
-                    Prompt Gerado
-                  </span>
-                  {prompt && (
-                    <Button size="sm" variant="outline" onClick={copyPrompt}>
-                      <Copy className="h-4 w-4 mr-1" />
-                      Copiar
-                    </Button>
-                  )}
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                {!prompt ? (
-                  <div className="text-center text-gray-500 py-12">
-                    <Sparkles className="h-12 w-12 text-gray-300 mx-auto mb-4" />
-                    <p>Faça upload de uma imagem para gerar o {analysisMode === 'prompt' ? 'prompt' : 'conteúdo'}</p>
-                  </div>
-                ) : (
-                  <div className="space-y-4">
-                    <div className="bg-gray-50 p-4 rounded-lg">
-                      <p className="text-gray-800 leading-relaxed whitespace-pre-wrap">
-                        {prompt}
-                      </p>
-                    </div>
-                    <div className="flex gap-2">
-                      <Button onClick={copyPrompt} className="flex-1">
-                        <Copy className="h-4 w-4 mr-2" />
-                        Copiar Prompt
-                      </Button>
-                      <Button variant="outline" onClick={clearAll}>
-                        Nova Imagem
-                      </Button>
-                    </div>
-                  </div>
-                )}
-              </CardContent>
-            </Card>
           </div>
         </div>
 
