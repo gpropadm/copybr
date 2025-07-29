@@ -262,11 +262,11 @@ export default function ProjetosPage() {
                     </span>
                   </div>
                   
-                  {/* Botão de ação principal - estilo novo chat */}
+                  {/* Botão ATUALIZADO - estilo novo chat */}
                   <Link href={`/dashboard/projeto/${project.id}`} className="block w-full">
-                    <button className="flex items-center justify-center w-full px-3 py-3 text-sm bg-gray-100 hover:bg-gray-200 border-gray-300 text-gray-900 rounded-lg border transition-colors">
+                    <button className="flex items-center justify-center w-full px-3 py-3 text-sm bg-blue-500 hover:bg-blue-600 text-white rounded-lg border transition-colors">
                       <Eye className="h-4 w-4 mr-2" />
-                      Abrir Projeto
+                      🚀 ABRIR PROJETO AGORA
                     </button>
                   </Link>
                 </CardContent>
