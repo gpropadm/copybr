@@ -24,35 +24,10 @@ export default function SocialAccountsManager({ userId, onAccountChange }: Socia
   const [accounts, setAccounts] = useState<SocialAccount[]>([])
   const [loading, setLoading] = useState(true)
   const [connecting, setConnecting] = useState<string | null>(null)
-  const [showWebhookConfig, setShowWebhookConfig] = useState(false)
-  const [zapierWebhook, setZapierWebhook] = useState('')
-  const [iftttWebhook, setIftttWebhook] = useState('')
 
   useEffect(() => {
     fetchAccounts()
-    loadWebhookConfig()
   }, [userId])
-
-  const loadWebhookConfig = () => {
-    const savedZapier = localStorage.getItem('zapier_webhook_url')
-    const savedIFTTT = localStorage.getItem('ifttt_webhook_url')
-    if (savedZapier) setZapierWebhook(savedZapier)
-    if (savedIFTTT) setIftttWebhook(savedIFTTT)
-  }
-
-  const saveWebhookConfig = () => {
-    if (zapierWebhook.trim()) {
-      localStorage.setItem('zapier_webhook_url', zapierWebhook.trim())
-      // Atualiza a variável de ambiente temporariamente
-      process.env.NEXT_PUBLIC_ZAPIER_WEBHOOK_URL = zapierWebhook.trim()
-    }
-    if (iftttWebhook.trim()) {
-      localStorage.setItem('ifttt_webhook_url', iftttWebhook.trim())
-      process.env.NEXT_PUBLIC_IFTTT_WEBHOOK_URL = iftttWebhook.trim()
-    }
-    setShowWebhookConfig(false)
-    alert('Configuração salva! Agora você pode publicar via automação.')
-  }
 
   const fetchAccounts = async () => {
     try {
@@ -229,96 +204,37 @@ export default function SocialAccountsManager({ userId, onAccountChange }: Socia
 
   return (
     <div className="space-y-6">
-      {/* Webhook Configuration Card */}
+      {/* Social Media Publishing Card */}
       <Card>
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
             <Settings className="h-5 w-5" />
-            Configuração de Automação
+            Publicação em Redes Sociais
           </CardTitle>
           <CardDescription>
-            Configure Zapier ou IFTTT para publicar automaticamente em suas redes sociais
+            Gere instruções claras para publicar seu conteúdo em todas as redes sociais
           </CardDescription>
         </CardHeader>
         <CardContent>
-          {!showWebhookConfig ? (
-            <div className="space-y-4">
-              <div className="p-4 bg-blue-50 border border-blue-200 rounded-lg">
-                <p className="text-sm text-blue-800 mb-2">
-                  <strong>Como funciona:</strong>
-                </p>
-                <ul className="text-sm text-blue-700 space-y-1">
-                  <li>• Configure um webhook no Zapier ou IFTTT</li>
-                  <li>• Conecte suas redes sociais lá</li>
-                  <li>• CopyBR envia posts automaticamente</li>
-                  <li>• Funciona com Facebook, Instagram, LinkedIn, etc</li>
-                </ul>
-              </div>
-              
-              <div className="flex gap-2">
-                <Button onClick={() => setShowWebhookConfig(true)}>
-                  Configurar Webhooks
-                </Button>
-                <Button onClick={testPosting}>
-                  Testar Publicação
-                </Button>
-                <Button 
-                  variant="outline"
-                  onClick={() => window.open('https://zapier.com/', '_blank')}
-                >
-                  <ExternalLink className="h-4 w-4 mr-2" />
-                  Zapier
-                </Button>
-                <Button 
-                  variant="outline"
-                  onClick={() => window.open('https://ifttt.com/', '_blank')}
-                >
-                  <ExternalLink className="h-4 w-4 mr-2" />
-                  IFTTT
-                </Button>
-              </div>
+          <div className="space-y-4">
+            <div className="p-4 bg-green-50 border border-green-200 rounded-lg">
+              <p className="text-sm text-green-800 mb-2">
+                <strong>Como funciona:</strong>
+              </p>
+              <ul className="text-sm text-green-700 space-y-1">
+                <li>• Clique "Gerar Post" para criar instruções</li>
+                <li>• Copie o conteúdo otimizado</li>
+                <li>• Publique manualmente em cada rede</li>
+                <li>• Simples, rápido e funciona sempre!</li>
+              </ul>
             </div>
-          ) : (
-            <div className="space-y-4">
-              <div>
-                <label className="block text-sm font-medium mb-1">
-                  Zapier Webhook URL (opcional)
-                </label>
-                <input
-                  type="url"
-                  value={zapierWebhook}
-                  onChange={(e) => setZapierWebhook(e.target.value)}
-                  placeholder="https://hooks.zapier.com/hooks/catch/..."
-                  className="w-full p-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-[#693ee0] focus:border-[#693ee0]"
-                />
-              </div>
-              
-              <div>
-                <label className="block text-sm font-medium mb-1">
-                  IFTTT Webhook URL (opcional)
-                </label>
-                <input
-                  type="url"
-                  value={iftttWebhook}
-                  onChange={(e) => setIftttWebhook(e.target.value)}
-                  placeholder="https://maker.ifttt.com/trigger/..."
-                  className="w-full p-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-[#693ee0] focus:border-[#693ee0]"
-                />
-              </div>
-              
-              <div className="flex gap-2">
-                <Button onClick={saveWebhookConfig}>
-                  Salvar Configuração
-                </Button>
-                <Button 
-                  variant="outline"
-                  onClick={() => setShowWebhookConfig(false)}
-                >
-                  Cancelar
-                </Button>
-              </div>
+            
+            <div className="flex gap-2">
+              <Button onClick={testPosting}>
+                📝 Gerar Post para Redes Sociais
+              </Button>
             </div>
-          )}
+          </div>
         </CardContent>
       </Card>
 
