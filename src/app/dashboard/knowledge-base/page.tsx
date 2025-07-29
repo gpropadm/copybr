@@ -21,6 +21,8 @@ export default function KnowledgeBasePage() {
   const [selectedCategory, setSelectedCategory] = useState('all')
   const [editingId, setEditingId] = useState<string | null>(null)
   const [expandedEntries, setExpandedEntries] = useState<Set<string>>(new Set())
+  const [showDeleteModal, setShowDeleteModal] = useState(false)
+  const [entryToDelete, setEntryToDelete] = useState<string | null>(null)
   
   // Form states
   const [formQuestion, setFormQuestion] = useState('')
@@ -165,10 +167,22 @@ export default function KnowledgeBasePage() {
   }
 
   const handleDeleteEntry = (id: string) => {
-    if (window.confirm('Tem certeza que deseja excluir esta entrada?')) {
-      const newEntries = entries.filter(e => e.id !== id)
+    setEntryToDelete(id)
+    setShowDeleteModal(true)
+  }
+
+  const confirmDelete = () => {
+    if (entryToDelete) {
+      const newEntries = entries.filter(e => e.id !== entryToDelete)
       saveEntries(newEntries)
+      setShowDeleteModal(false)
+      setEntryToDelete(null)
     }
+  }
+
+  const cancelDelete = () => {
+    setShowDeleteModal(false)
+    setEntryToDelete(null)
   }
 
   const toggleExpanded = (id: string) => {
@@ -464,6 +478,43 @@ export default function KnowledgeBasePage() {
               </div>
             </CardContent>
           </Card>
+        )}
+
+        {/* Delete Confirmation Modal */}
+        {showDeleteModal && (
+          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+            <div className="bg-white rounded-lg p-6 max-w-md w-full mx-4">
+              <div className="flex items-center gap-3 mb-4">
+                <div className="w-10 h-10 bg-red-100 rounded-full flex items-center justify-center">
+                  <Trash2 className="h-5 w-5 text-red-600" />
+                </div>
+                <div>
+                  <h3 className="text-lg font-semibold text-gray-900">Excluir entrada</h3>
+                  <p className="text-sm text-gray-500">Esta ação não pode ser desfeita</p>
+                </div>
+              </div>
+              
+              <p className="text-gray-700 mb-6">
+                Tem certeza que deseja excluir esta pergunta e resposta? Esta ação é permanente e não pode ser desfeita.
+              </p>
+              
+              <div className="flex gap-3 justify-end">
+                <Button 
+                  variant="outline" 
+                  onClick={cancelDelete}
+                  className="px-4 py-2"
+                >
+                  Cancelar
+                </Button>
+                <button 
+                  onClick={confirmDelete}
+                  className="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors font-medium"
+                >
+                  Excluir
+                </button>
+              </div>
+            </div>
+          </div>
         )}
       </div>
     </div>
