@@ -26,7 +26,8 @@ import {
   X,
   Users,
   Camera,
-  TrendingUp
+  TrendingUp,
+  Home
 } from 'lucide-react'
 import { ThemeProvider, useTheme } from '@/contexts/ThemeContext'
 import { useAuth } from '@/contexts/AuthContext'
@@ -69,6 +70,12 @@ function DashboardContent({
   }, [showUserMenu])
 
   const menuItems = [
+    {
+      icon: Home,
+      label: 'Dashboard',
+      href: '/dashboard',
+      color: 'text-indigo-600'
+    },
     {
       icon: MessageSquare,
       label: 'Chat',
