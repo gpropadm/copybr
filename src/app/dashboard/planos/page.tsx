@@ -257,63 +257,31 @@ export default function PlanosPage() {
         </div>
 
         {/* FAQ */}
-        <div className="max-w-6xl mx-auto">
-          <h2 className="text-xl font-bold text-gray-900 text-center mb-6">
+        <div className="max-w-4xl mx-auto">
+          <h2 className="text-lg font-bold text-gray-900 text-center mb-4">
             Perguntas Frequentes
           </h2>
           
-          <div className="space-y-4">
-            <Card>
-              <CardHeader className="pb-2">
-                <CardTitle className="text-sm font-medium">
-                  Posso cancelar minha assinatura a qualquer momento?
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                <p className="text-xs text-gray-600">
-                  Sim! Você pode cancelar sua assinatura a qualquer momento. Não há multas ou taxas de cancelamento.
-                </p>
-              </CardContent>
-            </Card>
-
-            <Card>
-              <CardHeader className="pb-2">
-                <CardTitle className="text-sm font-medium">
-                  O que acontece se eu exceder meu limite mensal?
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                <p className="text-xs text-gray-600">
-                  Quando você atingir o limite, receberá uma notificação para fazer upgrade. Nos planos pagos, oferecemos um buffer de segurança.
-                </p>
-              </CardContent>
-            </Card>
-
-            <Card>
-              <CardHeader className="pb-2">
-                <CardTitle className="text-sm font-medium">
-                  Posso fazer upgrade ou downgrade do meu plano?
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                <p className="text-xs text-gray-600">
-                  Claro! Você pode alterar seu plano a qualquer momento. As mudanças entram em vigor imediatamente.
-                </p>
-              </CardContent>
-            </Card>
-
-            <Card>
-              <CardHeader className="pb-2">
-                <CardTitle className="text-sm font-medium">
-                  Há garantia de reembolso?
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                <p className="text-xs text-gray-600">
-                  Oferecemos garantia de 7 dias para todos os planos pagos. Se não ficar satisfeito, devolvemos 100% do valor pago.
-                </p>
-              </CardContent>
-            </Card>
+          <div className="bg-gray-50 rounded-lg p-4 space-y-3">
+            <div className="border-b border-gray-200 pb-2">
+              <h4 className="text-sm font-medium text-gray-900 mb-1">Posso cancelar a qualquer momento?</h4>
+              <p className="text-xs text-gray-600">Sim! Sem multas ou taxas de cancelamento.</p>
+            </div>
+            
+            <div className="border-b border-gray-200 pb-2">
+              <h4 className="text-sm font-medium text-gray-900 mb-1">E se eu exceder meu limite?</h4>
+              <p className="text-xs text-gray-600">Receberá notificação para upgrade. Planos pagos têm buffer de segurança.</p>
+            </div>
+            
+            <div className="border-b border-gray-200 pb-2">
+              <h4 className="text-sm font-medium text-gray-900 mb-1">Posso alterar meu plano?</h4>
+              <p className="text-xs text-gray-600">Sim! Upgrade/downgrade a qualquer momento com efeito imediato.</p>
+            </div>
+            
+            <div>
+              <h4 className="text-sm font-medium text-gray-900 mb-1">Há garantia de reembolso?</h4>
+              <p className="text-xs text-gray-600">Garantia de 7 dias para planos pagos. 100% do valor devolvido.</p>
+            </div>
           </div>
         </div>
 
