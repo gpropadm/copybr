@@ -6,6 +6,7 @@ import Button from '@/components/ui/Button'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/Card'
 import Link from 'next/link'
 import CopyGenerator from '@/components/copy/CopyGenerator'
+import ABTestButton from '@/components/ab-testing/ABTestButton'
 
 interface Project {
   id: string
@@ -495,6 +496,11 @@ export default function ProjetoDetalhePage() {
                           </div>
                         </div>
                         <div className="flex items-center gap-2">
+                          <ABTestButton 
+                            copyId={copy.id}
+                            aiScore={copy.score || 0}
+                            copyContent={copy.text}
+                          />
                           <button
                             onClick={() => handleCopyText(copy.text)}
                             className="p-2 text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded"
