@@ -246,7 +246,7 @@ Inclua: gancho inicial impactante, benefícios do produto, call-to-action forte,
                     ) : (
                       <>
                         <Sparkles className="h-4 w-4 mr-2" />
-                        {analysisMode === 'prompt' ? 'Gerar Prompt' : 'Gerar 5 Copies'}
+                        {analysisMode === 'prompt' ? 'Gerar Prompt' : 'Gerar Copies'}
                       </>
                     )}
                   </Button>
@@ -263,14 +263,14 @@ Inclua: gancho inicial impactante, benefícios do produto, call-to-action forte,
                 <CardHeader>
                   <CardTitle className="flex items-center gap-2">
                     <Copy className="h-5 w-5" />
-                    5 Copies para Redes Sociais
+                    Copies para Redes Sociais
                   </CardTitle>
                 </CardHeader>
                 <CardContent>
                   {copies.length === 0 ? (
                     <div className="text-center text-gray-500 py-12">
                       <Copy className="h-12 w-12 text-gray-300 mx-auto mb-4" />
-                      <p>Faça upload de uma imagem para gerar 5 copies promocionais</p>
+                      <p>Faça upload de uma imagem para gerar copies promocionais</p>
                     </div>
                   ) : (
                     <div className="space-y-4">
@@ -290,17 +290,16 @@ Inclua: gancho inicial impactante, benefícios do produto, call-to-action forte,
                             <p className="text-gray-800 leading-relaxed whitespace-pre-wrap mb-3">
                               {copyText}
                             </p>
-                            <Button 
-                              size="sm" 
+                            <button 
                               onClick={() => {
                                 navigator.clipboard.writeText(copyText)
                                 alert(`Copy #${index + 1} copiada!`)
                               }}
-                              className="w-full"
+                              className="flex items-center justify-center w-full px-3 py-3 text-sm bg-gray-100 hover:bg-gray-200 border-gray-300 text-gray-900 rounded-lg border transition-colors"
                             >
-                              <Copy className="h-3 w-3 mr-2" />
+                              <Copy className="h-4 w-4 mr-2" />
                               Copiar Copy #{index + 1}
-                            </Button>
+                            </button>
                           </div>
                         </div>
                       ))}
