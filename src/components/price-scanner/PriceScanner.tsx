@@ -62,58 +62,102 @@ export default function PriceScanner() {
     setLoading(true)
     
     try {
-      // Simula processamento OCR + IA
-      // Em produção, usaria APIs como Google Vision, Tesseract.js, ou Azure OCR
+      // Importa Tesseract.js dinamicamente
+      const Tesseract = await import('tesseract.js')
       
-      // Simula delay de processamento
-      await new Promise(resolve => setTimeout(resolve, 2000))
+      console.log('🔍 Iniciando OCR REAL...')
       
-      // Simula resultados realistas baseados em produtos comuns
-      const mockResults = [
+      // Processa imagem com Tesseract OCR
+      const { data: { text, confidence } } = await Tesseract.recognize(
+        imageFile,
+        'por', // Português
         {
-          productName: 'Coca-Cola Lata 350ml',
-          price: 1.99,
-          confidence: 0.95,
-          rawText: 'COCA-COLA LATA 350ML R$ 1,99'
-        },
-        {
-          productName: 'Pão de Hambúrguer Wickbold',
-          price: 24.90,
-          confidence: 0.87,
-          rawText: 'PÃO HAMBURGUER WICKBOLD 36UN R$ 24,90'
-        },
-        {
-          productName: 'Carne Moída Bovina',
-          price: 18.90,
-          confidence: 0.92,
-          rawText: 'CARNE MOIDA BOVINA KG R$ 18,90'
-        },
-        {
-          productName: 'Queijo Mussarela Fatiado',
-          price: 12.90,
-          confidence: 0.89,
-          rawText: 'QUEIJO MUSSARELA FATIADO 200G R$ 12,90'
-        },
-        {
-          productName: 'Batata Palha 500g',
-          price: 8.50,
-          confidence: 0.94,
-          rawText: 'BATATA PALHA 500G R$ 8,50'
+          logger: (m: any) => console.log('OCR Progress:', m)
         }
-      ]
+      )
       
-      const randomResult = mockResults[Math.floor(Math.random() * mockResults.length)]
+      console.log('📄 Texto extraído:', text)
+      console.log('🎯 Confiança:', confidence)
+      
+      // IA para extrair produto e preço do texto
+      const extractedData = extractProductAndPrice(text)
       
       return {
-        ...randomResult,
+        productName: extractedData.product || 'Produto Não Identificado',
+        price: extractedData.price || 0,
+        confidence: confidence / 100,
+        rawText: text,
         store: currentStore
       }
       
     } catch (error) {
-      throw new Error('Erro ao processar imagem')
+      console.error('❌ Erro OCR:', error)
+      throw new Error('Erro ao processar imagem com OCR')
     } finally {
       setLoading(false)
     }
+  }
+
+  // IA para extrair produto e preço do texto OCR
+  const extractProductAndPrice = (text: string) => {
+    console.log('🤖 Analisando texto:', text)
+    
+    const cleanText = text.toUpperCase().replace(/\n/g, ' ')
+    
+    // Regex para encontrar preços (R$ X,XX ou X,XX)
+    const priceRegex = /R?\$?\s*(\d{1,3}(?:[.,]\d{2})?)/g
+    const priceMatches = cleanText.match(priceRegex)
+    
+    console.log('💰 Preços encontrados:', priceMatches)
+    
+    let price = 0
+    if (priceMatches && priceMatches.length > 0) {
+      // Pega o último preço encontrado (geralmente é o preço de venda)
+      const lastPrice = priceMatches[priceMatches.length - 1]
+      const numericPrice = lastPrice.replace(/[R$\s]/g, '').replace(',', '.')
+      price = parseFloat(numericPrice) || 0
+    }
+    
+    // IA simples para detectar produtos comuns
+    let product = ''
+    
+    if (cleanText.includes('COCA') || cleanText.includes('COLA')) {
+      product = 'Coca-Cola'
+      if (cleanText.includes('350') || cleanText.includes('LATA')) product += ' Lata 350ml'
+      if (cleanText.includes('2L') || cleanText.includes('2 L')) product += ' 2L'
+    } else if (cleanText.includes('PÃO') && cleanText.includes('HAMBUR')) {
+      product = 'Pão de Hambúrguer'
+      if (cleanText.includes('36')) product += ' (36 unidades)'
+    } else if (cleanText.includes('CARNE')) {
+      product = 'Carne'
+      if (cleanText.includes('MOIDA') || cleanText.includes('MOÍDA')) product += ' Moída'
+      if (cleanText.includes('KG')) product += ' (kg)'
+    } else if (cleanText.includes('QUEIJO')) {
+      product = 'Queijo'
+      if (cleanText.includes('MUSSARELA')) product += ' Mussarela'
+      if (cleanText.includes('FATIADO')) product += ' Fatiado'
+    } else if (cleanText.includes('BATATA')) {
+      product = 'Batata'
+      if (cleanText.includes('PALHA')) product += ' Palha'
+    } else if (cleanText.includes('LEITE')) {
+      product = 'Leite'
+      if (cleanText.includes('1L')) product += ' 1L'
+    } else if (cleanText.includes('AÇÚCAR') || cleanText.includes('ACUCAR')) {
+      product = 'Açúcar'
+      if (cleanText.includes('1KG')) product += ' 1kg'
+    } else if (cleanText.includes('ÓLEO') || cleanText.includes('OLEO')) {
+      product = 'Óleo'
+      if (cleanText.includes('900') || cleanText.includes('ML')) product += ' 900ml'
+    } else {
+      // Tenta extrair primeira palavra que parece ser produto
+      const words = cleanText.split(' ').filter(w => w.length > 2 && !w.includes('R$'))
+      product = words.slice(0, 2).join(' ') || 'Produto Detectado'
+    }
+    
+    console.log('🎯 Produto extraído:', product)
+    console.log('💵 Preço extraído:', price)
+    
+    return { product, price }
   }
 
   const handleImageCapture = async (file: File) => {
