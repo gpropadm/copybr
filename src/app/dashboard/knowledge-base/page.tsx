@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import { Book, Plus, Search, Calendar, User, Edit, Trash2, Save, X } from 'lucide-react'
+import { Book, Plus, Search, Calendar, Edit, Trash2, Save, X, ChevronDown, ChevronRight } from 'lucide-react'
 import Button from '@/components/ui/Button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/Card'
 
@@ -20,6 +20,7 @@ export default function KnowledgeBasePage() {
   const [searchTerm, setSearchTerm] = useState('')
   const [selectedCategory, setSelectedCategory] = useState('all')
   const [editingId, setEditingId] = useState<string | null>(null)
+  const [expandedEntries, setExpandedEntries] = useState<Set<string>>(new Set())
   
   // Form states
   const [formQuestion, setFormQuestion] = useState('')
@@ -168,6 +169,16 @@ export default function KnowledgeBasePage() {
       const newEntries = entries.filter(e => e.id !== id)
       saveEntries(newEntries)
     }
+  }
+
+  const toggleExpanded = (id: string) => {
+    const newExpanded = new Set(expandedEntries)
+    if (newExpanded.has(id)) {
+      newExpanded.delete(id)
+    } else {
+      newExpanded.add(id)
+    }
+    setExpandedEntries(newExpanded)
   }
 
   const filteredEntries = entries.filter(entry => {
@@ -355,10 +366,18 @@ export default function KnowledgeBasePage() {
           ) : (
             filteredEntries.map((entry) => (
               <Card key={entry.id}>
-                <CardHeader>
+                <CardHeader 
+                  className="cursor-pointer hover:bg-gray-50 transition-colors"
+                  onClick={() => toggleExpanded(entry.id)}
+                >
                   <div className="flex items-start justify-between">
                     <div className="flex-1">
-                      <CardTitle className="text-lg text-gray-900 mb-2">
+                      <CardTitle className="text-lg text-gray-900 mb-2 flex items-center gap-2">
+                        {expandedEntries.has(entry.id) ? (
+                          <ChevronDown className="h-4 w-4 text-gray-500" />
+                        ) : (
+                          <ChevronRight className="h-4 w-4 text-gray-500" />
+                        )}
                         {entry.question}
                       </CardTitle>
                       <div className="flex items-center gap-3 text-sm text-gray-500">
@@ -371,7 +390,7 @@ export default function KnowledgeBasePage() {
                         </span>
                       </div>
                     </div>
-                    <div className="flex items-center gap-2">
+                    <div className="flex items-center gap-2" onClick={(e) => e.stopPropagation()}>
                       <button 
                         onClick={() => handleEditEntry(entry.id)}
                         className="flex items-center justify-center px-2 py-1.5 text-xs bg-gray-100 hover:bg-gray-200 border-gray-300 text-gray-900 rounded border transition-colors"
@@ -387,25 +406,27 @@ export default function KnowledgeBasePage() {
                     </div>
                   </div>
                 </CardHeader>
-                <CardContent>
-                  <div className="prose max-w-none">
-                    <div className="text-gray-800 whitespace-pre-wrap leading-relaxed">
-                      {entry.answer}
-                    </div>
-                  </div>
-                  
-                  {entry.tags.length > 0 && (
-                    <div className="mt-4 pt-4 border-t border-gray-200">
-                      <div className="flex flex-wrap gap-2">
-                        {entry.tags.map((tag, index) => (
-                          <span key={index} className="px-2 py-1 bg-gray-100 text-gray-700 rounded text-xs">
-                            #{tag}
-                          </span>
-                        ))}
+                {expandedEntries.has(entry.id) && (
+                  <CardContent>
+                    <div className="prose max-w-none">
+                      <div className="text-gray-800 whitespace-pre-wrap leading-relaxed">
+                        {entry.answer}
                       </div>
                     </div>
-                  )}
-                </CardContent>
+                    
+                    {entry.tags.length > 0 && (
+                      <div className="mt-4 pt-4 border-t border-gray-200">
+                        <div className="flex flex-wrap gap-2">
+                          {entry.tags.map((tag, index) => (
+                            <span key={index} className="px-2 py-1 bg-gray-100 text-gray-700 rounded text-xs">
+                              #{tag}
+                            </span>
+                          ))}
+                        </div>
+                      </div>
+                    )}
+                  </CardContent>
+                )}
               </Card>
             ))
           )}
