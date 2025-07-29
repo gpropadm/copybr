@@ -20,6 +20,7 @@ export default function PriceScanner() {
   const [currentStore, setCurrentStore] = useState<string>('')
   const [loading, setLoading] = useState(false)
   const [savedProducts, setSavedProducts] = useState<any[]>([])
+  const [debugLogs, setDebugLogs] = useState<string[]>([])
   const fileInputRef = useRef<HTMLInputElement>(null)
   const videoRef = useRef<HTMLVideoElement>(null)
   const canvasRef = useRef<HTMLCanvasElement>(null)
@@ -58,10 +59,16 @@ export default function PriceScanner() {
     }
   }
 
+  const addDebugLog = (message: string) => {
+    setDebugLogs(prev => [...prev.slice(-4), `${new Date().toLocaleTimeString()}: ${message}`])
+  }
+
   const processImageWithOCR = async (imageFile: File): Promise<ScannedProduct> => {
     setLoading(true)
+    setDebugLogs([]) // Limpar logs anteriores
     
     try {
+      addDebugLog('🔧 USANDO TESSERACT OCR COMO PRINCIPAL')
       console.log('🔧 USANDO TESSERACT OCR COMO PRINCIPAL (GPT-4 Vision está drogada)')
       
       // Usar Tesseract OCR PRIMEIRO
@@ -69,14 +76,18 @@ export default function PriceScanner() {
       
       // Se Tesseract teve boa confiança, usar resultado dele
       if (tesseractResult.confidence > 0.4) {
+        addDebugLog(`✅ Tesseract funcionou: ${tesseractResult.confidence.toFixed(2)}`)
         console.log('✅ Tesseract OCR funcionou bem, usando resultado')
         return tesseractResult
       }
       
+      addDebugLog('⚠️ Tesseract baixa confiança, tentando GPT-4 Vision...')
       console.log('⚠️ Tesseract OCR com baixa confiança, tentando GPT-4 Vision como último recurso...')
       
       // Só usar GPT-4 Vision se Tesseract falhar
       const base64Image = await convertFileToBase64(imageFile)
+      
+      addDebugLog('🚀 Chamando GPT-4 Vision API...')
       
       const response = await fetch('/api/vision', {
         method: 'POST',
@@ -101,11 +112,13 @@ Se não conseguir ler claramente, responda:
       })
       
       if (!response.ok) {
+        addDebugLog('❌ GPT-4 Vision falhou')
         console.log('❌ GPT-4 Vision falhou, mantendo resultado Tesseract')
         return tesseractResult
       }
       
       const data = await response.json()
+      addDebugLog(`🎯 GPT-4 retornou: ${data.confidence}`)
       console.log('🎯 Resultado GPT-4 (última tentativa):', data)
       
       // Se GPT-4 Vision também teve baixa confiança, preferir Tesseract
@@ -372,6 +385,26 @@ Se não conseguir ler claramente, responda:
           </div>
         </CardContent>
       </Card>
+
+      {/* Debug Logs - só aparece se tiver logs */}
+      {debugLogs.length > 0 && (
+        <Card className="mb-4 border-blue-200 bg-blue-50">
+          <CardHeader>
+            <CardTitle className="text-blue-800 text-sm">
+              🔍 Debug (mostrar para Alex)
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="space-y-1">
+              {debugLogs.map((log, index) => (
+                <p key={index} className="text-xs font-mono text-blue-700">
+                  {log}
+                </p>
+              ))}
+            </div>
+          </CardContent>
+        </Card>
+      )}
 
       {/* Input oculto para captura de imagem */}
       <input
