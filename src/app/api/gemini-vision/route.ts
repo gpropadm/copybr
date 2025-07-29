@@ -66,7 +66,7 @@ export async function POST(request: NextRequest) {
     console.log('🎯 Resposta Gemini Vision RAW:', content)
 
     // Verificar se é um prompt genérico (não scanner de preços)
-    if (body.prompt.includes('comprehensive, precise text prompt')) {
+    if (body.prompt.includes('prompt de texto abrangente e preciso') || body.prompt.includes('comprehensive, precise text prompt')) {
       // Retorno para geração de prompt
       return NextResponse.json({
         success: true,

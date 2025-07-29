@@ -66,7 +66,7 @@ export default function ImageToPromptPage() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           image: base64Data,
-          prompt: 'Analyze this image in detail and create a comprehensive, precise text prompt that could be used to generate a similar image using AI. Include style, colors, composition, mood, lighting, and any other relevant visual elements. Be specific and detailed.'
+          prompt: 'Analise esta imagem em detalhes e crie um prompt de texto abrangente e preciso que poderia ser usado para gerar uma imagem similar usando IA. Inclua estilo, cores, composição, humor, iluminação e qualquer outros elementos visuais relevantes. Seja específico e detalhado. Responda SEMPRE em português brasileiro.'
         })
       })
 
