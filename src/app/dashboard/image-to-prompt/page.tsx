@@ -543,7 +543,7 @@ Inclua: gancho inicial impactante, benefícios do produto, call-to-action forte,
                                 ))}
                               </div>
                             </div>
-                          )}
+                          ) : null}
                         </div>
                       </div>
                     </div>
