@@ -182,134 +182,46 @@ export default function DashboardPage() {
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 sm:gap-6 lg:gap-8">
-          {/* Recent Projects */}
+          {/* Dashboard Overview */}
           <div className="lg:col-span-2">
             <Card>
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
                   <Folder className="h-5 w-5" />
-                  Seus Projetos
+                  Resumo
                 </CardTitle>
                 <CardDescription>
-                  {projects.length === 0 && !loading ? 'Você ainda não tem projetos. Crie seu primeiro!' : 'Gerencie seus projetos e crie novos copies'}
+                  Visão geral da sua conta CopyBR
                 </CardDescription>
               </CardHeader>
               <CardContent>
-                {loading ? (
-                  <div className="space-y-4">
-                    {[1, 2, 3].map((i) => (
-                      <div key={i} className="border border-gray-200 rounded-lg p-4 animate-pulse">
-                        <div className="h-4 bg-gray-200 rounded w-3/4 mb-2"></div>
-                        <div className="h-3 bg-gray-200 rounded w-1/2 mb-3"></div>
-                        <div className="h-3 bg-gray-200 rounded w-1/4"></div>
-                      </div>
-                    ))}
+                <div className="text-center py-8">
+                  <div className="w-16 h-16 bg-gradient-to-br from-blue-100 to-purple-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                    <Zap className="h-8 w-8 text-blue-600" />
                   </div>
-                ) : projects.length === 0 ? (
-                  <div className="text-center py-8">
-                    <Folder className="h-12 w-12 text-gray-400 mx-auto mb-4" />
-                    <h3 className="text-lg font-medium text-gray-900 mb-2">Nenhum projeto ainda</h3>
-                    <p className="text-gray-600 mb-4">Crie seu primeiro projeto para começar a gerar copies incríveis!</p>
+                  <h3 className="text-lg font-medium text-gray-900 mb-2">Dashboard CopyBR</h3>
+                  <p className="text-gray-600 mb-6">
+                    {projects.length === 0 
+                      ? 'Crie seu primeiro projeto para começar a gerar copies incríveis!'
+                      : `Você tem ${projects.length} projeto${projects.length > 1 ? 's' : ''} ativo${projects.length > 1 ? 's' : ''}`
+                    }
+                  </p>
+                  
+                  <div className="flex gap-3 justify-center">
                     <Link href="/dashboard/novo-projeto">
                       <Button>
-                        <Plus className="h-4 w-4 mr-2" />
-                        Criar Primeiro Projeto
-                      </Button>
-                    </Link>
-                  </div>
-                ) : (
-                  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-1 xl:grid-cols-2 gap-4">
-                    {projects.map((project) => {
-                      const getProjectIcon = (type: string) => {
-                        const icons: { [key: string]: any } = {
-                          'vendas': Target,
-                          'marketing': Sparkles,
-                          'redes-sociais': Users,
-                          'empresarial': Building,
-                          'ecommerce': Copy,
-                          'conteudo': Edit3
-                        }
-                        return icons[type] || Folder
-                      }
-                      
-                      const getProjectGradient = (type: string) => {
-                        const gradients: { [key: string]: string } = {
-                          'vendas': 'from-green-400 to-green-600',
-                          'marketing': 'from-purple-400 to-purple-600',
-                          'redes-sociais': 'from-blue-400 to-blue-600',
-                          'empresarial': 'from-gray-400 to-gray-600',
-                          'ecommerce': 'from-orange-400 to-orange-600',
-                          'conteudo': 'from-pink-400 to-pink-600'
-                        }
-                        return gradients[type] || 'from-blue-400 to-blue-600'
-                      }
-                      
-                      const ProjectIcon = getProjectIcon(project.type)
-                      
-                      return (
-                        <Card key={project.id} className="hover:shadow-lg transition-all duration-300 cursor-pointer group hover:-translate-y-1">
-                          <CardContent className="p-4">
-                            <div className="flex items-start gap-3 mb-3">
-                              <div className={`w-12 h-12 bg-gradient-to-br ${getProjectGradient(project.type)} rounded-xl flex items-center justify-center flex-shrink-0 group-hover:scale-110 transition-transform duration-300`}>
-                                <ProjectIcon className="h-6 w-6 text-white" />
-                              </div>
-                              <div className="flex-1 min-w-0">
-                                <h3 className="font-semibold text-gray-900 text-sm leading-tight mb-1 truncate group-hover:text-blue-600 transition-colors">
-                                  {project.name}
-                                </h3>
-                                <span className="text-xs bg-gray-100 text-gray-700 px-2 py-1 rounded-full">
-                                  {getProjectTypeLabel(project.type)}
-                                </span>
-                              </div>
-                            </div>
-                            
-                            {project.description && (
-                              <p className="text-sm text-gray-600 mb-3 line-clamp-2 leading-relaxed">
-                                {project.description}
-                              </p>
-                            )}
-                            
-                            <div className="flex items-center justify-between pt-3 border-t border-gray-100">
-                              <div className="flex items-center gap-4">
-                                <div className="flex items-center gap-1">
-                                  <Copy className="h-3 w-3 text-gray-400" />
-                                  <span className="text-xs text-gray-500 font-medium">
-                                    {project._count.copies}
-                                  </span>
-                                </div>
-                                <span className="text-xs text-gray-400">
-                                  {formatDate(project.createdAt)}
-                                </span>
-                              </div>
-                              <Link href={`/dashboard/projeto/${project.id}`}>
-                                <Button size="sm" className="h-7 px-3 bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white border-0">
-                                  <Edit3 className="h-3 w-3 mr-1" />
-                                  Abrir
-                                </Button>
-                              </Link>
-                            </div>
-                          </CardContent>
-                        </Card>
-                      )
-                    })}
-                  </div>
-                )}
-                
-                {projects.length > 0 && (
-                  <div className="mt-4 flex gap-2">
-                    <Link href="/dashboard/novo-projeto" className="flex-1">
-                      <Button className="w-full">
                         <Plus className="h-4 w-4 mr-2" />
                         Novo Projeto
                       </Button>
                     </Link>
-                    <Link href="/historico">
+                    <Link href="/dashboard/projetos">
                       <Button variant="outline">
-                        Ver Todos
+                        <Folder className="h-4 w-4 mr-2" />
+                        Ver Projetos
                       </Button>
                     </Link>
                   </div>
-                )}
+                </div>
               </CardContent>
             </Card>
           </div>
