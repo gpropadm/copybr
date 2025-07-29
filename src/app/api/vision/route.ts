@@ -62,8 +62,8 @@ export async function POST(request: NextRequest) {
           ]
         }
       ],
-      max_tokens: 300,
-      temperature: 0.1, // Baixa temperatura para respostas mais consistentes
+      max_tokens: 500,
+      temperature: 0.0, // Temperatura zero para máxima consistência
     })
 
     const content = completion.choices[0]?.message?.content
@@ -103,6 +103,24 @@ export async function POST(request: NextRequest) {
 
     // Garantir que confidence está entre 0 e 1
     if (parsedResponse.confidence > 1) parsedResponse.confidence = parsedResponse.confidence / 100
+
+    // Detectar respostas suspeitas/alucinações
+    const suspiciousPatterns = [
+      /sono eme/i,
+      /atacadao/i,
+      /loja atacadao/i
+    ]
+    
+    const isSuspicious = suspiciousPatterns.some(pattern => 
+      pattern.test(parsedResponse.product) || pattern.test(parsedResponse.rawText)
+    )
+    
+    if (isSuspicious || parsedResponse.confidence < 0.3) {
+      console.log('⚠️ Resposta suspeita detectada, reduzindo confiança')
+      parsedResponse.confidence = Math.min(parsedResponse.confidence, 0.2)
+      parsedResponse.product = 'Não foi possível identificar o produto'
+      parsedResponse.price = 0
+    }
 
     console.log('✅ Resposta processada:', parsedResponse)
 

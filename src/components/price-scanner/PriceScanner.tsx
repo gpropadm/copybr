@@ -75,25 +75,28 @@ export default function PriceScanner() {
         },
         body: JSON.stringify({
           image: base64Image,
-          prompt: `Você é um especialista em leitura de etiquetas de preços de supermercados brasileiros. Analise esta imagem e extraia:
+          prompt: `ANALISE ESTA IMAGEM COM EXTREMA PRECISÃO. NÃO INVENTE INFORMAÇÕES.
 
-1. NOME DO PRODUTO: Identifique o produto completo com marca, tamanho e tipo (ex: "Coca-Cola Lata 350ml", "Pão de Hambúrguer 36 unidades")
-2. PREÇO: Encontre o preço de venda principal em reais (formato: apenas números como 4.99, 12.50)
-3. CONFIANÇA: Avalie sua confiança de 0 a 1 na identificação
+INSTRUÇÕES RIGOROSAS:
+1. Leia APENAS o texto que você consegue ver claramente na imagem
+2. Se não conseguir ler algo com certeza, NÃO INVENTE
+3. Para o produto: use EXATAMENTE o nome que está escrito
+4. Para o preço: use APENAS números que você vê claramente após "R$"
+5. Se a confiança for menor que 0.7, seja honesto
 
-IMPORTANTE:
-- Foque no texto mais destacado para o produto
-- Procure por "R$" ou valores em destaque para o preço
-- Se não conseguir identificar claramente, seja honesto na confiança
-- Ignore códigos de barras ou textos pequenos
-
-Responda APENAS neste formato JSON:
+FORMATO DE RESPOSTA (JSON):
 {
-  "product": "nome completo do produto",
+  "product": "EXATAMENTE o que está escrito na imagem OU 'Não identificado'",
   "price": 0.00,
-  "confidence": 0.95,
-  "rawText": "todo texto visível na imagem"
-}`
+  "confidence": 0.00,
+  "rawText": "TODO o texto que você consegue ler na imagem"
+}
+
+REGRAS CRÍTICAS:
+- NÃO adicione informações que não estão na imagem
+- NÃO assuma nomes de lojas se não estiver escrito
+- Se não conseguir ler o preço claramente, coloque 0.00
+- Seja BRUTALMENTE honesto sobre sua confiança`
         })
       })
       
