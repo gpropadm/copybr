@@ -281,7 +281,7 @@ export default function MeusCopiesPage() {
                         ))}
                       </div>
                     </div>
-                  )}
+                  ) : null}
 
                   {/* Ações */}
                   <div className="flex gap-2 pt-2 border-t border-gray-200">
