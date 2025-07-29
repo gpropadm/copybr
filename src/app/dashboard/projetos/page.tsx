@@ -14,6 +14,9 @@ interface Project {
   description: string
   createdAt: string
   status: string
+  _count?: {
+    copies: number
+  }
 }
 
 const projectTypeLabels: {[key: string]: string} = {
@@ -50,28 +53,59 @@ export default function ProjetosPage() {
   }, [isAuthenticated, router])
 
   useEffect(() => {
-    // Carregar projetos do localStorage específicos do usuário
-    const loadProjects = () => {
-      if (!user?.id) {
+    fetchProjects()
+  }, [])
+
+  const fetchProjects = async () => {
+    try {
+      // Obter dados do usuário logado
+      const userData = localStorage.getItem('auth_user')
+      if (!userData) {
+        console.error('Usuário não autenticado')
         setLoading(false)
         return
       }
-
-      try {
+      
+      const user = JSON.parse(userData)
+      
+      const response = await fetch('/api/projects', {
+        headers: {
+          'x-user-id': user.id
+        }
+      })
+      const result = await response.json()
+      
+      if (result.success) {
+        setProjects(result.data)
+      } else {
+        // Fallback para localStorage se API falhar
         const userProjectsKey = `projects_${user.id}`
         const savedProjects = localStorage.getItem(userProjectsKey)
         if (savedProjects) {
           setProjects(JSON.parse(savedProjects))
         }
-      } catch (error) {
-        console.error('Erro ao carregar projetos:', error)
-      } finally {
-        setLoading(false)
       }
+    } catch (error) {
+      console.error('Erro ao buscar projetos:', error)
+      
+      // Fallback para localStorage em caso de erro
+      try {
+        const userData = localStorage.getItem('auth_user')
+        if (userData) {
+          const user = JSON.parse(userData)
+          const userProjectsKey = `projects_${user.id}`
+          const savedProjects = localStorage.getItem(userProjectsKey)
+          if (savedProjects) {
+            setProjects(JSON.parse(savedProjects))
+          }
+        }
+      } catch (localError) {
+        console.error('Erro ao carregar do localStorage:', localError)
+      }
+    } finally {
+      setLoading(false)
     }
-
-    loadProjects()
-  }, [user])
+  }
 
   const filteredProjects = projects.filter(project => {
     const matchesSearch = project.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
