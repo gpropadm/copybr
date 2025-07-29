@@ -27,6 +27,22 @@ export default function SocialAccountsManager({ userId, onAccountChange }: Socia
 
   useEffect(() => {
     fetchAccounts()
+    
+    // Verificar se voltou da autenticação do Facebook
+    const urlParams = new URLSearchParams(window.location.search)
+    const success = urlParams.get('success')
+    const error = urlParams.get('error')
+    
+    if (success === 'facebook_connected') {
+      alert('✅ Facebook conectado com sucesso!')
+      // Limpar parâmetros da URL
+      window.history.replaceState({}, document.title, window.location.pathname)
+      fetchAccounts()
+    } else if (error) {
+      alert(`❌ Erro ao conectar: ${error}`)
+      // Limpar parâmetros da URL
+      window.history.replaceState({}, document.title, window.location.pathname)
+    }
   }, [userId])
 
   const fetchAccounts = async () => {
@@ -56,16 +72,42 @@ export default function SocialAccountsManager({ userId, onAccountChange }: Socia
     setConnecting(platform)
     
     try {
-      alert(`Conectando ${platform}... (simulação)`)
-      await simulateOAuthConnection(platform)
-      await fetchAccounts()
-      if (onAccountChange) onAccountChange()
+      if (platform.toLowerCase() === 'facebook') {
+        // OAuth real para Facebook
+        await connectFacebook()
+      } else {
+        // Simulação para outras plataformas
+        alert(`Conectando ${platform}... (simulação)`)
+        await simulateOAuthConnection(platform)
+        await fetchAccounts()
+        if (onAccountChange) onAccountChange()
+      }
     } catch (error) {
       console.error('Erro ao conectar conta:', error)
       alert('Erro ao conectar conta. Tente novamente.')
     } finally {
       setConnecting(null)
     }
+  }
+
+  const connectFacebook = async () => {
+    const userData = localStorage.getItem('auth_user')
+    if (!userData) {
+      throw new Error('Usuário não autenticado')
+    }
+    
+    const user = JSON.parse(userData)
+    
+    // Redirecionar para OAuth do Facebook
+    const facebookAuthUrl = `https://www.facebook.com/v18.0/dialog/oauth?` +
+      `client_id=${process.env.NEXT_PUBLIC_FACEBOOK_APP_ID || 'test-app-id'}` +
+      `&redirect_uri=${encodeURIComponent(window.location.origin + '/api/auth/facebook/callback')}` +
+      `&scope=pages_manage_posts,pages_read_engagement,publish_video` +
+      `&state=${user.id}` + // Passar userId como state
+      `&response_type=code`
+    
+    // Abrir popup ou redirecionar
+    window.location.href = facebookAuthUrl
   }
 
   const testPosting = async () => {
