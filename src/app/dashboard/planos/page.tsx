@@ -257,30 +257,30 @@ export default function PlanosPage() {
         </div>
 
         {/* FAQ */}
-        <div className="max-w-4xl mx-auto">
-          <h2 className="text-lg font-bold text-gray-900 text-center mb-4">
+        <div className="w-full">
+          <h2 className="text-2xl font-bold text-gray-900 text-center mb-6">
             Perguntas Frequentes
           </h2>
           
-          <div className="bg-gray-50 rounded-lg p-4 space-y-3">
-            <div className="border-b border-gray-200 pb-2">
-              <h4 className="text-sm font-medium text-gray-900 mb-1">Posso cancelar a qualquer momento?</h4>
-              <p className="text-xs text-gray-600">Sim! Sem multas ou taxas de cancelamento.</p>
+          <div className="bg-gray-50 rounded-lg p-6 grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div className="border-b border-gray-200 pb-3 md:border-b-0">
+              <h4 className="text-base font-medium text-gray-900 mb-2">Posso cancelar a qualquer momento?</h4>
+              <p className="text-sm text-gray-600">Sim! Sem multas ou taxas de cancelamento.</p>
             </div>
             
-            <div className="border-b border-gray-200 pb-2">
-              <h4 className="text-sm font-medium text-gray-900 mb-1">E se eu exceder meu limite?</h4>
-              <p className="text-xs text-gray-600">Receberá notificação para upgrade. Planos pagos têm buffer de segurança.</p>
+            <div className="border-b border-gray-200 pb-3 md:border-b-0">
+              <h4 className="text-base font-medium text-gray-900 mb-2">E se eu exceder meu limite?</h4>
+              <p className="text-sm text-gray-600">Receberá notificação para upgrade. Planos pagos têm buffer de segurança.</p>
             </div>
             
-            <div className="border-b border-gray-200 pb-2">
-              <h4 className="text-sm font-medium text-gray-900 mb-1">Posso alterar meu plano?</h4>
-              <p className="text-xs text-gray-600">Sim! Upgrade/downgrade a qualquer momento com efeito imediato.</p>
+            <div className="border-b border-gray-200 pb-3 md:border-b-0">
+              <h4 className="text-base font-medium text-gray-900 mb-2">Posso alterar meu plano?</h4>
+              <p className="text-sm text-gray-600">Sim! Upgrade/downgrade a qualquer momento com efeito imediato.</p>
             </div>
             
             <div>
-              <h4 className="text-sm font-medium text-gray-900 mb-1">Há garantia de reembolso?</h4>
-              <p className="text-xs text-gray-600">Garantia de 7 dias para planos pagos. 100% do valor devolvido.</p>
+              <h4 className="text-base font-medium text-gray-900 mb-2">Há garantia de reembolso?</h4>
+              <p className="text-sm text-gray-600">Garantia de 7 dias para planos pagos. 100% do valor devolvido.</p>
             </div>
           </div>
         </div>
