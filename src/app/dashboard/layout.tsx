@@ -28,7 +28,8 @@ import {
   Camera,
   TrendingUp,
   Home,
-  Sparkles
+  Sparkles,
+  BookOpen
 } from 'lucide-react'
 import { ThemeProvider, useTheme } from '@/contexts/ThemeContext'
 import { useAuth } from '@/contexts/AuthContext'
@@ -118,6 +119,12 @@ function DashboardContent({
       label: 'Imagem para Prompt',
       href: '/dashboard/image-to-prompt',
       color: 'text-purple-600'
+    },
+    {
+      icon: BookOpen,
+      label: 'Knowledge Base',
+      href: '/dashboard/knowledge-base',
+      color: 'text-indigo-600'
     },
     {
       icon: TrendingUp,
