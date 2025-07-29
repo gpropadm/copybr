@@ -1,19 +1,9 @@
 'use client'
 
-import { useState, useRef, useEffect } from 'react'
-import { Upload, Copy, Image as ImageIcon, Sparkles, Download, X, History, Heart, Clock } from 'lucide-react'
+import { useState, useRef } from 'react'
+import { Upload, Copy, Image as ImageIcon, Sparkles, X } from 'lucide-react'
 import Button from '@/components/ui/Button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/Card'
-
-interface HistoryEntry {
-  id: string
-  image: string
-  type: 'prompt' | 'copies'
-  prompt?: string
-  copies?: string[]
-  createdAt: string
-  isFavorite: boolean
-}
 
 export default function ImageToPromptPage() {
   const [image, setImage] = useState<string | null>(null)
@@ -23,52 +13,27 @@ export default function ImageToPromptPage() {
   const [loading, setLoading] = useState(false)
   const [dragActive, setDragActive] = useState(false)
   const [analysisMode, setAnalysisMode] = useState<'prompt' | 'copy+prompt'>('prompt')
-  const [showHistory, setShowHistory] = useState(false)
-  const [history, setHistory] = useState<HistoryEntry[]>([])
   const fileInputRef = useRef<HTMLInputElement>(null)
 
-  // Carregar histórico do localStorage
-  useEffect(() => {
-    const savedHistory = localStorage.getItem('image_to_prompt_history')
-    if (savedHistory) {
-      setHistory(JSON.parse(savedHistory))
-    }
-  }, [])
-
-  // Salvar no histórico
+  // Salvar no histórico (para Meus Copies)
   const saveToHistory = (type: 'prompt' | 'copies', generatedPrompt?: string, generatedCopies?: string[]) => {
     if (!image) return
 
-    const entry: HistoryEntry = {
+    const entry = {
       id: Date.now().toString(),
       image,
       type,
       prompt: generatedPrompt,
       copies: generatedCopies,
       createdAt: new Date().toISOString(),
-      isFavorite: false
+      isFavorite: false,
+      title: `${type === 'prompt' ? 'Prompt' : 'Copies'} - ${new Date().toLocaleDateString('pt-BR')}`
     }
 
-    const newHistory = [entry, ...history].slice(0, 50) // Manter apenas 50 entradas
-    setHistory(newHistory)
-    localStorage.setItem('image_to_prompt_history', JSON.stringify(newHistory))
-  }
-
-  // Toggle favorito
-  const toggleFavorite = (id: string) => {
-    const newHistory = history.map(entry => 
-      entry.id === id ? { ...entry, isFavorite: !entry.isFavorite } : entry
-    )
-    setHistory(newHistory)
-    localStorage.setItem('image_to_prompt_history', JSON.stringify(newHistory))
-  }
-
-  // Limpar histórico
-  const clearHistory = () => {
-    if (confirm('Tem certeza que deseja limpar todo o histórico?')) {
-      setHistory([])
-      localStorage.removeItem('image_to_prompt_history')
-    }
+    const savedEntries = localStorage.getItem('image_to_prompt_history')
+    const currentEntries = savedEntries ? JSON.parse(savedEntries) : []
+    const newEntries = [entry, ...currentEntries].slice(0, 50) // Manter apenas 50 entradas
+    localStorage.setItem('image_to_prompt_history', JSON.stringify(newEntries))
   }
 
   const handleDrag = (e: React.DragEvent) => {
@@ -187,10 +152,6 @@ Inclua: gancho inicial impactante, benefícios do produto, call-to-action forte,
     alert('Prompt copiado!')
   }
 
-  const copyCopy = () => {
-    navigator.clipboard.writeText(copy)
-    alert('Copy copiada!')
-  }
 
   const clearAll = () => {
     setImage(null)
@@ -212,40 +173,26 @@ Inclua: gancho inicial impactante, benefícios do produto, call-to-action forte,
           </p>
           
           {/* Mode Toggle */}
-          <div className="mt-4 flex gap-2 items-center justify-between">
-            <div className="flex gap-2">
-              <button
-                onClick={() => setAnalysisMode('prompt')}
-                className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
-                  analysisMode === 'prompt'
-                    ? 'bg-purple-600 text-white'
-                    : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
-                }`}
-              >
-                Quero um Prompt
-              </button>
-              <button
-                onClick={() => setAnalysisMode('copy+prompt')}
-                className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
-                  analysisMode === 'copy+prompt'
-                    ? 'bg-purple-600 text-white'
-                    : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
-                }`}
-              >
-                Quero uma Copy
-              </button>
-            </div>
-            
+          <div className="mt-4 flex gap-2">
             <button
-              onClick={() => setShowHistory(!showHistory)}
-              className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors flex items-center gap-2 ${
-                showHistory
-                  ? 'bg-blue-600 text-white'
+              onClick={() => setAnalysisMode('prompt')}
+              className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
+                analysisMode === 'prompt'
+                  ? 'bg-purple-600 text-white'
                   : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
               }`}
             >
-              <History className="h-4 w-4" />
-              Histórico ({history.length})
+              Quero um Prompt
+            </button>
+            <button
+              onClick={() => setAnalysisMode('copy+prompt')}
+              className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
+                analysisMode === 'copy+prompt'
+                  ? 'bg-purple-600 text-white'
+                  : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+              }`}
+            >
+              Quero uma Copy
             </button>
           </div>
         </div>
@@ -428,131 +375,6 @@ Inclua: gancho inicial impactante, benefícios do produto, call-to-action forte,
             )}
           </div>
         </div>
-
-        {/* History */}
-        {showHistory && (
-          <Card className="mt-6">
-            <CardHeader>
-              <CardTitle className="flex items-center justify-between">
-                <span className="flex items-center gap-2">
-                  <History className="h-5 w-5" />
-                  Histórico de Gerações
-                </span>
-                {history.length > 0 && (
-                  <button
-                    onClick={clearHistory}
-                    className="text-sm text-red-600 hover:text-red-700 px-3 py-1 rounded border border-red-200 hover:bg-red-50"
-                  >
-                    Limpar Tudo
-                  </button>
-                )}
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              {history.length === 0 ? (
-                <div className="text-center text-gray-500 py-8">
-                  <History className="h-12 w-12 text-gray-300 mx-auto mb-4" />
-                  <p>Nenhum histórico ainda</p>
-                  <p className="text-sm">Gere prompts ou copies para começar seu histórico</p>
-                </div>
-              ) : (
-                <div className="space-y-4 max-h-96 overflow-y-auto">
-                  {history.map((entry) => (
-                    <div key={entry.id} className="border border-gray-200 rounded-lg p-4">
-                      <div className="flex items-start gap-4">
-                        <img 
-                          src={entry.image} 
-                          alt="Generated"
-                          className="w-16 h-16 object-cover rounded-lg flex-shrink-0"
-                        />
-                        <div className="flex-1 min-w-0">
-                          <div className="flex items-center justify-between mb-2">
-                            <div className="flex items-center gap-2">
-                              <span className={`text-xs px-2 py-1 rounded-full ${
-                                entry.type === 'prompt' 
-                                  ? 'bg-purple-100 text-purple-800' 
-                                  : 'bg-blue-100 text-blue-800'
-                              }`}>
-                                {entry.type === 'prompt' ? 'Prompt' : `${entry.copies?.length || 0} Copies`}
-                              </span>
-                              <div className="flex items-center gap-1 text-xs text-gray-500">
-                                <Clock className="h-3 w-3" />
-                                {new Date(entry.createdAt).toLocaleDateString('pt-BR', {
-                                  day: '2-digit',
-                                  month: '2-digit',
-                                  hour: '2-digit',
-                                  minute: '2-digit'
-                                })}
-                              </div>
-                            </div>
-                            <button
-                              onClick={() => toggleFavorite(entry.id)}
-                              className={`p-1 rounded transition-colors ${
-                                entry.isFavorite 
-                                  ? 'text-red-500 hover:text-red-600' 
-                                  : 'text-gray-400 hover:text-red-500'
-                              }`}
-                            >
-                              <Heart className={`h-4 w-4 ${entry.isFavorite ? 'fill-current' : ''}`} />
-                            </button>
-                          </div>
-                          
-                          {entry.type === 'prompt' && entry.prompt ? (
-                            <div className="space-y-2">
-                              <p className="text-sm text-gray-800" style={{
-                                display: '-webkit-box',
-                                WebkitLineClamp: 3,
-                                WebkitBoxOrient: 'vertical' as const,
-                                overflow: 'hidden'
-                              }}>
-                                {entry.prompt}
-                              </p>
-                              <button
-                                onClick={() => {
-                                  navigator.clipboard.writeText(entry.prompt!)
-                                  alert('Prompt copiado!')
-                                }}
-                                className="text-xs text-blue-600 hover:text-blue-700"
-                              >
-                                Copiar prompt
-                              </button>
-                            </div>
-                          ) : entry.copies ? (
-                            <div className="space-y-2">
-                              <div className="grid grid-cols-1 gap-2 max-h-32 overflow-y-auto">
-                                {entry.copies.map((copyText, index) => (
-                                  <div key={index} className="bg-gray-50 p-2 rounded text-xs">
-                                    <div className="flex justify-between items-start">
-                                      <p className="flex-1" style={{
-                                        display: '-webkit-box',
-                                        WebkitLineClamp: 2,
-                                        WebkitBoxOrient: 'vertical' as const,
-                                        overflow: 'hidden'
-                                      }}>{copyText}</p>
-                                      <button
-                                        onClick={() => {
-                                          navigator.clipboard.writeText(copyText)
-                                          alert(`Copy #${index + 1} copiada!`)
-                                        }}
-                                        className="ml-2 text-blue-600 hover:text-blue-700 flex-shrink-0"
-                                      >
-                                        <Copy className="h-3 w-3" />
-                                      </button>
-                                    </div>
-                                  </div>
-                                ))}
-                              </div>
-                            </div>
-                          ) : null}
-                        </div>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              )}
-            </CardContent>
-          </Card>
-        )}
 
         {/* Tips */}
         <Card className="mt-6">

@@ -29,7 +29,8 @@ import {
   TrendingUp,
   Home,
   Sparkles,
-  BookOpen
+  BookOpen,
+  Copy
 } from 'lucide-react'
 import { ThemeProvider, useTheme } from '@/contexts/ThemeContext'
 import { useAuth } from '@/contexts/AuthContext'
@@ -125,6 +126,12 @@ function DashboardContent({
       label: 'Leitura',
       href: '/dashboard/knowledge-base',
       color: 'text-indigo-600'
+    },
+    {
+      icon: Copy,
+      label: 'Meus Copies',
+      href: '/dashboard/meus-copies',
+      color: 'text-blue-600'
     },
     {
       icon: TrendingUp,
