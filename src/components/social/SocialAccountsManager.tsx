@@ -102,7 +102,7 @@ export default function SocialAccountsManager({ userId, onAccountChange }: Socia
     const facebookAuthUrl = `https://www.facebook.com/v18.0/dialog/oauth?` +
       `client_id=${process.env.NEXT_PUBLIC_FACEBOOK_APP_ID || 'test-app-id'}` +
       `&redirect_uri=${encodeURIComponent(window.location.origin + '/api/auth/facebook/callback')}` +
-      `&scope=pages_manage_posts,pages_read_engagement,publish_video` +
+      `&scope=email,public_profile` +
       `&state=${user.id}` + // Passar userId como state
       `&response_type=code`
     
