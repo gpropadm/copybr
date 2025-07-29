@@ -40,6 +40,8 @@ export async function POST(request: NextRequest) {
     }
 
     console.log('🔍 Processando imagem com GPT-4 Vision...')
+    console.log('📝 Prompt enviado:', body.prompt)
+    console.log('📸 Tamanho da imagem base64:', body.image.length)
 
     // Chamada para GPT-4 Vision
     const completion = await openai.chat.completions.create({
@@ -72,7 +74,8 @@ export async function POST(request: NextRequest) {
       throw new Error('Resposta vazia da OpenAI Vision')
     }
 
-    console.log('🎯 Resposta GPT-4 Vision:', content)
+    console.log('🎯 Resposta GPT-4 Vision RAW:', content)
+    console.log('📊 Tokens usados:', completion.usage?.total_tokens)
 
     // Tentar fazer parse do JSON
     let parsedResponse: VisionResponse
@@ -104,22 +107,50 @@ export async function POST(request: NextRequest) {
     // Garantir que confidence está entre 0 e 1
     if (parsedResponse.confidence > 1) parsedResponse.confidence = parsedResponse.confidence / 100
 
-    // Detectar respostas suspeitas/alucinações
+    // Detectar respostas suspeitas/alucinações - LISTA EXPANDIDA
     const suspiciousPatterns = [
       /sono eme/i,
       /atacadao/i,
-      /loja atacadao/i
+      /loja atacadao/i,
+      /r\$ 3\.00/i, // Preço específico que apareceu
+      /confiança 30%/i,
+      /smartphone.*r\$ 3/i,
+      /celular.*r\$ 3/i,
+      // Palavras que não fazem sentido
+      /xlkjdflkj/i,
+      /asdfgh/i,
+      /qwerty/i,
+      // Preços irreais para celulares
+      /r\$ [0-9]\./i, // R$ 1.00, R$ 2.00, etc - muito barato para celular
+      // Textos sem sentido
+      /[a-z]{10,}/i, // Palavras muito longas sem espaço
     ]
+    
+    // Palavras que indicam alucinação
+    const hallucination_words = ['sono', 'eme', 'atacadao', 'drogada', 'fumou']
+    const productLower = parsedResponse.product.toLowerCase()
+    const rawTextLower = parsedResponse.rawText.toLowerCase()
+    
+    const hasHallucination = hallucination_words.some(word => 
+      productLower.includes(word) || rawTextLower.includes(word)
+    )
     
     const isSuspicious = suspiciousPatterns.some(pattern => 
       pattern.test(parsedResponse.product) || pattern.test(parsedResponse.rawText)
-    )
+    ) || hasHallucination
     
-    if (isSuspicious || parsedResponse.confidence < 0.3) {
-      console.log('⚠️ Resposta suspeita detectada, reduzindo confiança')
-      parsedResponse.confidence = Math.min(parsedResponse.confidence, 0.2)
-      parsedResponse.product = 'Não foi possível identificar o produto'
+    console.log('🔍 Checando alucinações...')
+    console.log('🎯 Produto:', parsedResponse.product)
+    console.log('💰 Preço:', parsedResponse.price)
+    console.log('📊 Confiança original:', parsedResponse.confidence)
+    console.log('⚠️ Suspeito?', isSuspicious)
+    
+    if (isSuspicious || parsedResponse.confidence < 0.4) {
+      console.log('❌ ALUCINAÇÃO DETECTADA - Bloqueando resposta')
+      parsedResponse.confidence = 0.1
+      parsedResponse.product = 'Imagem não pôde ser analisada'
       parsedResponse.price = 0
+      parsedResponse.rawText = 'Análise falhou - tente uma imagem com melhor qualidade'
     }
 
     console.log('✅ Resposta processada:', parsedResponse)

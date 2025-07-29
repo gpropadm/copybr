@@ -75,28 +75,36 @@ export default function PriceScanner() {
         },
         body: JSON.stringify({
           image: base64Image,
-          prompt: `ANALISE ESTA IMAGEM COM EXTREMA PRECISÃO. NÃO INVENTE INFORMAÇÕES.
+          prompt: `VOCÊ É UM SISTEMA DE OCR EXTREMAMENTE RIGOROSO.
 
-INSTRUÇÕES RIGOROSAS:
-1. Leia APENAS o texto que você consegue ver claramente na imagem
-2. Se não conseguir ler algo com certeza, NÃO INVENTE
-3. Para o produto: use EXATAMENTE o nome que está escrito
-4. Para o preço: use APENAS números que você vê claramente após "R$"
-5. Se a confiança for menor que 0.7, seja honesto
+INSTRUÇÕES ABSOLUTAS:
+- Leia APENAS texto que está CLARAMENTE visível na imagem
+- NÃO INVENTE nada
+- NÃO ASSUMA nada
+- Se não conseguir ler com 100% de certeza, diga "Não identificado"
 
-FORMATO DE RESPOSTA (JSON):
+PASSOS:
+1. Examine a imagem cuidadosamente
+2. Identifique texto legível
+3. Encontre preços (formato R$ XX,XX)
+4. Seja honesto sobre a qualidade da leitura
+
+RESPOSTA OBRIGATÓRIA (JSON):
 {
-  "product": "EXATAMENTE o que está escrito na imagem OU 'Não identificado'",
+  "product": "Texto do produto que conseguiu ler OU 'Não identificado'",
   "price": 0.00,
   "confidence": 0.00,
-  "rawText": "TODO o texto que você consegue ler na imagem"
+  "rawText": "Todo texto legível da imagem"
 }
 
-REGRAS CRÍTICAS:
-- NÃO adicione informações que não estão na imagem
-- NÃO assuma nomes de lojas se não estiver escrito
-- Se não conseguir ler o preço claramente, coloque 0.00
-- Seja BRUTALMENTE honesto sobre sua confiança`
+PROIBIDO:
+- Inventar nomes de produtos
+- Assumir lojas (Atacadão, etc)
+- Criar preços falsos
+- Mentir sobre confiança
+- Usar palavras como "sono", "eme" ou textos sem sentido
+
+SE NÃO CONSEGUIR LER CLARAMENTE: coloque confidence baixa (<0.5)`
         })
       })
       
