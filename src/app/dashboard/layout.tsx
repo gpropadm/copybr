@@ -27,7 +27,8 @@ import {
   Users,
   Camera,
   TrendingUp,
-  Home
+  Home,
+  Sparkles
 } from 'lucide-react'
 import { ThemeProvider, useTheme } from '@/contexts/ThemeContext'
 import { useAuth } from '@/contexts/AuthContext'
@@ -111,6 +112,12 @@ function DashboardContent({
       label: 'Scanner de Preços',
       href: '/dashboard/price-scanner',
       color: 'text-cyan-600'
+    },
+    {
+      icon: Sparkles,
+      label: 'Imagem para Prompt',
+      href: '/dashboard/image-to-prompt',
+      color: 'text-purple-600'
     },
     {
       icon: TrendingUp,

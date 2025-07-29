@@ -44,7 +44,7 @@ export async function POST(request: NextRequest) {
 
     // Inicializar Gemini
     const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY)
-    const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" })
+    const model = genAI.getGenerativeModel({ model: "gemini-2.0-flash-exp" })
 
     // Preparar imagem para Gemini
     const imagePart = {
@@ -65,7 +65,17 @@ export async function POST(request: NextRequest) {
 
     console.log('🎯 Resposta Gemini Vision RAW:', content)
 
-    // Tentar fazer parse do JSON
+    // Verificar se é um prompt genérico (não scanner de preços)
+    if (body.prompt.includes('comprehensive, precise text prompt')) {
+      // Retorno para geração de prompt
+      return NextResponse.json({
+        success: true,
+        text: content,
+        rawText: content
+      })
+    }
+
+    // Tentar fazer parse do JSON (para scanner de preços)
     let parsedResponse: VisionResponse
     try {
       parsedResponse = JSON.parse(content)
