@@ -62,39 +62,106 @@ export default function PriceScanner() {
     setLoading(true)
     
     try {
-      // Importa Tesseract.js dinamicamente
+      console.log('🤖 Iniciando análise com GPT-4 Vision...')
+      
+      // Converte imagem para base64
+      const base64Image = await convertFileToBase64(imageFile)
+      
+      // Chama GPT-4 Vision
+      const response = await fetch('/api/vision', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          image: base64Image,
+          prompt: `Você é um especialista em leitura de etiquetas de preços de supermercados brasileiros. Analise esta imagem e extraia:
+
+1. NOME DO PRODUTO: Identifique o produto completo com marca, tamanho e tipo (ex: "Coca-Cola Lata 350ml", "Pão de Hambúrguer 36 unidades")
+2. PREÇO: Encontre o preço de venda principal em reais (formato: apenas números como 4.99, 12.50)
+3. CONFIANÇA: Avalie sua confiança de 0 a 1 na identificação
+
+IMPORTANTE:
+- Foque no texto mais destacado para o produto
+- Procure por "R$" ou valores em destaque para o preço
+- Se não conseguir identificar claramente, seja honesto na confiança
+- Ignore códigos de barras ou textos pequenos
+
+Responda APENAS neste formato JSON:
+{
+  "product": "nome completo do produto",
+  "price": 0.00,
+  "confidence": 0.95,
+  "rawText": "todo texto visível na imagem"
+}`
+        })
+      })
+      
+      if (!response.ok) {
+        throw new Error('Erro na API do GPT-4 Vision')
+      }
+      
+      const data = await response.json()
+      console.log('🎯 Resultado GPT-4:', data)
+      
+      return {
+        productName: data.product || 'Produto Não Identificado',
+        price: data.price || 0,
+        confidence: data.confidence || 0.5,
+        rawText: data.rawText || 'Análise via GPT-4 Vision',
+        store: currentStore
+      }
+      
+    } catch (error) {
+      console.error('❌ Erro GPT-4 Vision:', error)
+      
+      // Fallback para Tesseract se GPT-4 falhar
+      console.log('🔄 Fallback para Tesseract OCR...')
+      return await processWithTesseract(imageFile)
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  // Converte arquivo para base64
+  const convertFileToBase64 = (file: File): Promise<string> => {
+    return new Promise((resolve, reject) => {
+      const reader = new FileReader()
+      reader.onload = () => {
+        const result = reader.result as string
+        // Remove o prefixo data:image/...;base64,
+        const base64 = result.split(',')[1]
+        resolve(base64)
+      }
+      reader.onerror = reject
+      reader.readAsDataURL(file)
+    })
+  }
+
+  // Fallback Tesseract (caso GPT-4 falhe)
+  const processWithTesseract = async (imageFile: File): Promise<ScannedProduct> => {
+    try {
       const Tesseract = await import('tesseract.js')
       
-      console.log('🔍 Iniciando OCR REAL...')
-      
-      // Processa imagem com Tesseract OCR
       const { data: { text, confidence } } = await Tesseract.recognize(
         imageFile,
-        'por', // Português
+        'por+eng',
         {
-          logger: (m: any) => console.log('OCR Progress:', m)
+          logger: (m: any) => console.log('OCR Progress:', m),
         }
       )
       
-      console.log('📄 Texto extraído:', text)
-      console.log('🎯 Confiança:', confidence)
-      
-      // IA para extrair produto e preço do texto
       const extractedData = extractProductAndPrice(text)
       
       return {
-        productName: extractedData.product || 'Produto Não Identificado',
+        productName: extractedData.product || 'Produto Detectado',
         price: extractedData.price || 0,
         confidence: confidence / 100,
         rawText: text,
         store: currentStore
       }
-      
     } catch (error) {
-      console.error('❌ Erro OCR:', error)
-      throw new Error('Erro ao processar imagem com OCR')
-    } finally {
-      setLoading(false)
+      throw new Error('Erro no fallback OCR')
     }
   }
 
