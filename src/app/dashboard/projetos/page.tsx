@@ -198,7 +198,14 @@ export default function ProjetosPage() {
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
             {filteredProjects.map((project) => (
-              <Card key={project.id} className="hover:shadow-md transition-shadow">
+              <Card 
+                key={project.id} 
+                className="hover:shadow-md transition-shadow cursor-pointer" 
+                onClick={() => {
+                  console.log('Clicando no projeto:', project.id)
+                  router.push(`/dashboard/projeto/${project.id}`)
+                }}
+              >
                 <CardHeader className="pb-3">
                   <div className="flex items-start justify-between">
                     <div className="flex-1 min-w-0">
@@ -216,22 +223,37 @@ export default function ProjetosPage() {
                     </div>
                     
                     <div className="relative group">
-                      <button className="p-1 hover:bg-gray-100 rounded">
+                      <button 
+                        className="p-1 hover:bg-gray-100 rounded"
+                        onClick={(e) => e.stopPropagation()}
+                      >
                         <MoreVertical className="h-4 w-4 text-gray-400" />
                       </button>
                       
                       {/* Dropdown menu - simplified for now */}
                       <div className="absolute right-0 top-8 w-32 bg-white border border-gray-200 rounded-lg shadow-lg z-10 opacity-0 group-hover:opacity-100 transition-opacity">
-                        <button className="w-full px-3 py-2 text-left text-sm hover:bg-gray-50 flex items-center gap-2">
+                        <button 
+                          className="w-full px-3 py-2 text-left text-sm hover:bg-gray-50 flex items-center gap-2"
+                          onClick={(e) => {
+                            e.stopPropagation()
+                            router.push(`/dashboard/projeto/${project.id}`)
+                          }}
+                        >
                           <Eye className="h-3 w-3" />
                           Ver
                         </button>
-                        <button className="w-full px-3 py-2 text-left text-sm hover:bg-gray-50 flex items-center gap-2">
+                        <button 
+                          className="w-full px-3 py-2 text-left text-sm hover:bg-gray-50 flex items-center gap-2"
+                          onClick={(e) => e.stopPropagation()}
+                        >
                           <Edit className="h-3 w-3" />
                           Editar
                         </button>
                         <button 
-                          onClick={() => handleDeleteProject(project.id)}
+                          onClick={(e) => {
+                            e.stopPropagation()
+                            handleDeleteProject(project.id)
+                          }}
                           className="w-full px-3 py-2 text-left text-sm hover:bg-gray-50 flex items-center gap-2 text-red-600"
                         >
                           <Trash2 className="h-3 w-3" />
@@ -260,7 +282,7 @@ export default function ProjetosPage() {
                   </div>
                   
                   {/* Botões de ação */}
-                  <div className="flex items-center gap-2">
+                  <div className="flex items-center gap-2" onClick={(e) => e.stopPropagation()}>
                     <Link href={`/dashboard/projeto/${project.id}`} className="flex-1">
                       <Button className="w-full text-sm py-2">
                         <Eye className="h-3 w-3 mr-2" />

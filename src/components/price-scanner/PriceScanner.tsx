@@ -21,6 +21,7 @@ export default function PriceScanner() {
   const [loading, setLoading] = useState(false)
   const [savedProducts, setSavedProducts] = useState<any[]>([])
   const [debugLogs, setDebugLogs] = useState<string[]>([])
+  const [useGemini, setUseGemini] = useState(false) // Toggle para escolher API
   const fileInputRef = useRef<HTMLInputElement>(null)
   const videoRef = useRef<HTMLVideoElement>(null)
   const canvasRef = useRef<HTMLCanvasElement>(null)
@@ -68,72 +69,130 @@ export default function PriceScanner() {
     setDebugLogs([]) // Limpar logs anteriores
     
     try {
-      addDebugLog('🔧 USANDO TESSERACT OCR COMO PRINCIPAL')
-      console.log('🔧 USANDO TESSERACT OCR COMO PRINCIPAL (GPT-4 Vision está drogada)')
-      
-      // Usar Tesseract OCR PRIMEIRO
-      const tesseractResult = await processWithTesseract(imageFile)
-      
-      // Se Tesseract teve boa confiança, usar resultado dele
-      if (tesseractResult.confidence > 0.4) {
-        addDebugLog(`✅ Tesseract funcionou: ${tesseractResult.confidence.toFixed(2)}`)
-        console.log('✅ Tesseract OCR funcionou bem, usando resultado')
-        return tesseractResult
-      }
-      
-      addDebugLog('⚠️ Tesseract baixa confiança, tentando GPT-4 Vision...')
-      console.log('⚠️ Tesseract OCR com baixa confiança, tentando GPT-4 Vision como último recurso...')
-      
-      // Só usar GPT-4 Vision se Tesseract falhar
       const base64Image = await convertFileToBase64(imageFile)
       
-      addDebugLog('🚀 Chamando GPT-4 Vision API...')
-      
-      const response = await fetch('/api/vision', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          image: base64Image,
-          prompt: `SISTEMA OCR RÍGIDO - ÚLTIMA TENTATIVA
+      if (useGemini) {
+        // Tentar Gemini Vision primeiro
+        addDebugLog('🔮 USANDO GEMINI VISION COMO PRINCIPAL')
+        console.log('🔮 TESTANDO GEMINI VISION COMO MÉTODO PRINCIPAL')
+        
+        addDebugLog('🔍 Chamando Gemini Vision API...')
+        
+        const response = await fetch('/api/gemini-vision', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            image: base64Image,
+            prompt: `Você é um especialista em OCR de etiquetas de preço no Brasil.
 
-APENAS leia o texto que vê na imagem. 
-NÃO INVENTE NADA.
+Analise esta imagem de etiqueta de preço e extraia EXATAMENTE o que vê:
+- PRODUTO: Nome do produto (sem inventar)  
+- PREÇO: Valor em reais (formato: número)
 
-Se não conseguir ler claramente, responda:
+REGRAS CRÍTICAS:
+1. APENAS leia texto que está CLARAMENTE visível
+2. Se não conseguir ler, responda "Não identificado" 
+3. NÃO invente nomes ou preços
+4. Preços devem ser realistas para o tipo de produto
+5. Ignore textos borrados ou ilegíveis
+
+Responda em JSON puro:
 {
-  "product": "Não identificado",
-  "price": 0.00,
-  "confidence": 0.1,
-  "rawText": "Imagem ilegível"
+  "product": "nome_real_ou_Não_identificado",
+  "price": numero_sem_simbolos,
+  "confidence": 0.0_a_1.0,
+  "rawText": "texto_que_conseguiu_ler"
 }`
+          })
         })
-      })
-      
-      if (!response.ok) {
-        addDebugLog('❌ GPT-4 Vision falhou')
-        console.log('❌ GPT-4 Vision falhou, mantendo resultado Tesseract')
-        return tesseractResult
+        
+        if (response.ok) {
+          const data = await response.json()
+          addDebugLog(`🎯 Gemini Vision: ${data.confidence?.toFixed(2) || '0.00'}`)
+          console.log('🎯 Resultado Gemini Vision:', data)
+          
+          // Se Gemini teve boa confiança, usar resultado
+          if (data.confidence >= 0.5 && !data.error) {
+            addDebugLog('✅ Gemini Vision funcionou!')
+            return {
+              productName: data.product || 'Produto Não Identificado',
+              price: data.price || 0,
+              confidence: data.confidence || 0.1,
+              rawText: data.rawText || 'Análise via Gemini Vision',
+              store: currentStore
+            }
+          }
+        }
+        
+        addDebugLog('⚠️ Gemini falhou, tentando GPT-4 Vision...')
+      } else {
+        // Usar GPT-4 Vision PRIMEIRO (método padrão)
+        addDebugLog('🚀 USANDO GPT-4 VISION COMO PRINCIPAL')
+        console.log('🚀 TESTANDO GPT-4 VISION COMO MÉTODO PRINCIPAL')
+        
+        addDebugLog('🔍 Chamando GPT-4 Vision API...')
+        
+        const response = await fetch('/api/vision', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            image: base64Image,
+            prompt: `VOCÊ É UM OCR ESPECIALISTA EM ETIQUETAS DE PREÇO.
+
+Analise esta imagem de etiqueta de preço e extraia:
+- PRODUTO: Nome exato do produto
+- PREÇO: Valor em reais (R$)
+
+REGRAS RIGOROSAS:
+1. APENAS leia o que REALMENTE vê na imagem
+2. Se não conseguir ler claramente, diga "Não identificado"
+3. NÃO invente produtos ou preços
+4. NÃO use palavras como "SONO EME" ou nomes estranhos
+5. Preços de celular/smartphone devem ser realistas (R$ 200+)
+
+Responda APENAS em JSON:
+{
+  "product": "nome do produto ou Não identificado",
+  "price": valor_numerico_ou_0,
+  "confidence": 0.0_a_1.0,
+  "rawText": "texto_original_da_imagem"
+}`
+          })
+        })
+        
+        if (response.ok) {
+          const data = await response.json()
+          addDebugLog(`🎯 GPT-4 Vision: ${data.confidence?.toFixed(2) || '0.00'}`)
+          console.log('🎯 Resultado GPT-4 Vision:', data)
+          
+          // Se GPT-4 Vision teve boa confiança E não detectou alucinação, usar resultado
+          if (data.confidence >= 0.5 && !data.error) {
+            addDebugLog('✅ GPT-4 Vision funcionou!')
+            return {
+              productName: data.product || 'Produto Não Identificado',
+              price: data.price || 0,
+              confidence: data.confidence || 0.1,
+              rawText: data.rawText || 'Análise via GPT-4 Vision',
+              store: currentStore
+            }
+          }
+        }
+        
+        addDebugLog('⚠️ GPT-4 Vision falhou, tentando Gemini...')
       }
       
-      const data = await response.json()
-      addDebugLog(`🎯 GPT-4 retornou: ${data.confidence}`)
-      console.log('🎯 Resultado GPT-4 (última tentativa):', data)
+      // Fallback para Tesseract se ambos falharem
+      addDebugLog('⚠️ IAs falharam, tentando Tesseract OCR...')
+      console.log('⚠️ Ambas IAs falharam ou baixa confiança, usando Tesseract como backup...')
       
-      // Se GPT-4 Vision também teve baixa confiança, preferir Tesseract
-      if (data.confidence < 0.5) {
-        console.log('📉 GPT-4 Vision também falhou, usando Tesseract')
-        return tesseractResult
-      }
+      const tesseractResult = await processWithTesseract(imageFile)
+      addDebugLog(`🔧 Tesseract backup: ${tesseractResult.confidence.toFixed(2)}`)
       
-      return {
-        productName: data.product || 'Produto Não Identificado',
-        price: data.price || 0,
-        confidence: data.confidence || 0.1,
-        rawText: data.rawText || 'Análise via GPT-4 Vision (backup)',
-        store: currentStore
-      }
+      return tesseractResult
       
     } catch (error) {
       console.error('❌ Erro em todo o processo:', error)
@@ -364,6 +423,25 @@ Se não conseguir ler claramente, responda:
               Tire uma foto da etiqueta de preço para adicionar automaticamente ao sistema
             </p>
             
+            {/* Toggle para escolher API */}
+            <div className="mb-4 p-3 bg-gray-50 rounded-lg">
+              <p className="text-xs text-gray-600 mb-2">Método de análise:</p>
+              <div className="flex gap-2 text-xs">
+                <button
+                  onClick={() => setUseGemini(false)}
+                  className={`px-3 py-1 rounded ${!useGemini ? 'bg-blue-500 text-white' : 'bg-gray-200'}`}
+                >
+                  GPT-4 Vision
+                </button>
+                <button
+                  onClick={() => setUseGemini(true)}
+                  className={`px-3 py-1 rounded ${useGemini ? 'bg-green-500 text-white' : 'bg-gray-200'}`}
+                >
+                  🔮 Gemini Vision (TESTE)
+                </button>
+              </div>
+            </div>
+            
             <Button 
               onClick={openCamera}
               disabled={loading}
@@ -378,7 +456,7 @@ Se não conseguir ler claramente, responda:
               ) : (
                 <>
                   <Camera className="h-4 w-4 mr-2" />
-                  Escanear Produto
+                  Escanear com {useGemini ? 'Gemini' : 'GPT-4'}
                 </>
               )}
             </Button>

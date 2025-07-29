@@ -113,27 +113,31 @@ export async function POST(request: NextRequest) {
     // Garantir que confidence está entre 0 e 1
     if (parsedResponse.confidence > 1) parsedResponse.confidence = parsedResponse.confidence / 100
 
-    // Detectar respostas suspeitas/alucinações - LISTA EXPANDIDA
+    // Detectar respostas suspeitas/alucinações - SISTEMA APRIMORADO
     const suspiciousPatterns = [
       /sono eme/i,
       /atacadao/i,
       /loja atacadao/i,
-      /r\$ 3\.00/i, // Preço específico que apareceu
+      /r\$ 3\.00/i,
       /confiança 30%/i,
-      /smartphone.*r\$ 3/i,
-      /celular.*r\$ 3/i,
-      // Palavras que não fazem sentido
+      /smartphone.*r\$ [0-9]\./i, // Celular barato demais
+      /celular.*r\$ [0-9]\./i,
+      // Palavras sem sentido
       /xlkjdflkj/i,
       /asdfgh/i,
       /qwerty/i,
-      // Preços irreais para celulares
-      /r\$ [0-9]\./i, // R$ 1.00, R$ 2.00, etc - muito barato para celular
-      // Textos sem sentido
-      /[a-z]{10,}/i, // Palavras muito longas sem espaço
+      /abcd.*efgh/i,
+      // Preços irreais (muito baratos para produtos complexos)
+      /smartphone.*r\$ [1-9]\.?\d{0,2}$/i, // Smartphone < R$ 100
+      /celular.*r\$ [1-9]\.?\d{0,2}$/i,    // Celular < R$ 100
+      // Textos muito longos sem espaço (indicam alucinação)
+      /[a-z]{15,}/i,
+      // Produtos que não fazem sentido
+      /produto.*[0-9]{5,}/i, // Nomes com muitos números
     ]
     
-    // Palavras que indicam alucinação
-    const hallucination_words = ['sono', 'eme', 'atacadao', 'drogada', 'fumou']
+    // Palavras específicas que indicam alucinação detectada anteriormente
+    const hallucination_words = ['sono', 'eme', 'atacadao', 'drogada', 'fumou', 'inventado', 'alucinacao']
     const productLower = parsedResponse.product.toLowerCase()
     const rawTextLower = parsedResponse.rawText.toLowerCase()
     
@@ -141,9 +145,16 @@ export async function POST(request: NextRequest) {
       productLower.includes(word) || rawTextLower.includes(word)
     )
     
+    // Verificar se produto parece inventado (muito específico mas sem sentido)
+    const seemsInvented = (
+      parsedResponse.product.length > 50 || // Nome muito longo
+      parsedResponse.product.split(' ').length > 8 || // Muitas palavras
+      /\d{10,}/.test(parsedResponse.product) // Muitos números seguidos
+    )
+    
     const isSuspicious = suspiciousPatterns.some(pattern => 
       pattern.test(parsedResponse.product) || pattern.test(parsedResponse.rawText)
-    ) || hasHallucination
+    ) || hasHallucination || seemsInvented
     
     console.log('🔍 Checando alucinações...')
     console.log('🎯 Produto:', parsedResponse.product)
