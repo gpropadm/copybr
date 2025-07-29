@@ -62,12 +62,22 @@ export default function PriceScanner() {
     setLoading(true)
     
     try {
-      console.log('🤖 Iniciando análise com GPT-4 Vision...')
+      console.log('🔧 USANDO TESSERACT OCR COMO PRINCIPAL (GPT-4 Vision está drogada)')
       
-      // Converte imagem para base64
+      // Usar Tesseract OCR PRIMEIRO
+      const tesseractResult = await processWithTesseract(imageFile)
+      
+      // Se Tesseract teve boa confiança, usar resultado dele
+      if (tesseractResult.confidence > 0.4) {
+        console.log('✅ Tesseract OCR funcionou bem, usando resultado')
+        return tesseractResult
+      }
+      
+      console.log('⚠️ Tesseract OCR com baixa confiança, tentando GPT-4 Vision como último recurso...')
+      
+      // Só usar GPT-4 Vision se Tesseract falhar
       const base64Image = await convertFileToBase64(imageFile)
       
-      // Chama GPT-4 Vision
       const response = await fetch('/api/vision', {
         method: 'POST',
         headers: {
@@ -75,60 +85,54 @@ export default function PriceScanner() {
         },
         body: JSON.stringify({
           image: base64Image,
-          prompt: `VOCÊ É UM SISTEMA DE OCR EXTREMAMENTE RIGOROSO.
+          prompt: `SISTEMA OCR RÍGIDO - ÚLTIMA TENTATIVA
 
-INSTRUÇÕES ABSOLUTAS:
-- Leia APENAS texto que está CLARAMENTE visível na imagem
-- NÃO INVENTE nada
-- NÃO ASSUMA nada
-- Se não conseguir ler com 100% de certeza, diga "Não identificado"
+APENAS leia o texto que vê na imagem. 
+NÃO INVENTE NADA.
 
-PASSOS:
-1. Examine a imagem cuidadosamente
-2. Identifique texto legível
-3. Encontre preços (formato R$ XX,XX)
-4. Seja honesto sobre a qualidade da leitura
-
-RESPOSTA OBRIGATÓRIA (JSON):
+Se não conseguir ler claramente, responda:
 {
-  "product": "Texto do produto que conseguiu ler OU 'Não identificado'",
+  "product": "Não identificado",
   "price": 0.00,
-  "confidence": 0.00,
-  "rawText": "Todo texto legível da imagem"
-}
-
-PROIBIDO:
-- Inventar nomes de produtos
-- Assumir lojas (Atacadão, etc)
-- Criar preços falsos
-- Mentir sobre confiança
-- Usar palavras como "sono", "eme" ou textos sem sentido
-
-SE NÃO CONSEGUIR LER CLARAMENTE: coloque confidence baixa (<0.5)`
+  "confidence": 0.1,
+  "rawText": "Imagem ilegível"
+}`
         })
       })
       
       if (!response.ok) {
-        throw new Error('Erro na API do GPT-4 Vision')
+        console.log('❌ GPT-4 Vision falhou, mantendo resultado Tesseract')
+        return tesseractResult
       }
       
       const data = await response.json()
-      console.log('🎯 Resultado GPT-4:', data)
+      console.log('🎯 Resultado GPT-4 (última tentativa):', data)
+      
+      // Se GPT-4 Vision também teve baixa confiança, preferir Tesseract
+      if (data.confidence < 0.5) {
+        console.log('📉 GPT-4 Vision também falhou, usando Tesseract')
+        return tesseractResult
+      }
       
       return {
         productName: data.product || 'Produto Não Identificado',
         price: data.price || 0,
-        confidence: data.confidence || 0.5,
-        rawText: data.rawText || 'Análise via GPT-4 Vision',
+        confidence: data.confidence || 0.1,
+        rawText: data.rawText || 'Análise via GPT-4 Vision (backup)',
         store: currentStore
       }
       
     } catch (error) {
-      console.error('❌ Erro GPT-4 Vision:', error)
+      console.error('❌ Erro em todo o processo:', error)
       
-      // Fallback para Tesseract se GPT-4 falhar
-      console.log('🔄 Fallback para Tesseract OCR...')
-      return await processWithTesseract(imageFile)
+      // Se tudo falhar, retornar erro padrão
+      return {
+        productName: 'Erro na análise',
+        price: 0,
+        confidence: 0.1,
+        rawText: 'Não foi possível processar a imagem',
+        store: currentStore
+      }
     } finally {
       setLoading(false)
     }

@@ -20,9 +20,13 @@ interface VisionResponse {
 
 export async function POST(request: NextRequest) {
   try {
+    console.log('🔑 Verificando OPENAI_API_KEY...')
+    console.log('🔑 Key exists:', !!process.env.OPENAI_API_KEY)
+    console.log('🔑 Key preview:', process.env.OPENAI_API_KEY?.substring(0, 10) + '...')
+    
     // Verificar se tem API key configurada
     if (!process.env.OPENAI_API_KEY) {
-      console.log('🤖 OPENAI_API_KEY não configurada - usando fallback simulado')
+      console.log('❌ OPENAI_API_KEY não configurada - usando fallback simulado')
       return NextResponse.json(
         { error: 'API OpenAI não configurada. Configure OPENAI_API_KEY.' },
         { status: 503 }
@@ -40,8 +44,9 @@ export async function POST(request: NextRequest) {
     }
 
     console.log('🔍 Processando imagem com GPT-4 Vision...')
-    console.log('📝 Prompt enviado:', body.prompt)
+    console.log('📝 Prompt enviado:', body.prompt.substring(0, 100) + '...')
     console.log('📸 Tamanho da imagem base64:', body.image.length)
+    console.log('🚀 CHAMANDO OPENAI API REAL - DEVE CONSUMIR CRÉDITOS!')
 
     // Chamada para GPT-4 Vision
     const completion = await openai.chat.completions.create({
@@ -76,6 +81,7 @@ export async function POST(request: NextRequest) {
 
     console.log('🎯 Resposta GPT-4 Vision RAW:', content)
     console.log('📊 Tokens usados:', completion.usage?.total_tokens)
+    console.log('💰 CRÉDITOS FORAM CONSUMIDOS! Total tokens:', completion.usage?.total_tokens)
 
     // Tentar fazer parse do JSON
     let parsedResponse: VisionResponse
