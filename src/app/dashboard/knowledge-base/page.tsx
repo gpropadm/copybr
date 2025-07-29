@@ -195,7 +195,7 @@ export default function KnowledgeBasePage() {
         <div className="mb-6">
           <h1 className="text-2xl sm:text-3xl font-bold text-gray-900 mb-2 flex items-center gap-2">
             <Book className="h-7 w-7 text-blue-600" />
-            Knowledge Base
+            Leitura
           </h1>
           <p className="text-gray-600">
             Seu livro pessoal de perguntas e respostas para estudos

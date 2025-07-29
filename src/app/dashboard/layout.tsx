@@ -122,7 +122,7 @@ function DashboardContent({
     },
     {
       icon: BookOpen,
-      label: 'Knowledge Base',
+      label: 'Leitura',
       href: '/dashboard/knowledge-base',
       color: 'text-indigo-600'
     },
