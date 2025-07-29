@@ -372,12 +372,18 @@ export default function KnowledgeBasePage() {
                       </div>
                     </div>
                     <div className="flex items-center gap-2">
-                      <Button size="sm" variant="outline" onClick={() => handleEditEntry(entry.id)}>
+                      <button 
+                        onClick={() => handleEditEntry(entry.id)}
+                        className="flex items-center justify-center px-2 py-1.5 text-xs bg-gray-100 hover:bg-gray-200 border-gray-300 text-gray-900 rounded border transition-colors"
+                      >
                         <Edit className="h-3 w-3" />
-                      </Button>
-                      <Button size="sm" variant="outline" onClick={() => handleDeleteEntry(entry.id)}>
+                      </button>
+                      <button 
+                        onClick={() => handleDeleteEntry(entry.id)}
+                        className="flex items-center justify-center px-2 py-1.5 text-xs bg-gray-100 hover:bg-gray-200 border-gray-300 text-gray-900 rounded border transition-colors"
+                      >
                         <Trash2 className="h-3 w-3" />
-                      </Button>
+                      </button>
                     </div>
                   </div>
                 </CardHeader>
