@@ -262,18 +262,18 @@ export default function PlanosPage() {
             Perguntas Frequentes
           </h2>
           
-          <div className="bg-gray-50 rounded-lg p-6 grid grid-cols-1 md:grid-cols-2 gap-6">
-            <div className="border-b border-gray-200 pb-3 md:border-b-0">
+          <div className="bg-gray-50 rounded-lg p-6 space-y-4">
+            <div className="border-b border-gray-200 pb-3">
               <h4 className="text-base font-medium text-gray-900 mb-2">Posso cancelar a qualquer momento?</h4>
               <p className="text-sm text-gray-600">Sim! Sem multas ou taxas de cancelamento.</p>
             </div>
             
-            <div className="border-b border-gray-200 pb-3 md:border-b-0">
+            <div className="border-b border-gray-200 pb-3">
               <h4 className="text-base font-medium text-gray-900 mb-2">E se eu exceder meu limite?</h4>
               <p className="text-sm text-gray-600">Receberá notificação para upgrade. Planos pagos têm buffer de segurança.</p>
             </div>
             
-            <div className="border-b border-gray-200 pb-3 md:border-b-0">
+            <div className="border-b border-gray-200 pb-3">
               <h4 className="text-base font-medium text-gray-900 mb-2">Posso alterar meu plano?</h4>
               <p className="text-sm text-gray-600">Sim! Upgrade/downgrade a qualquer momento com efeito imediato.</p>
             </div>
