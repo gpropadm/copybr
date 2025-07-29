@@ -1,0 +1,301 @@
+'use client'
+
+import { useState, useEffect } from 'react'
+import { BarChart3, TrendingUp, Calendar, Zap, Crown, Building, Star, ArrowUp } from 'lucide-react'
+import Button from '@/components/ui/Button'
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/Card'
+
+interface UsageData {
+  copiesUsed: number
+  promptsUsed: number
+  copiesLimit: number
+  promptsLimit: number
+  planName: string
+  planIcon: any
+  resetDate: string
+  dailyUsage: { date: string, copies: number, prompts: number }[]
+}
+
+export default function MeuConsumoPage() {
+  const [usageData, setUsageData] = useState<UsageData | null>(null)
+  const [currentPlan, setCurrentPlan] = useState('free')
+
+  useEffect(() => {
+    // Simular dados do usuário - na produção viria da API
+    const mockData: UsageData = {
+      copiesUsed: 7,
+      promptsUsed: 1,
+      copiesLimit: currentPlan === 'free' ? 10 : currentPlan === 'starter' ? 100 : currentPlan === 'pro' ? 500 : 999999,
+      promptsLimit: currentPlan === 'free' ? 2 : currentPlan === 'starter' ? 20 : currentPlan === 'pro' ? 100 : 999999,
+      planName: currentPlan === 'free' ? 'FREE' : currentPlan === 'starter' ? 'STARTER' : currentPlan === 'pro' ? 'PRO' : 'BUSINESS',
+      planIcon: currentPlan === 'free' ? Star : currentPlan === 'starter' ? Zap : currentPlan === 'pro' ? Crown : Building,
+      resetDate: new Date(new Date().getFullYear(), new Date().getMonth() + 1, 1).toISOString(),
+      dailyUsage: [
+        { date: '2024-01-01', copies: 2, prompts: 0 },
+        { date: '2024-01-02', copies: 1, prompts: 1 },
+        { date: '2024-01-03', copies: 3, prompts: 0 },
+        { date: '2024-01-04', copies: 1, prompts: 0 },
+        { date: '2024-01-05', copies: 0, prompts: 0 },
+      ]
+    }
+    setUsageData(mockData)
+  }, [currentPlan])
+
+  if (!usageData) {
+    return <div className="flex items-center justify-center min-h-screen">
+      <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
+    </div>
+  }
+
+  const copiesPercentage = Math.round((usageData.copiesUsed / usageData.copiesLimit) * 100)
+  const promptsPercentage = Math.round((usageData.promptsUsed / usageData.promptsLimit) * 100)
+  
+  const resetDate = new Date(usageData.resetDate).toLocaleDateString('pt-BR', {
+    day: '2-digit',
+    month: 'long',
+    year: 'numeric'
+  })
+
+  const isNearLimit = copiesPercentage > 80 || promptsPercentage > 80
+  const isOverLimit = copiesPercentage >= 100 || promptsPercentage >= 100
+
+  const totalUsageThisMonth = usageData.dailyUsage.reduce((acc, day) => acc + day.copies + day.prompts, 0)
+
+  return (
+    <div className="min-h-screen p-4 sm:p-6">
+      <div className="max-w-6xl mx-auto">
+        {/* Header */}
+        <div className="mb-6">
+          <h1 className="text-2xl sm:text-3xl font-bold text-gray-900 mb-2 flex items-center gap-2">
+            <BarChart3 className="h-7 w-7 text-blue-600" />
+            Meu Consumo
+          </h1>
+          <p className="text-gray-600">
+            Acompanhe seu uso mensal e otimize seu plano
+          </p>
+        </div>
+
+        {/* Alert se próximo do limite */}
+        {isNearLimit && (
+          <div className={`mb-6 p-4 rounded-lg border-l-4 ${
+            isOverLimit 
+              ? 'bg-red-50 border-red-400 text-red-800' 
+              : 'bg-yellow-50 border-yellow-400 text-yellow-800'
+          }`}>
+            <div className="flex items-center justify-between">
+              <div>
+                <h3 className="font-medium">
+                  {isOverLimit ? '🚨 Limite atingido!' : '⚠️ Próximo do limite'}
+                </h3>
+                <p className="text-sm mt-1">
+                  {isOverLimit 
+                    ? 'Você atingiu o limite do seu plano. Faça upgrade para continuar usando.'
+                    : 'Você está próximo do limite mensal. Considere fazer upgrade.'
+                  }
+                </p>
+              </div>
+              <Button size="sm" className={isOverLimit ? 'bg-red-600 hover:bg-red-700' : 'bg-yellow-600 hover:bg-yellow-700'}>
+                <ArrowUp className="h-4 w-4 mr-1" />
+                Fazer Upgrade
+              </Button>
+            </div>
+          </div>
+        )}
+
+        {/* Current Plan */}
+        <Card className="mb-6">
+          <CardHeader>
+            <CardTitle className="flex items-center justify-between">
+              <span className="flex items-center gap-2">
+                <usageData.planIcon className="h-5 w-5 text-blue-600" />
+                Plano Atual: {usageData.planName}
+              </span>
+              <Button variant="outline" size="sm">
+                Alterar Plano
+              </Button>
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+              <div className="text-center">
+                <div className="text-2xl font-bold text-gray-900">{usageData.planName}</div>
+                <div className="text-sm text-gray-600">Plano Ativo</div>
+              </div>
+              <div className="text-center">
+                <div className="text-2xl font-bold text-blue-600">{totalUsageThisMonth}</div>
+                <div className="text-sm text-gray-600">Total Usado</div>
+              </div>
+              <div className="text-center">
+                <div className="text-2xl font-bold text-green-600">{resetDate}</div>
+                <div className="text-sm text-gray-600">Próximo Reset</div>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+
+        {/* Usage Stats */}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+          {/* Copies Usage */}
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <TrendingUp className="h-5 w-5 text-blue-600" />
+                Copies Utilizadas
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="space-y-4">
+                <div className="flex justify-between items-center">
+                  <span className="text-3xl font-bold text-gray-900">
+                    {usageData.copiesUsed}
+                  </span>
+                  <span className="text-lg text-gray-600">
+                    / {usageData.copiesLimit === 999999 ? '∞' : usageData.copiesLimit}
+                  </span>
+                </div>
+                
+                <div className="w-full bg-gray-200 rounded-full h-3">
+                  <div 
+                    className={`h-3 rounded-full transition-all duration-300 ${
+                      copiesPercentage >= 100 ? 'bg-red-500' :
+                      copiesPercentage >= 80 ? 'bg-yellow-500' : 'bg-blue-500'
+                    }`}
+                    style={{ width: `${Math.min(copiesPercentage, 100)}%` }}
+                  ></div>
+                </div>
+                
+                <div className="flex justify-between text-sm text-gray-600">
+                  <span>{copiesPercentage}% usado</span>
+                  <span>
+                    {usageData.copiesLimit === 999999 
+                      ? 'Ilimitado' 
+                      : `${usageData.copiesLimit - usageData.copiesUsed} restantes`
+                    }
+                  </span>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+
+          {/* Prompts Usage */}
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <Zap className="h-5 w-5 text-purple-600" />
+                Prompts Utilizados
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="space-y-4">
+                <div className="flex justify-between items-center">
+                  <span className="text-3xl font-bold text-gray-900">
+                    {usageData.promptsUsed}
+                  </span>
+                  <span className="text-lg text-gray-600">
+                    / {usageData.promptsLimit === 999999 ? '∞' : usageData.promptsLimit}
+                  </span>
+                </div>
+                
+                <div className="w-full bg-gray-200 rounded-full h-3">
+                  <div 
+                    className={`h-3 rounded-full transition-all duration-300 ${
+                      promptsPercentage >= 100 ? 'bg-red-500' :
+                      promptsPercentage >= 80 ? 'bg-yellow-500' : 'bg-purple-500'
+                    }`}
+                    style={{ width: `${Math.min(promptsPercentage, 100)}%` }}
+                  ></div>
+                </div>
+                
+                <div className="flex justify-between text-sm text-gray-600">
+                  <span>{promptsPercentage}% usado</span>
+                  <span>
+                    {usageData.promptsLimit === 999999 
+                      ? 'Ilimitado' 
+                      : `${usageData.promptsLimit - usageData.promptsUsed} restantes`
+                    }
+                  </span>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+        </div>
+
+        {/* Usage History */}
+        <Card className="mb-6">
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <Calendar className="h-5 w-5 text-green-600" />
+              Histórico dos Últimos 7 Dias
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="space-y-4">
+              {usageData.dailyUsage.slice(-7).map((day, index) => (
+                <div key={index} className="flex items-center justify-between py-2 border-b border-gray-100 last:border-b-0">
+                  <div className="flex items-center gap-3">
+                    <div className="w-2 h-2 bg-blue-500 rounded-full"></div>
+                    <span className="text-sm font-medium text-gray-900">
+                      {new Date(day.date).toLocaleDateString('pt-BR', { 
+                        weekday: 'short', 
+                        day: '2-digit', 
+                        month: '2-digit' 
+                      })}
+                    </span>
+                  </div>
+                  <div className="flex gap-4 text-sm text-gray-600">
+                    <span>{day.copies} copies</span>
+                    <span>{day.prompts} prompts</span>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </CardContent>
+        </Card>
+
+        {/* Plan Comparison */}
+        <Card>
+          <CardHeader>
+            <CardTitle>Compare Planos</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="grid grid-cols-1 md:grid-cols-4 gap-4 text-center">
+              <div className="p-4 bg-gray-50 rounded-lg">
+                <Star className="h-8 w-8 text-gray-600 mx-auto mb-2" />
+                <h3 className="font-medium text-gray-900">FREE</h3>
+                <p className="text-sm text-gray-600">10 copies/mês</p>
+                <p className="text-sm text-gray-600">2 prompts/mês</p>
+              </div>
+              <div className="p-4 bg-blue-50 rounded-lg">
+                <Zap className="h-8 w-8 text-blue-600 mx-auto mb-2" />
+                <h3 className="font-medium text-gray-900">STARTER</h3>
+                <p className="text-sm text-gray-600">100 copies/mês</p>
+                <p className="text-sm text-gray-600">20 prompts/mês</p>
+                <p className="text-sm font-medium text-blue-600">R$ 19/mês</p>
+              </div>
+              <div className="p-4 bg-purple-50 rounded-lg">
+                <Crown className="h-8 w-8 text-purple-600 mx-auto mb-2" />
+                <h3 className="font-medium text-gray-900">PRO</h3>
+                <p className="text-sm text-gray-600">500 copies/mês</p>
+                <p className="text-sm text-gray-600">100 prompts/mês</p>
+                <p className="text-sm font-medium text-purple-600">R$ 49/mês</p>
+              </div>
+              <div className="p-4 bg-orange-50 rounded-lg">
+                <Building className="h-8 w-8 text-orange-600 mx-auto mb-2" />
+                <h3 className="font-medium text-gray-900">BUSINESS</h3>
+                <p className="text-sm text-gray-600">Uso ilimitado</p>
+                <p className="text-sm text-gray-600">API access</p>
+                <p className="text-sm font-medium text-orange-600">R$ 149/mês</p>
+              </div>
+            </div>
+            
+            <div className="mt-6 text-center">
+              <Button onClick={() => window.location.href = '/dashboard/planos'}>
+                Ver Todos os Planos
+              </Button>
+            </div>
+          </CardContent>
+        </Card>
+      </div>
+    </div>
+  )
+}

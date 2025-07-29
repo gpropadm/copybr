@@ -296,12 +296,21 @@ function DashboardContent({
                       <span className="text-sm">Perfil</span>
                     </button>
                     
-                    <button
+                    <Link
+                      href="/dashboard/meu-consumo"
+                      className={`flex items-center space-x-3 w-full px-3 py-2 rounded-lg ${isDarkMode ? 'text-gray-300 hover:bg-gray-600' : 'text-gray-700 hover:bg-gray-100'} transition-colors text-left`}
+                    >
+                      <BarChart3 className="h-4 w-4" />
+                      <span className="text-sm">Meu Consumo</span>
+                    </Link>
+                    
+                    <Link
+                      href="/dashboard/planos"
                       className={`flex items-center space-x-3 w-full px-3 py-2 rounded-lg ${isDarkMode ? 'text-gray-300 hover:bg-gray-600' : 'text-gray-700 hover:bg-gray-100'} transition-colors text-left`}
                     >
                       <Zap className="h-4 w-4" />
                       <span className="text-sm">Planos</span>
-                    </button>
+                    </Link>
                   </div>
                 </div>
               )}
