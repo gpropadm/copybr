@@ -372,7 +372,7 @@ export default function KnowledgeBasePage() {
                 >
                   <div className="flex items-start justify-between">
                     <div className="flex-1">
-                      <CardTitle className="text-lg text-gray-900 mb-2 flex items-center gap-2">
+                      <CardTitle className="text-lg mb-2 flex items-center gap-2" style={{color: '#3f3f46'}}>
                         {expandedEntries.has(entry.id) ? (
                           <ChevronDown className="h-4 w-4 text-gray-500" />
                         ) : (
