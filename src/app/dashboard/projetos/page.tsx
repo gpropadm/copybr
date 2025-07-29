@@ -198,14 +198,7 @@ export default function ProjetosPage() {
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
             {filteredProjects.map((project) => (
-              <Card 
-                key={project.id} 
-                className="hover:shadow-md transition-shadow cursor-pointer" 
-                onClick={() => {
-                  console.log('Clicando no projeto:', project.id)
-                  router.push(`/dashboard/projeto/${project.id}`)
-                }}
-              >
+              <Card key={project.id} className="hover:shadow-md transition-shadow">
                 <CardHeader className="pb-3">
                   <div className="flex items-start justify-between">
                     <div className="flex-1 min-w-0">
@@ -223,10 +216,7 @@ export default function ProjetosPage() {
                     </div>
                     
                     <div className="relative group">
-                      <button 
-                        className="p-1 hover:bg-gray-100 rounded"
-                        onClick={(e) => e.stopPropagation()}
-                      >
+                      <button className="p-1 hover:bg-gray-100 rounded">
                         <MoreVertical className="h-4 w-4 text-gray-400" />
                       </button>
                       
@@ -234,26 +224,17 @@ export default function ProjetosPage() {
                       <div className="absolute right-0 top-8 w-32 bg-white border border-gray-200 rounded-lg shadow-lg z-10 opacity-0 group-hover:opacity-100 transition-opacity">
                         <button 
                           className="w-full px-3 py-2 text-left text-sm hover:bg-gray-50 flex items-center gap-2"
-                          onClick={(e) => {
-                            e.stopPropagation()
-                            router.push(`/dashboard/projeto/${project.id}`)
-                          }}
+                          onClick={() => router.push(`/dashboard/projeto/${project.id}`)}
                         >
                           <Eye className="h-3 w-3" />
                           Ver
                         </button>
-                        <button 
-                          className="w-full px-3 py-2 text-left text-sm hover:bg-gray-50 flex items-center gap-2"
-                          onClick={(e) => e.stopPropagation()}
-                        >
+                        <button className="w-full px-3 py-2 text-left text-sm hover:bg-gray-50 flex items-center gap-2">
                           <Edit className="h-3 w-3" />
                           Editar
                         </button>
                         <button 
-                          onClick={(e) => {
-                            e.stopPropagation()
-                            handleDeleteProject(project.id)
-                          }}
+                          onClick={() => handleDeleteProject(project.id)}
                           className="w-full px-3 py-2 text-left text-sm hover:bg-gray-50 flex items-center gap-2 text-red-600"
                         >
                           <Trash2 className="h-3 w-3" />
@@ -281,21 +262,13 @@ export default function ProjetosPage() {
                     </span>
                   </div>
                   
-                  {/* Botões de ação */}
-                  <div className="flex items-center gap-2" onClick={(e) => e.stopPropagation()}>
-                    <Link href={`/dashboard/projeto/${project.id}`} className="flex-1">
-                      <Button className="w-full text-sm py-2">
-                        <Eye className="h-3 w-3 mr-2" />
-                        Abrir
-                      </Button>
-                    </Link>
-                    <Link href={`/dashboard/projeto/${project.id}?tab=generate`} className="flex-1">
-                      <Button variant="outline" className="w-full text-sm py-2">
-                        <Plus className="h-3 w-3 mr-2" />
-                        Gerar Copy
-                      </Button>
-                    </Link>
-                  </div>
+                  {/* Botão de ação principal - estilo novo chat */}
+                  <Link href={`/dashboard/projeto/${project.id}`} className="block w-full">
+                    <button className="flex items-center justify-center w-full px-3 py-3 text-sm bg-gray-100 hover:bg-gray-200 border-gray-300 text-gray-900 rounded-lg border transition-colors">
+                      <Eye className="h-4 w-4 mr-2" />
+                      Abrir Projeto
+                    </button>
+                  </Link>
                 </CardContent>
               </Card>
             ))}
