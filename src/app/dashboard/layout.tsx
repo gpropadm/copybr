@@ -24,7 +24,9 @@ import {
   MoreHorizontal,
   Menu,
   X,
-  Users
+  Users,
+  Camera,
+  TrendingUp
 } from 'lucide-react'
 import { ThemeProvider, useTheme } from '@/contexts/ThemeContext'
 import { useAuth } from '@/contexts/AuthContext'
@@ -96,6 +98,18 @@ function DashboardContent({
       label: 'Redes Sociais',
       href: '/dashboard/redes-sociais',
       color: 'text-pink-600'
+    },
+    {
+      icon: Camera,
+      label: 'Scanner de Preços',
+      href: '/dashboard/price-scanner',
+      color: 'text-cyan-600'
+    },
+    {
+      icon: TrendingUp,
+      label: 'Oportunidades',
+      href: '/dashboard/opportunities',
+      color: 'text-amber-600'
     }
   ]
 

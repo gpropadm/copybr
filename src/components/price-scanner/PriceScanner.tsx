@@ -249,7 +249,7 @@ export default function PriceScanner() {
   }
 
   return (
-    <div className="p-4 max-w-md mx-auto">
+    <div className="p-2 md:p-4 w-full max-w-md mx-auto">
       {/* Header */}
       <Card className="mb-4">
         <CardHeader>
@@ -272,7 +272,7 @@ export default function PriceScanner() {
             <Button 
               onClick={openCamera}
               disabled={loading}
-              className="w-full"
+              className="w-full text-sm md:text-base"
               size="lg"
             >
               {loading ? (

@@ -96,7 +96,7 @@ export default function OpportunityDashboard() {
   }
 
   return (
-    <div className="p-4">
+    <div className="p-2 md:p-4 lg:p-6">
       <div className="mb-6">
         <h2 className="text-xl font-bold text-gray-900 mb-2">
           ⚡ Oportunidades de Promoção
@@ -151,7 +151,7 @@ export default function OpportunityDashboard() {
                 </div>
 
                 {/* Detalhes de Preço */}
-                <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-4 text-sm">
+                <div className="grid grid-cols-2 lg:grid-cols-4 gap-2 md:gap-4 mb-4 text-xs md:text-sm">
                   <div>
                     <span className="text-gray-500 block">Preço Anterior:</span>
                     <span className="font-medium">R$ {opportunity.previousPrice.toFixed(2)}</span>
@@ -184,7 +184,7 @@ export default function OpportunityDashboard() {
                 </div>
 
                 {/* Ações */}
-                <div className="flex gap-2">
+                <div className="flex flex-col sm:flex-row gap-2">
                   <Button 
                     onClick={() => copyToClipboard(opportunity.generatedCopy)}
                     size="sm"
