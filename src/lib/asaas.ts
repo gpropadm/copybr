@@ -78,8 +78,7 @@ interface CheckoutSession {
 export async function createCheckoutSession(
   planType: PlanType,
   userId: string,
-  userEmail: string,
-  paymentMethod: 'PIX' | 'CREDIT_CARD' = 'PIX'
+  userEmail: string
 ): Promise<CheckoutSession> {
   if (!isAsaasConfigured()) {
     throw new Error('Asaas não está configurado corretamente')
@@ -92,37 +91,41 @@ export async function createCheckoutSession(
   }
 
   try {
+    console.log('🔄 Criando cliente no Asaas...');
     // Criar cliente se não existir
     const customer = await asaas.customers.new({
       name: userEmail.split('@')[0],
       email: userEmail,
-      cpfCnpj: '00000000000', // CPF dummy - implementar validação real
+      cpfCnpj: '11144477735', // CPF válido para testes
       externalReference: userId
     })
+    console.log('✅ Cliente criado:', customer.id);
 
-    // Criar assinatura mensal
-    const subscription = await asaas.subscriptions.create({
+    console.log('🔄 Criando cobrança única (com checkout hospedado)...');
+    // Criar cobrança única com checkout hospedado
+    const payment = await asaas.payments.new({
       customer: customer.id!,
-      billingType: paymentMethod,
+      billingType: 'UNDEFINED', // Deixa usuário escolher PIX ou cartão
       value: plan.price,
-      nextDueDate: new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString().split('T')[0], // Formato YYYY-MM-DD
-      cycle: 'MONTHLY',
-      description: `Assinatura ${plan.name} - CopyBR`,
+      dueDate: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000), // 7 dias para pagar
+      description: `${plan.name} - CopyBR`,
       externalReference: `${userId}-${planType}`,
       callback: {
         successUrl: `${process.env.NEXT_PUBLIC_APP_URL || 'https://copybr.vercel.app'}/dashboard?success=true`,
         autoRedirect: true
       }
     })
+    console.log('✅ Cobrança criada:', payment.id);
 
     return {
-      url: subscription.paymentLink || '',
-      id: subscription.id || '',
-      paymentId: subscription.id || ''
+      url: payment.invoiceUrl || '',
+      id: payment.id || '',
+      paymentId: payment.id || ''
     }
   } catch (error) {
-    console.error('Erro ao criar sessão de checkout:', error)
-    throw new Error('Erro ao criar sessão de pagamento')
+    console.error('❌ Erro detalhado ao criar checkout:', error)
+    console.error('❌ Stack trace:', error instanceof Error ? error.stack : 'No stack')
+    throw new Error(`Erro ao criar checkout: ${error instanceof Error ? error.message : String(error)}`)
   }
 }
 
