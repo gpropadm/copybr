@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { mapAsaasStatus } from '@/lib/asaas'
 import { Database } from '@/lib/database'
+import { sendPlanActivatedEmail } from '@/lib/email'
 
 export async function POST(request: NextRequest) {
   try {
@@ -77,8 +78,21 @@ async function handlePaymentReceived(payment: any) {
     
     console.log(`✅ Usuário ${userId} ativado no plano ${planType} via ${payment.billingType}`);
     
-    // TODO: Enviar email de boas-vindas
-    // await sendWelcomeEmail(userId, planType)
+    // Enviar email de plano ativado
+    const user = await Database.getUser(userId);
+    if (user && user.email) {
+      const planNames = {
+        starter: 'Starter',
+        pro: 'Pro', 
+        business: 'Business'
+      };
+      
+      await sendPlanActivatedEmail(
+        user.email.split('@')[0], // Nome temporário até ter nome real
+        user.email,
+        planNames[planType as keyof typeof planNames] || planType
+      );
+    }
     
   } catch (error) {
     console.error('Erro ao processar pagamento recebido:', error)
