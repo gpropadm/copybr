@@ -2,8 +2,8 @@
 
 import { useState } from 'react'
 import { Check, Zap, Crown, Building, Star, ArrowRight } from 'lucide-react'
-import Button from '@/components/ui/Button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/Card'
+import { CheckoutButton } from '@/components/checkout-button'
 
 interface Plan {
   id: string
@@ -241,7 +241,8 @@ export default function PlanosPage() {
                 </ul>
 
                 {/* CTA Button */}
-                <Button
+                <CheckoutButton
+                  planType={plan.id as any}
                   className={`w-full mt-6 ${
                     plan.popular
                       ? 'bg-blue-600 hover:bg-blue-700'
@@ -250,7 +251,7 @@ export default function PlanosPage() {
                 >
                   {plan.id === 'free' ? 'Começar Grátis' : 'Assinar Agora'}
                   <ArrowRight className="h-4 w-4 ml-2" />
-                </Button>
+                </CheckoutButton>
               </CardContent>
             </Card>
           ))}
@@ -293,10 +294,13 @@ export default function PlanosPage() {
           <p className="text-sm text-gray-600 mb-4">
             Junte-se a milhares de profissionais que já usam o CopyBR para criar conteúdo incrível
           </p>
-          <Button className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700">
+          <CheckoutButton
+            planType="free"
+            className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700"
+          >
             Começar Agora Grátis
             <ArrowRight className="h-4 w-4 ml-2" />
-          </Button>
+          </CheckoutButton>
         </div>
       </div>
     </div>

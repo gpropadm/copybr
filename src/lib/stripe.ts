@@ -18,30 +18,44 @@ export const PLANS = {
     price: 0,
     priceId: '', // Não precisa para plano gratuito
     features: {
-      monthlyGenerations: 5,
+      monthlyGenerations: 10,
       templates: ['facebook-ad', 'email-subject', 'product-description'],
       watermark: true,
       support: 'email',
       history: false
     }
   },
-  pro: {
-    name: 'Pro',
-    price: 47,
-    priceId: process.env.STRIPE_PRO_PRICE_ID!,
+  starter: {
+    name: 'Starter',
+    price: 29.90,
+    priceId: process.env.STRIPE_STARTER_PRICE_ID!,
     features: {
-      monthlyGenerations: 200,
-      templates: 'all',
+      monthlyGenerations: 100,
+      templates: 'basic',
       watermark: false,
-      support: 'priority',
+      support: 'email',
       history: true,
       apiAccess: false
     }
   },
-  premium: {
-    name: 'Premium',
-    price: 97,
-    priceId: process.env.STRIPE_PREMIUM_PRICE_ID!,
+  pro: {
+    name: 'Pro',
+    price: 97.90,
+    priceId: process.env.STRIPE_PRO_PRICE_ID!,
+    features: {
+      monthlyGenerations: 1000,
+      templates: 'all',
+      watermark: false,
+      support: 'priority',
+      history: true,
+      apiAccess: false,
+      analytics: true
+    }
+  },
+  business: {
+    name: 'Business',
+    price: 197.90,
+    priceId: process.env.STRIPE_BUSINESS_PRICE_ID!,
     features: {
       monthlyGenerations: -1, // Ilimitado
       templates: 'all',
@@ -49,7 +63,9 @@ export const PLANS = {
       support: 'vip',
       history: true,
       apiAccess: true,
-      earlyAccess: true
+      analytics: true,
+      customTemplates: true,
+      dedicatedManager: true
     }
   }
 } as const
