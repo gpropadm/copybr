@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { stripe, getPlanByPriceId } from '@/lib/stripe'
+import { Database } from '@/lib/database'
 import Stripe from 'stripe'
 
 const webhookSecret = process.env.STRIPE_WEBHOOK_SECRET!
@@ -57,22 +58,20 @@ async function handleCheckoutCompleted(session: Stripe.Checkout.Session) {
   }
 
   try {
-    // Aqui você atualiza o banco de dados do usuário
-    console.log(`Usuário ${userId} assinou o plano ${planType}`)
-    
-    // Exemplo de atualização (implementar com seu banco de dados):
-    /*
-    await updateUserSubscription({
+    // Atualizar usuário no banco de dados
+    await Database.upsertUser({
       userId,
+      email: session.customer_email || '',
       customerId: session.customer as string,
       subscriptionId: session.subscription as string,
-      planType,
+      planType: planType as any,
       status: 'active',
       currentPeriodEnd: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000) // 30 dias
-    })
-    */
+    });
     
-    // Enviar email de boas-vindas
+    console.log(`✅ Usuário ${userId} ativado no plano ${planType}`);
+    
+    // TODO: Enviar email de boas-vindas
     // await sendWelcomeEmail(userId, planType)
     
   } catch (error) {
@@ -97,17 +96,15 @@ async function handleSubscriptionUpdated(subscription: Stripe.Subscription) {
       return
     }
 
-    console.log(`Assinatura do usuário ${userId} atualizada para ${planType}`)
-    
-    // Atualizar banco de dados:
-    /*
-    await updateUserSubscription({
+    // Atualizar no banco de dados
+    await Database.upsertUser({
       userId,
       planType,
-      status: subscription.status,
+      status: subscription.status as any,
       currentPeriodEnd: new Date(subscription.current_period_end * 1000)
-    })
-    */
+    });
+
+    console.log(`✅ Assinatura do usuário ${userId} atualizada para ${planType}`);
     
   } catch (error) {
     console.error('Erro ao processar atualização de assinatura:', error)
@@ -123,19 +120,17 @@ async function handleSubscriptionDeleted(subscription: Stripe.Subscription) {
   }
 
   try {
-    console.log(`Assinatura do usuário ${userId} cancelada`)
-    
-    // Downgrade para plano gratuito:
-    /*
-    await updateUserSubscription({
+    // Downgrade para plano gratuito
+    await Database.upsertUser({
       userId,
       planType: 'free',
       status: 'canceled',
       currentPeriodEnd: new Date(subscription.current_period_end * 1000)
-    })
-    */
+    });
+
+    console.log(`✅ Usuário ${userId} cancelado - volta para plano gratuito`);
     
-    // Enviar email de cancelamento
+    // TODO: Enviar email de cancelamento
     // await sendCancellationEmail(userId)
     
   } catch (error) {
