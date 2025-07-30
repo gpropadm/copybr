@@ -21,25 +21,46 @@ export default function MeuConsumoPage() {
   const [currentPlan, setCurrentPlan] = useState('free')
 
   useEffect(() => {
-    // Simular dados do usuário - na produção viria da API
-    const mockData: UsageData = {
-      copiesUsed: 7,
-      promptsUsed: 1,
-      copiesLimit: currentPlan === 'free' ? 10 : currentPlan === 'starter' ? 100 : currentPlan === 'pro' ? 500 : 999999,
-      promptsLimit: currentPlan === 'free' ? 2 : currentPlan === 'starter' ? 20 : currentPlan === 'pro' ? 100 : 999999,
-      planName: currentPlan === 'free' ? 'FREE' : currentPlan === 'starter' ? 'STARTER' : currentPlan === 'pro' ? 'PRO' : 'BUSINESS',
-      planIcon: currentPlan === 'free' ? Star : currentPlan === 'starter' ? Zap : currentPlan === 'pro' ? Crown : Building,
-      resetDate: new Date(new Date().getFullYear(), new Date().getMonth() + 1, 1).toISOString(),
-      dailyUsage: [
-        { date: '2024-01-01', copies: 2, prompts: 0 },
-        { date: '2024-01-02', copies: 1, prompts: 1 },
-        { date: '2024-01-03', copies: 3, prompts: 0 },
-        { date: '2024-01-04', copies: 1, prompts: 0 },
-        { date: '2024-01-05', copies: 0, prompts: 0 },
-      ]
-    }
-    setUsageData(mockData)
-  }, [currentPlan])
+    // Buscar dados reais da API
+    const fetchUserData = async () => {
+      try {
+        const response = await fetch('/api/user/subscription');
+        const data = await response.json();
+        
+        if (response.ok) {
+          const realData: UsageData = {
+            copiesUsed: data.monthlyUsage || 0,
+            promptsUsed: 0, // Por enquanto não temos prompts separados
+            copiesLimit: data.limits[data.planType] === -1 ? 999999 : data.limits[data.planType],
+            promptsLimit: data.planType === 'free' ? 2 : data.planType === 'starter' ? 20 : data.planType === 'pro' ? 100 : 999999,
+            planName: data.planType.toUpperCase(),
+            planIcon: data.planType === 'free' ? Star : data.planType === 'starter' ? Zap : data.planType === 'pro' ? Crown : Building,
+            resetDate: new Date(data.currentPeriodEnd).toLocaleDateString('pt-BR'),
+            dailyUsage: [] // Histórico vazio para usuário novo
+          };
+          
+          setUsageData(realData);
+          setCurrentPlan(data.planType);
+        }
+      } catch (error) {
+        console.error('Erro ao buscar dados:', error);
+        // Fallback para usuário novo
+        const fallbackData: UsageData = {
+          copiesUsed: 0,
+          promptsUsed: 0,
+          copiesLimit: 10,
+          promptsLimit: 2,
+          planName: 'FREE',
+          planIcon: Star,
+          resetDate: new Date(new Date().setMonth(new Date().getMonth() + 1)).toLocaleDateString('pt-BR'),
+          dailyUsage: []
+        };
+        setUsageData(fallbackData);
+      }
+    };
+    
+    fetchUserData();
+  }, [])
 
   if (!usageData) {
     return <div className="flex items-center justify-center min-h-screen">
