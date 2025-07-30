@@ -5,11 +5,12 @@ import { useSearchParams, useRouter } from 'next/navigation'
 
 function VerificarEmailContent() {
   const [code, setCode] = useState('')
-  const [email, setEmail] = useState('')
+  const [email, setEmail] = useState('') // Para reenvio, não obrigatório
   const [loading, setLoading] = useState(false)
   const [message, setMessage] = useState('')
   const [isSuccess, setIsSuccess] = useState(false)
   const [resendLoading, setResendLoading] = useState(false)
+  const [showResendForm, setShowResendForm] = useState(false)
   
   const searchParams = useSearchParams()
   const router = useRouter()
@@ -40,8 +41,8 @@ function VerificarEmailContent() {
   const handleVerify = async (e: React.FormEvent) => {
     e.preventDefault()
     
-    if (!email || !code) {
-      setMessage('Por favor, preencha todos os campos.')
+    if (!code) {
+      setMessage('Por favor, digite o código de verificação.')
       return
     }
 
@@ -49,12 +50,18 @@ function VerificarEmailContent() {
     setMessage('')
 
     try {
+      // Se temos email da URL, usar ele. Senão, será verificação apenas por código
+      const emailToUse = email || searchParams.get('email') || ''
+      
       const response = await fetch('/api/verify-email', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({ email, code }),
+        body: JSON.stringify({ 
+          email: emailToUse, 
+          code 
+        }),
       })
 
       const data = await response.json()
@@ -102,6 +109,7 @@ function VerificarEmailContent() {
 
       if (response.ok && data.success) {
         setMessage('Novo código enviado para seu email!')
+        setShowResendForm(false)
       } else {
         setMessage(data.error || 'Erro ao reenviar código.')
       }
@@ -143,22 +151,6 @@ function VerificarEmailContent() {
           ) : (
             <form onSubmit={handleVerify} className="space-y-6">
               <div>
-                <label htmlFor="email" className="block text-sm font-medium text-gray-700">
-                  Email
-                </label>
-                <input
-                  id="email"
-                  name="email"
-                  type="email"
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
-                  placeholder="seu@email.com"
-                  required
-                />
-              </div>
-
-              <div>
                 <label htmlFor="code" className="block text-sm font-medium text-gray-700">
                   Código de Verificação
                 </label>
@@ -172,9 +164,10 @@ function VerificarEmailContent() {
                   placeholder="123456"
                   maxLength={6}
                   required
+                  autoFocus
                 />
-                <p className="mt-1 text-xs text-gray-500">
-                  Digite os 6 dígitos do código
+                <p className="mt-1 text-xs text-gray-500 text-center">
+                  Digite os 6 dígitos enviados para seu email
                 </p>
               </div>
 
@@ -199,14 +192,42 @@ function VerificarEmailContent() {
               </div>
 
               <div className="text-center">
-                <button
-                  type="button"
-                  onClick={handleResendCode}
-                  disabled={resendLoading}
-                  className="text-sm text-blue-600 hover:text-blue-500 disabled:opacity-50"
-                >
-                  {resendLoading ? 'Reenviando...' : 'Reenviar código'}
-                </button>
+                {!showResendForm ? (
+                  <button
+                    type="button"
+                    onClick={() => setShowResendForm(true)}
+                    className="text-sm text-blue-600 hover:text-blue-500"
+                  >
+                    Não recebeu o código?
+                  </button>
+                ) : (
+                  <div className="space-y-3">
+                    <input
+                      type="email"
+                      value={email}
+                      onChange={(e) => setEmail(e.target.value)}
+                      placeholder="Seu email para reenvio"
+                      className="block w-full px-3 py-2 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+                    />
+                    <div className="flex space-x-2">
+                      <button
+                        type="button"
+                        onClick={handleResendCode}
+                        disabled={resendLoading}
+                        className="flex-1 px-3 py-2 text-sm bg-blue-600 text-white rounded-md hover:bg-blue-700 disabled:opacity-50"
+                      >
+                        {resendLoading ? 'Enviando...' : 'Reenviar'}
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => setShowResendForm(false)}
+                        className="px-3 py-2 text-sm text-gray-600 hover:text-gray-800"
+                      >
+                        Cancelar
+                      </button>
+                    </div>
+                  </div>
+                )}
               </div>
             </form>
           )}

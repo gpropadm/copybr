@@ -188,9 +188,24 @@ export class Database {
     return code;
   }
 
-  // Verificar código
-  static async verifyEmailCode(email: string, code: string): Promise<{ success: boolean; message: string }> {
-    const verification = emailVerifications.get(email);
+  // Verificar código (com ou sem email específico)
+  static async verifyEmailCode(email: string, code: string): Promise<{ success: boolean; message: string; email?: string }> {
+    let verification;
+    let foundEmail = email;
+    
+    if (email) {
+      // Busca por email específico
+      verification = emailVerifications.get(email);
+    } else {
+      // Busca o código em todos os emails (quando só temos o código)
+      for (const [verificationEmail, verificationData] of emailVerifications.entries()) {
+        if (verificationData.code === code) {
+          verification = verificationData;
+          foundEmail = verificationEmail;
+          break;
+        }
+      }
+    }
     
     if (!verification) {
       return { success: false, message: 'Código não encontrado. Solicite um novo código.' };
@@ -198,7 +213,7 @@ export class Database {
 
     // Verificar se expirou
     if (new Date() > verification.expiresAt) {
-      emailVerifications.delete(email);
+      emailVerifications.delete(foundEmail);
       return { success: false, message: 'Código expirado. Solicite um novo código.' };
     }
 
@@ -207,7 +222,7 @@ export class Database {
 
     // Verificar limite de tentativas
     if (verification.attempts > 3) {
-      emailVerifications.delete(email);
+      emailVerifications.delete(foundEmail);
       return { success: false, message: 'Muitas tentativas. Solicite um novo código.' };
     }
 
@@ -217,8 +232,8 @@ export class Database {
     }
 
     // Sucesso - remover código usado
-    emailVerifications.delete(email);
-    return { success: true, message: 'Email verificado com sucesso!' };
+    emailVerifications.delete(foundEmail);
+    return { success: true, message: 'Email verificado com sucesso!', email: foundEmail };
   }
 
   // Marcar email como verificado

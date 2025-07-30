@@ -5,14 +5,14 @@ export async function POST(req: NextRequest) {
   try {
     const { email, code, userId } = await req.json();
 
-    if (!email || !code) {
+    if (!code) {
       return NextResponse.json({
-        error: 'Email e código são obrigatórios'
+        error: 'Código é obrigatório'
       }, { status: 400 });
     }
 
-    // Verificar código
-    const result = await Database.verifyEmailCode(email, code);
+    // Verificar código (com ou sem email)
+    const result = await Database.verifyEmailCode(email || '', code);
 
     if (result.success) {
       // Marcar email como verificado no usuário (se userId fornecido)
@@ -23,7 +23,8 @@ export async function POST(req: NextRequest) {
 
       return NextResponse.json({
         success: true,
-        message: result.message
+        message: result.message,
+        email: result.email // Retorna o email encontrado
       });
     } else {
       return NextResponse.json({
