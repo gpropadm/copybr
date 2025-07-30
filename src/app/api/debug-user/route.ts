@@ -7,8 +7,20 @@ export async function GET(req: NextRequest) {
     
     console.log(`🔍 Debug User - userId: ${userId}`);
     
-    // Buscar usuário
-    const user = await Database.getUser(userId);
+    // Garantir que usuário existe - criar se não existir (igual à API de geração)
+    let user = await Database.getUser(userId);
+    if (!user) {
+      console.log(`👤 Criando usuário demo: ${userId}`)
+      user = await Database.upsertUser({
+        userId,
+        email: `${userId}@copybr.temp`,
+        planType: 'free',
+        status: 'active',
+        currentPeriodEnd: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000),
+        monthlyUsage: 0,
+        emailVerified: false
+      });
+    }
     console.log(`👤 User data:`, user);
     
     // Verificar se pode gerar copy
