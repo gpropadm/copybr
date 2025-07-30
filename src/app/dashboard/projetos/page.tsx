@@ -42,6 +42,8 @@ export default function ProjetosPage() {
   const router = useRouter()
   const [projects, setProjects] = useState<Project[]>([])
   const [searchTerm, setSearchTerm] = useState('')
+  const [showDeleteModal, setShowDeleteModal] = useState(false)
+  const [projectToDelete, setProjectToDelete] = useState<Project | null>(null)
   const [filterType, setFilterType] = useState('all')
   const [loading, setLoading] = useState(true)
 
@@ -114,9 +116,14 @@ export default function ProjetosPage() {
     return matchesSearch && matchesFilter
   })
 
-  const handleDeleteProject = (projectId: string) => {
-    if (window.confirm('Tem certeza que deseja excluir este projeto?')) {
-      const updatedProjects = projects.filter(p => p.id !== projectId)
+  const handleDeleteProject = (project: Project) => {
+    setProjectToDelete(project)
+    setShowDeleteModal(true)
+  }
+
+  const confirmDelete = () => {
+    if (projectToDelete) {
+      const updatedProjects = projects.filter(p => p.id !== projectToDelete.id)
       setProjects(updatedProjects)
       
       // Salvar com chave específica do usuário
@@ -125,9 +132,16 @@ export default function ProjetosPage() {
         localStorage.setItem(userProjectsKey, JSON.stringify(updatedProjects))
         
         // Limpar copies deste projeto também
-        localStorage.removeItem(`copies-${projectId}`)
+        localStorage.removeItem(`copies-${projectToDelete.id}`)
       }
     }
+    setShowDeleteModal(false)
+    setProjectToDelete(null)
+  }
+
+  const cancelDelete = () => {
+    setShowDeleteModal(false)
+    setProjectToDelete(null)
   }
 
   const formatDate = (dateString: string) => {
@@ -263,12 +277,18 @@ export default function ProjetosPage() {
                           <Eye className="h-3 w-3" />
                           Ver
                         </button>
-                        <button className="w-full px-3 py-2 text-left text-sm hover:bg-gray-50 flex items-center gap-2">
+                        <button 
+                          onClick={() => {
+                            // TODO: Implementar edição de projeto
+                            alert('Funcionalidade de edição em desenvolvimento')
+                          }}
+                          className="w-full px-3 py-2 text-left text-sm hover:bg-gray-50 flex items-center gap-2"
+                        >
                           <Edit className="h-3 w-3" />
                           Editar
                         </button>
                         <button 
-                          onClick={() => handleDeleteProject(project.id)}
+                          onClick={() => handleDeleteProject(project)}
                           className="w-full px-3 py-2 text-left text-sm hover:bg-gray-50 flex items-center gap-2 text-red-600"
                         >
                           <Trash2 className="h-3 w-3" />
@@ -347,6 +367,48 @@ export default function ProjetosPage() {
                 <div className="text-sm text-gray-600">Última Semana</div>
               </div>
             </Card>
+          </div>
+        )}
+
+        {/* Modal de Confirmação de Exclusão */}
+        {showDeleteModal && (
+          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+            <div className="bg-white rounded-lg p-6 max-w-md w-full mx-4">
+              <div className="flex items-center gap-3 mb-4">
+                <div className="flex-shrink-0 w-10 h-10 bg-red-100 rounded-full flex items-center justify-center">
+                  <Trash2 className="h-5 w-5 text-red-600" />
+                </div>
+                <div>
+                  <h3 className="text-lg font-semibold text-gray-900">
+                    Excluir Projeto
+                  </h3>
+                  <p className="text-sm text-gray-500">
+                    Esta ação não pode ser desfeita
+                  </p>
+                </div>
+              </div>
+              
+              <p className="text-gray-700 mb-6">
+                Tem certeza que deseja excluir o projeto <strong>"{projectToDelete?.name}"</strong>? 
+                Todas as copies relacionadas também serão perdidas.
+              </p>
+              
+              <div className="flex gap-3 justify-end">
+                <Button
+                  variant="outline"
+                  onClick={cancelDelete}
+                  className="px-4 py-2"
+                >
+                  Cancelar
+                </Button>
+                <Button
+                  onClick={confirmDelete}
+                  className="px-4 py-2 bg-red-600 hover:bg-red-700 text-white"
+                >
+                  Excluir Projeto
+                </Button>
+              </div>
+            </div>
           </div>
         )}
       </div>
