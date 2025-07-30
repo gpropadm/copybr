@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useEffect, useRef } from 'react'
-import { Send, Trash2, Edit3, MessageCircle, Zap, Loader2 } from 'lucide-react'
+import { Send, Trash2, Edit3, Zap, Loader2 } from 'lucide-react'
 import Button from '@/components/ui/Button'
 import { Card, CardContent } from '@/components/ui/Card'
 
@@ -53,7 +53,7 @@ export default function ChatPage() {
   const fetchUsage = async () => {
     try {
       const userData = localStorage.getItem('auth_user')
-      let headers = {}
+      let headers: Record<string, string> = {}
       
       if (userData) {
         const user = JSON.parse(userData)
@@ -115,7 +115,7 @@ export default function ChatPage() {
 
     try {
       const userData = localStorage.getItem('auth_user')
-      let headers = { 'Content-Type': 'application/json' }
+      let headers: Record<string, string> = { 'Content-Type': 'application/json' }
       
       if (userData) {
         const user = JSON.parse(userData)
@@ -348,7 +348,7 @@ export default function ChatPage() {
                   type="text"
                   value={newMessage}
                   onChange={(e) => setNewMessage(e.target.value)}
-                  onKeyPress={(e) => e.key === 'Enter' && !e.shiftKey && handleSendMessage()}
+                  onKeyDown={(e) => e.key === 'Enter' && !e.shiftKey && handleSendMessage()}
                   placeholder={
                     canSendMessage() 
                       ? "Digite sua mensagem..." 
