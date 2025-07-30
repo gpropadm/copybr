@@ -15,7 +15,8 @@ export async function GET(req: NextRequest) {
         userId,
         email: 'demo@copybr.com.br',
         planType: 'free',
-        status: 'active'
+        status: 'active',
+        currentPeriodEnd: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000) // 30 dias
       });
     }
 

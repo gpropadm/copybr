@@ -35,7 +35,7 @@ export default function MeuConsumoPage() {
             promptsLimit: data.planType === 'free' ? 2 : data.planType === 'starter' ? 20 : data.planType === 'pro' ? 100 : 999999,
             planName: data.planType.toUpperCase(),
             planIcon: data.planType === 'free' ? Star : data.planType === 'starter' ? Zap : data.planType === 'pro' ? Crown : Building,
-            resetDate: new Date(data.currentPeriodEnd).toLocaleDateString('pt-BR'),
+            resetDate: data.currentPeriodEnd ? new Date(data.currentPeriodEnd).toLocaleDateString('pt-BR') : new Date(new Date().setMonth(new Date().getMonth() + 1)).toLocaleDateString('pt-BR'),
             dailyUsage: [] // Histórico vazio para usuário novo
           };
           
