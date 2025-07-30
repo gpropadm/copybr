@@ -43,12 +43,14 @@ export default function CopyGenerator({ onCopyGenerated }: CopyGeneratorProps) {
       }
       
       const user = JSON.parse(userData)
+      console.log('🔍 User data from localStorage:', user)
+      console.log('🔍 User ID being sent:', user.id)
       
       const response = await fetch('/api/generate-copy', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          'x-user-id': user.id
+          'x-user-id': user.id || 'fallback-user'
         },
         body: JSON.stringify({
           template: selectedTemplate,

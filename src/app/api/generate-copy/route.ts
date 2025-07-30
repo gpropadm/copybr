@@ -9,6 +9,21 @@ export async function POST(request: NextRequest) {
     
     console.log(`🔍 Generate Copy - userId: ${userId}`)
     
+    // Garantir que usuário existe - criar se não existir
+    let user = await Database.getUser(userId);
+    if (!user) {
+      console.log(`👤 Criando usuário novo: ${userId}`)
+      user = await Database.upsertUser({
+        userId,
+        email: `${userId}@copybr.temp`,
+        planType: 'free',
+        status: 'active',
+        currentPeriodEnd: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000),
+        monthlyUsage: 0,
+        emailVerified: false
+      });
+    }
+    
     // Verificar se usuário pode gerar copy
     const canGenerate = await Database.canGenerateCopy(userId);
     
