@@ -7,16 +7,22 @@ export async function POST(request: NextRequest) {
     // Por enquanto usar demo user - depois integrar com auth real
     const userId = request.headers.get('x-user-id') || 'demo-user'
     
+    console.log(`🔍 Generate Copy - userId: ${userId}`)
+    
     // Verificar se usuário pode gerar copy
     const canGenerate = await Database.canGenerateCopy(userId);
     
+    console.log(`📊 Can generate check:`, canGenerate)
+    
     if (!canGenerate.allowed) {
+      console.log(`❌ Blocked: ${canGenerate.reason}`)
       return NextResponse.json(
         { 
           error: 'Limite excedido',
           message: canGenerate.reason,
           usage: canGenerate.usage,
-          limit: canGenerate.limit
+          limit: canGenerate.limit,
+          userId: userId
         },
         { status: 403 }
       );

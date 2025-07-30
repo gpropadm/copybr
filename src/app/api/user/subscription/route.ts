@@ -11,13 +11,19 @@ export async function GET(req: NextRequest) {
     
     // Se não existe, criar usuário gratuito
     if (!user) {
+      console.log(`👤 Criando novo usuário: ${userId}`)
       user = await Database.upsertUser({
         userId,
         email: 'demo@copybr.com.br',
         planType: 'free',
         status: 'active',
-        currentPeriodEnd: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000) // 30 dias
+        currentPeriodEnd: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000), // 30 dias
+        monthlyUsage: 0, // Garantir que inicia com 0
+        emailVerified: false
       });
+      console.log(`✅ Usuário criado:`, user)
+    } else {
+      console.log(`👤 Usuário existente:`, user)
     }
 
     return NextResponse.json({
