@@ -88,7 +88,7 @@ export async function createCheckoutSession(
   }
 
   const session = await stripe.checkout.sessions.create({
-    payment_method_types: ['card', 'pix'],
+    payment_method_types: ['card'],
     mode: 'subscription',
     customer_email: userEmail,
     client_reference_id: userId,
