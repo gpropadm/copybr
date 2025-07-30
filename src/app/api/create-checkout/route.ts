@@ -32,7 +32,7 @@ export async function POST(req: NextRequest) {
     const userEmail = 'demo@copybr.com.br';
 
     // Criar sessão de checkout hospedado (usuário escolhe PIX ou cartão)
-    const session = await createCheckoutSession(planType, userId, userEmail);
+    const session = await createCheckoutSession(planType, userId, userEmail, 'Demo User');
 
     return NextResponse.json({ 
       url: session.url,

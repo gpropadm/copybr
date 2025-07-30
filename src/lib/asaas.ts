@@ -78,7 +78,8 @@ interface CheckoutSession {
 export async function createCheckoutSession(
   planType: PlanType,
   userId: string,
-  userEmail: string
+  userEmail: string,
+  userName?: string
 ): Promise<CheckoutSession> {
   if (!isAsaasConfigured()) {
     throw new Error('Asaas não está configurado corretamente')
@@ -94,7 +95,7 @@ export async function createCheckoutSession(
     console.log('🔄 Criando cliente no Asaas...');
     // Criar cliente se não existir
     const customer = await asaas.customers.new({
-      name: userEmail.split('@')[0],
+      name: userName || userEmail.split('@')[0],
       email: userEmail,
       cpfCnpj: '11144477735', // CPF válido para testes
       externalReference: userId

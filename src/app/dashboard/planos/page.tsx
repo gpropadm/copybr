@@ -247,6 +247,7 @@ export default function PlanosPage() {
                   planType={plan.id as any}
                   userId={user?.id || 'demo-user'}
                   userEmail={user?.email || 'demo@copybr.com.br'}
+                  userName={user?.name || 'Demo User'}
                   className={`w-full mt-6 ${
                     plan.popular
                       ? 'bg-blue-600 hover:bg-blue-700'
@@ -302,6 +303,7 @@ export default function PlanosPage() {
             planType="free"
             userId={user?.id || 'demo-user'}
             userEmail={user?.email || 'demo@copybr.com.br'}
+            userName={user?.name || 'Demo User'}
             className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700"
           >
             Começar Agora Grátis

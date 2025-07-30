@@ -3,7 +3,7 @@ import { createCheckoutSession, PLANS } from '@/lib/asaas';
 
 export async function POST(req: NextRequest) {
   try {
-    const { planType, userId, userEmail } = await req.json();
+    const { planType, userId, userEmail, userName } = await req.json();
 
     // Validações
     if (!planType || !userId || !userEmail) {
@@ -28,7 +28,7 @@ export async function POST(req: NextRequest) {
     }
 
     // Criar checkout hospedado (usuário escolhe PIX ou cartão na página do Asaas)
-    const session = await createCheckoutSession(planType, userId, userEmail);
+    const session = await createCheckoutSession(planType, userId, userEmail, userName);
     
     return NextResponse.json({ 
       checkoutUrl: session.url,

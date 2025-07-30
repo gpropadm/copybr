@@ -8,6 +8,7 @@ interface CheckoutButtonProps {
   planType: PlanType;
   userId?: string;
   userEmail?: string;
+  userName?: string;
   className?: string;
   children: React.ReactNode;
 }
@@ -16,6 +17,7 @@ export function CheckoutButton({
   planType,
   userId = 'demo-user',
   userEmail = 'demo@copybr.com.br',
+  userName,
   className,
   children
 }: CheckoutButtonProps) {
@@ -40,6 +42,7 @@ export function CheckoutButton({
           planType,
           userId,
           userEmail,
+          userName,
         }),
       });
 
