@@ -143,14 +143,17 @@ export async function createPixPayment(
 
   try {
     // Criar cliente se não existir
+    console.log('🔄 Criando cliente no Asaas...');
     const customer = await asaas.customers.new({
       name: userEmail.split('@')[0],
       email: userEmail,
-      cpfCnpj: '00000000000', // CPF dummy - implementar validação real
+      cpfCnpj: '11144477735', // CPF válido para testes
       externalReference: userId
     })
+    console.log('✅ Cliente criado:', customer.id);
 
     // Criar cobrança PIX
+    console.log('🔄 Criando cobrança PIX...');
     const payment = await asaas.payments.new({
       customer: customer.id!,
       billingType: 'PIX',
@@ -159,9 +162,12 @@ export async function createPixPayment(
       description: `${plan.name} - CopyBR`,
       externalReference: `${userId}-${planType}-onetime`
     })
+    console.log('✅ Cobrança criada:', payment.id);
 
     // Gerar QR Code PIX
+    console.log('🔄 Gerando QR Code PIX...');
     const pixInfo = await asaas.payments.getPixQrCode(payment.id!)
+    console.log('✅ QR Code gerado');
 
     return {
       pixCode: pixInfo.payload || '',
@@ -169,8 +175,9 @@ export async function createPixPayment(
       paymentId: payment.id || ''
     }
   } catch (error) {
-    console.error('Erro ao criar pagamento PIX:', error)
-    throw new Error('Erro ao criar pagamento PIX')
+    console.error('❌ Erro detalhado ao criar pagamento PIX:', error)
+    console.error('❌ Stack trace:', error instanceof Error ? error.stack : 'No stack')
+    throw new Error(`Erro ao criar pagamento PIX: ${error instanceof Error ? error.message : String(error)}`)
   }
 }
 
