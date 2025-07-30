@@ -113,7 +113,7 @@ export async function sendWelcomeEmail(userName: string, userEmail: string) {
     console.log(`📧 Enviando email de boas-vindas para ${userEmail}`)
     
     const { data, error } = await resend.emails.send({
-      from: 'CopyBR <noreply@copybr.com.br>', // Substituir pelo domínio real
+      from: 'CopyBR <onboarding@resend.dev>', // Domínio padrão do Resend
       to: [userEmail],
       subject: `🎉 Bem-vindo ao CopyBR, ${userName}!`,
       html: welcomeEmailTemplate(userName, userEmail),
@@ -144,7 +144,7 @@ export async function sendPlanActivatedEmail(userName: string, userEmail: string
     console.log(`📧 Enviando email de plano ativado para ${userEmail}`)
     
     const { data, error } = await resend.emails.send({
-      from: 'CopyBR <noreply@copybr.com.br>', // Substituir pelo domínio real
+      from: 'CopyBR <onboarding@resend.dev>', // Domínio padrão do Resend
       to: [userEmail],
       subject: `🚀 Seu plano ${planName} está ativo!`,
       html: planActivatedTemplate(userName, planName),
