@@ -13,9 +13,10 @@ export async function GET(req: NextRequest) {
       }, { status: 500 });
     }
 
-    // Dados de teste
-    const testEmail = 'copybradm@gmail.com'; // Email da conta Resend
-    const testName = 'Alex Vieira da Silva';
+    // Pegar email da URL se fornecido, senão usar o da conta Resend
+    const { searchParams } = new URL(req.url);
+    const testEmail = searchParams.get('email') || 'copybradm@gmail.com';
+    const testName = searchParams.get('name') || 'Usuário de Teste';
 
     console.log('📧 Gerando código de verificação...');
     const code = await Database.createEmailVerification(testEmail);
@@ -29,7 +30,11 @@ export async function GET(req: NextRequest) {
         message: 'Email de verificação enviado com sucesso!',
         emailId: result.data?.id,
         testCode: code, // Para facilitar os testes
-        testInstructions: `Use o código ${code} na página /verificar-email para testar`
+        sentTo: testEmail,
+        testInstructions: `Use o código ${code} na página /verificar-email para testar`,
+        note: testEmail === 'copybradm@gmail.com' 
+          ? 'Email enviado para conta verificada do Resend (plano gratuito)'
+          : `Tentativa de envio para ${testEmail} - pode falhar no plano gratuito`
       });
     } else {
       return NextResponse.json({
