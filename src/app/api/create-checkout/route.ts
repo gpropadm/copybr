@@ -31,8 +31,8 @@ export async function POST(req: NextRequest) {
     const userId = 'demo-user';
     const userEmail = 'demo@copybr.com.br';
 
-    // Criar sessão de checkout para cartão (padrão para assinaturas)
-    const session = await createCheckoutSession(planType, userId, userEmail, 'CREDIT_CARD');
+    // Criar sessão de checkout hospedado (usuário escolhe PIX ou cartão)
+    const session = await createCheckoutSession(planType, userId, userEmail);
 
     return NextResponse.json({ 
       url: session.url,

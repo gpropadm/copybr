@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { createCheckoutSession, createPixPayment, PLANS } from '@/lib/asaas';
+import { createCheckoutSession, PLANS } from '@/lib/asaas';
 
 export async function POST(req: NextRequest) {
   try {
