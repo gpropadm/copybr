@@ -1,9 +1,9 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { createCheckoutSession, PLANS } from '@/lib/stripe';
+import { createCheckoutSession, createPixPayment, PLANS } from '@/lib/asaas';
 
 export async function POST(req: NextRequest) {
   try {
-    const { planType, userId, userEmail } = await req.json();
+    const { planType, userId, userEmail, paymentMethod = 'PIX' } = await req.json();
 
     // Validações
     if (!planType || !userId || !userEmail) {
@@ -27,13 +27,34 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    // Criar sessão de checkout
-    const session = await createCheckoutSession(planType, userId, userEmail);
+    if (!['PIX', 'CREDIT_CARD'].includes(paymentMethod)) {
+      return NextResponse.json(
+        { error: 'Método de pagamento inválido. Use PIX ou CREDIT_CARD' },
+        { status: 400 }
+      );
+    }
 
-    return NextResponse.json({ 
-      checkoutUrl: session.url,
-      sessionId: session.id 
-    });
+    // Criar pagamento conforme método escolhido
+    if (paymentMethod === 'PIX') {
+      const pixPayment = await createPixPayment(planType, userId, userEmail);
+      
+      return NextResponse.json({ 
+        paymentMethod: 'PIX',
+        pixCode: pixPayment.pixCode,
+        qrCode: pixPayment.qrCode,
+        paymentId: pixPayment.paymentId
+      });
+    } else {
+      // Criar sessão de checkout para cartão
+      const session = await createCheckoutSession(planType, userId, userEmail, 'CREDIT_CARD');
+      
+      return NextResponse.json({ 
+        paymentMethod: 'CREDIT_CARD',
+        checkoutUrl: session.url,
+        sessionId: session.id,
+        paymentId: session.paymentId
+      });
+    }
 
   } catch (error) {
     console.error('Erro ao criar checkout:', error);

@@ -6,7 +6,7 @@ import { Check, Star, ArrowRight, Shield, CreditCard, Zap } from 'lucide-react'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/Card'
 import Button from '@/components/ui/Button'
 import { formatCurrency } from '@/lib/utils'
-import { PLANS, type PlanType } from '@/lib/stripe'
+import { PLANS, type PlanType } from '@/lib/asaas'
 
 export default function AssinaturaPage() {
   const router = useRouter()

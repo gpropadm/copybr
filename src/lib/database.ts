@@ -5,7 +5,7 @@ export interface UserSubscription {
   userId: string;
   email: string;
   planType: 'free' | 'starter' | 'pro' | 'business';
-  status: 'active' | 'canceled' | 'past_due';
+  status: 'active' | 'canceled' | 'past_due' | 'pending';
   customerId?: string;
   subscriptionId?: string;
   currentPeriodEnd: Date;

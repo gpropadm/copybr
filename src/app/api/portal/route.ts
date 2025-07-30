@@ -1,5 +1,4 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { createBillingPortalSession } from '@/lib/stripe';
 
 export async function POST(req: NextRequest) {
   try {
@@ -12,11 +11,10 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    // Criar sessão do portal de cobrança
-    const session = await createBillingPortalSession(customerId);
-
+    // Portal de cobrança não implementado ainda no Asaas
+    // Por enquanto, redirecionar para dashboard do usuário
     return NextResponse.json({ 
-      portalUrl: session.url 
+      portalUrl: `${process.env.NEXT_PUBLIC_APP_URL || 'https://copybr.vercel.app'}/dashboard/planos`
     });
 
   } catch (error) {
