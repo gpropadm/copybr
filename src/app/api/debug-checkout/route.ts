@@ -1,9 +1,17 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { asaas, isAsaasConfigured, PLANS } from '@/lib/asaas';
 
+export async function GET(req: NextRequest) {
+  return debugCheckout();
+}
+
 export async function POST(req: NextRequest) {
+  return debugCheckout();
+}
+
+async function debugCheckout() {
   try {
-    const { planType = 'starter' } = await req.json();
+    const planType = 'starter';
     
     console.log('🔍 Debug checkout - início');
     console.log('🔑 API configurada:', isAsaasConfigured());
