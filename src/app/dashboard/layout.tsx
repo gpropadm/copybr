@@ -263,18 +263,12 @@ function DashboardContent({
               {showUserMenu && (
                 <div className={`absolute bottom-full left-0 right-0 mb-2 ${isDarkMode ? 'bg-gray-700 border-gray-600' : 'bg-white border-gray-200'} border rounded-lg shadow-lg z-50`}>
                   <div className="p-2 space-y-1">
-                    {/* Sair */}
-                    <button
-                      onClick={handleLogout}
-                      className={`flex items-center space-x-3 w-full px-3 py-2 rounded-lg ${isDarkMode ? 'text-red-400 hover:bg-red-900/20' : 'text-red-600 hover:bg-red-50'} transition-colors text-left`}
-                    >
-                      <LogOut className="h-4 w-4" />
-                      <span className="text-sm">Sair</span>
-                    </button>
-                    
                     {/* Dark Mode Toggle */}
                     <button
-                      onClick={toggleDarkMode}
+                      onClick={() => {
+                        toggleDarkMode()
+                        setShowUserMenu(false)
+                      }}
                       className={`flex items-center space-x-3 w-full px-3 py-2 rounded-lg ${isDarkMode ? 'text-gray-300 hover:bg-gray-600' : 'text-gray-700 hover:bg-gray-100'} transition-colors text-left`}
                     >
                       {isDarkMode ? <Sun className="h-4 w-4" /> : <Moon className="h-4 w-4" />}
@@ -283,6 +277,7 @@ function DashboardContent({
 
                     {/* Placeholder menus */}
                     <button
+                      onClick={() => setShowUserMenu(false)}
                       className={`flex items-center space-x-3 w-full px-3 py-2 rounded-lg ${isDarkMode ? 'text-gray-300 hover:bg-gray-600' : 'text-gray-700 hover:bg-gray-100'} transition-colors text-left`}
                     >
                       <Settings className="h-4 w-4" />
@@ -290,6 +285,7 @@ function DashboardContent({
                     </button>
                     
                     <button
+                      onClick={() => setShowUserMenu(false)}
                       className={`flex items-center space-x-3 w-full px-3 py-2 rounded-lg ${isDarkMode ? 'text-gray-300 hover:bg-gray-600' : 'text-gray-700 hover:bg-gray-100'} transition-colors text-left`}
                     >
                       <User className="h-4 w-4" />
@@ -298,6 +294,7 @@ function DashboardContent({
                     
                     <Link
                       href="/dashboard/meu-consumo"
+                      onClick={() => setShowUserMenu(false)}
                       className={`flex items-center space-x-3 w-full px-3 py-2 rounded-lg ${isDarkMode ? 'text-gray-300 hover:bg-gray-600' : 'text-gray-700 hover:bg-gray-100'} transition-colors text-left`}
                     >
                       <BarChart3 className="h-4 w-4" />
@@ -306,11 +303,24 @@ function DashboardContent({
                     
                     <Link
                       href="/dashboard/planos"
+                      onClick={() => setShowUserMenu(false)}
                       className={`flex items-center space-x-3 w-full px-3 py-2 rounded-lg ${isDarkMode ? 'text-gray-300 hover:bg-gray-600' : 'text-gray-700 hover:bg-gray-100'} transition-colors text-left`}
                     >
                       <Zap className="h-4 w-4" />
                       <span className="text-sm">Planos</span>
                     </Link>
+
+                    {/* Separador */}
+                    <div className={`border-t ${isDarkMode ? 'border-gray-600' : 'border-gray-200'} my-1`}></div>
+                    
+                    {/* Sair - movido para o final */}
+                    <button
+                      onClick={handleLogout}
+                      className={`flex items-center space-x-3 w-full px-3 py-2 rounded-lg ${isDarkMode ? 'text-red-400 hover:bg-red-900/20' : 'text-red-600 hover:bg-red-50'} transition-colors text-left`}
+                    >
+                      <LogOut className="h-4 w-4" />
+                      <span className="text-sm">Sair</span>
+                    </button>
                   </div>
                 </div>
               )}
