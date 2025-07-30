@@ -14,7 +14,7 @@ export async function GET(req: NextRequest) {
 
     // Teste com dados demo
     const testName = 'Alex Vieira da Silva';
-    const testEmail = 'brasiliasite@gmail.com'; // Usar seu email real para teste
+    const testEmail = 'copybradm@gmail.com'; // Email da conta Resend
 
     console.log('📧 Enviando email de teste...');
     const result = await sendWelcomeEmail(testName, testEmail);
