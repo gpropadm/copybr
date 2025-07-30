@@ -8,8 +8,10 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/Card'
 interface UsageData {
   copiesUsed: number
   promptsUsed: number
+  projectsCreated: number
   copiesLimit: number
   promptsLimit: number
+  projectsLimit: number
   planName: string
   planIcon: any
   resetDate: string
@@ -36,12 +38,26 @@ export default function MeuConsumoPage() {
         const response = await fetch('/api/user/subscription', { headers });
         const data = await response.json();
         
+        // Buscar projetos criados
+        let projectsCount = 0;
+        try {
+          const projectsResponse = await fetch('/api/projects', { headers });
+          if (projectsResponse.ok) {
+            const projectsData = await projectsResponse.json();
+            projectsCount = projectsData.data?.length || 0;
+          }
+        } catch (error) {
+          console.log('Erro ao buscar projetos:', error);
+        }
+        
         if (response.ok) {
           const realData: UsageData = {
             copiesUsed: data.monthlyUsage || 0,
             promptsUsed: 0, // Por enquanto não temos prompts separados
+            projectsCreated: projectsCount,
             copiesLimit: data.limits[data.planType] === -1 ? 999999 : data.limits[data.planType],
             promptsLimit: data.planType === 'free' ? 2 : data.planType === 'starter' ? 20 : data.planType === 'pro' ? 100 : 999999,
+            projectsLimit: data.planType === 'free' ? 10 : data.planType === 'starter' ? 50 : data.planType === 'pro' ? 200 : 999999,
             planName: data.planType.toUpperCase(),
             planIcon: data.planType === 'free' ? Star : data.planType === 'starter' ? Zap : data.planType === 'pro' ? Crown : Building,
             resetDate: data.currentPeriodEnd ? 
@@ -59,8 +75,10 @@ export default function MeuConsumoPage() {
         const fallbackData: UsageData = {
           copiesUsed: 0,
           promptsUsed: 0,
+          projectsCreated: 0,
           copiesLimit: 10,
           promptsLimit: 2,
+          projectsLimit: 10,
           planName: 'FREE',
           planIcon: Star,
           resetDate: new Date(new Date().setMonth(new Date().getMonth() + 1)).toLocaleDateString('pt-BR'),
@@ -81,6 +99,7 @@ export default function MeuConsumoPage() {
 
   const copiesPercentage = Math.round((usageData.copiesUsed / usageData.copiesLimit) * 100)
   const promptsPercentage = Math.round((usageData.promptsUsed / usageData.promptsLimit) * 100)
+  const projectsPercentage = Math.round((usageData.projectsCreated / usageData.projectsLimit) * 100)
   
   const resetDate = new Date(usageData.resetDate).toLocaleDateString('pt-BR', {
     day: '2-digit',
@@ -88,8 +107,8 @@ export default function MeuConsumoPage() {
     year: 'numeric'
   })
 
-  const isNearLimit = copiesPercentage > 80 || promptsPercentage > 80
-  const isOverLimit = copiesPercentage >= 100 || promptsPercentage >= 100
+  const isNearLimit = copiesPercentage > 80 || promptsPercentage > 80 || projectsPercentage > 80
+  const isOverLimit = copiesPercentage >= 100 || promptsPercentage >= 100 || projectsPercentage >= 100
 
   const totalUsageThisMonth = usageData.dailyUsage.reduce((acc, day) => acc + day.copies + day.prompts, 0)
 
@@ -183,6 +202,22 @@ export default function MeuConsumoPage() {
             </CardHeader>
             <CardContent>
               <div className="space-y-3">
+                {/* Informação de Projetos */}
+                <div className="mb-3 p-2 bg-blue-50 rounded-lg border border-blue-200">
+                  <div className="flex justify-between items-center text-sm">
+                    <span className="text-blue-800 font-medium">Projetos este mês</span>
+                    <span className="text-blue-600">
+                      {usageData.projectsCreated}/{usageData.projectsLimit === 999999 ? '∞' : usageData.projectsLimit}
+                    </span>
+                  </div>
+                  <div className="text-xs text-blue-600 mt-1">
+                    Você ainda pode criar {usageData.projectsLimit === 999999 
+                      ? 'projetos ilimitados' 
+                      : `${usageData.projectsLimit - usageData.projectsCreated} projetos este mês`
+                    }
+                  </div>
+                </div>
+
                 <div className="flex justify-between items-baseline">
                   <span className="text-2xl font-bold text-gray-900">
                     {usageData.copiesUsed}
