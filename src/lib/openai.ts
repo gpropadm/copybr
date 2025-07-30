@@ -18,6 +18,11 @@ export interface CopyResult {
   score?: number
 }
 
+export interface ChatMessage {
+  role: 'user' | 'assistant'
+  content: string
+}
+
 const TEMPLATES = {
   'facebook-ad': {
     name: 'Anúncio Facebook/Instagram',
@@ -276,4 +281,166 @@ async function callOpenAI(systemPrompt: string, userPrompt: string): Promise<str
     
     throw error
   }
+}
+
+// Função para gerar resposta de chat livre
+export async function generateChatResponse(messages: ChatMessage[]): Promise<string> {
+  const systemPrompt = `Você é um assistente especialista em copywriting brasileiro. Você ajuda pessoas a criar copies, textos publicitários, headlines, emails marketing e conteúdo persuasivo.
+
+INSTRUÇÕES IMPORTANTES:
+- Sempre responda em português brasileiro natural
+- Seja útil, criativo e prático
+- Dê exemplos concretos quando possível
+- Use técnicas de copywriting quando apropriado
+- Adapte sua resposta ao contexto brasileiro
+- Seja conversacional mas profissional
+- Inclua emojis quando apropriado para engajamento
+- Foque em resultados práticos
+
+Você pode ajudar com:
+- Criação de copies para redes sociais
+- Headlines e títulos impactantes
+- Emails marketing
+- Descrições de produtos
+- Textos para landing pages
+- Estratégias de copywriting
+- Análise e melhoria de textos
+
+Seja sempre construtivo, criativo e focado em gerar valor real para o usuário.`
+
+  try {
+    // Verificar se tem API key configurada
+    if (!process.env.OPENAI_API_KEY) {
+      console.log('🤖 Usando modo simulação para chat - configure OPENAI_API_KEY para usar API real')
+      return await simulateChatResponse(messages)
+    }
+
+    // Chamada real da OpenAI API
+    console.log('🚀 Usando OpenAI API real para chat')
+    const completion = await openai.chat.completions.create({
+      model: 'gpt-4o-mini',
+      messages: [
+        { role: 'system', content: systemPrompt },
+        ...messages
+      ],
+      max_tokens: 1000,
+      temperature: 0.7,
+      top_p: 1,
+      frequency_penalty: 0.1,
+      presence_penalty: 0.1,
+    })
+
+    const content = completion.choices[0]?.message?.content
+    
+    if (!content) {
+      throw new Error('Resposta vazia da OpenAI')
+    }
+
+    return content.trim()
+    
+  } catch (error) {
+    console.error('Erro na chamada OpenAI Chat:', error)
+    
+    if (error instanceof Error) {
+      // Erros específicos da OpenAI
+      if (error.message.includes('insufficient_quota')) {
+        throw new Error('Cota da API OpenAI esgotada. Verifique seu billing.')
+      }
+      if (error.message.includes('invalid_api_key')) {
+        throw new Error('Chave da API OpenAI inválida. Verifique a configuração.')
+      }
+      if (error.message.includes('rate_limit')) {
+        throw new Error('Limite de requisições atingido. Tente novamente em alguns minutos.')
+      }
+    }
+    
+    // Fallback para simulação em caso de erro
+    console.log('⚠️ Erro na API - usando fallback simulado para chat')
+    return await simulateChatResponse(messages)
+  }
+}
+
+// Simulação de resposta do chat para desenvolvimento
+async function simulateChatResponse(messages: ChatMessage[]): Promise<string> {
+  // Simular delay da API
+  await new Promise(resolve => setTimeout(resolve, 1000))
+  
+  const lastMessage = messages[messages.length - 1]?.content?.toLowerCase() || ''
+  
+  // Respostas simuladas baseadas no contexto
+  if (lastMessage.includes('instagram') || lastMessage.includes('redes sociais')) {
+    return `🚀 Ótima pergunta sobre Instagram! Aqui estão algumas dicas para criar copies que convertem:
+
+📝 **Estrutura ideal para posts:**
+- Hook forte na primeira linha
+- Storytelling ou problema relatable  
+- Benefícios claros
+- Call-to-action direto
+
+💡 **Exemplo prático:**
+"Você já perdeu uma venda por causa de um copy fraco? 😢
+
+Ano passado eu descobri os 3 elementos que fazem QUALQUER copy vender mais:
+✅ Urgência real (não fake)
+✅ Prova social específica  
+✅ CTA irresistível
+
+Quer aprender a fórmula completa? 👆 Comenta 'QUERO' que eu te ensino!"`
+  }
+  
+  if (lastMessage.includes('email') || lastMessage.includes('newsletter')) {
+    return `📧 Email marketing é uma arte! Vou te dar uma estratégia que funciona:
+
+🎯 **Assunto irresistível:**
+- Use números: "5 erros que destroem suas vendas"
+- Crie curiosidade: "O que descobri sobre seu concorrente..."
+- Urgência real: "Só até amanhã: 50% OFF"
+
+✍️ **Estrutura do email:**
+1. Assunto que desperta curiosidade
+2. Abertura pessoal/história
+3. Problema + agitação
+4. Solução (seu produto)
+5. Call-to-action único e claro
+
+💰 **Dica de ouro:** Escreva como se fosse para um amigo próximo. Emails pessoais convertem 3x mais!
+
+Quer que eu crie um exemplo específico para seu nicho?`
+  }
+  
+  if (lastMessage.includes('headline') || lastMessage.includes('título')) {
+    return `🔥 Headlines são TUDO! Aqui está minha fórmula secreta:
+
+📊 **Fórmula comprovada:**
+[NÚMERO] + [ADJETIVO] + [BENEFÍCIO] + [TIMEFRAME] + [OBJEÇÃO]
+
+💡 **Exemplos que funcionam:**
+- "7 Estratégias Simples Para Dobrar Suas Vendas em 30 Dias (Mesmo Sem Experiência)"
+- "Como Ganhar R$ 5.000/Mês Online em 60 Dias (Método Testado)"
+
+🎯 **Gatilhos mentais poderosos:**
+- Números ímpares (7, 5, 3)
+- Timeframes específicos (30 dias, 2 semanas)
+- Palavras de poder (segredo, descoberta, revolucionário)
+- Benefícios claros (ganhar dinheiro, economizar tempo)
+
+Qual o seu nicho? Posso criar headlines específicas para você! 🚀`
+  }
+  
+  // Resposta genérica útil
+  return `👋 Entendi! Como especialista em copywriting, posso te ajudar com isso.
+
+🎯 **Algumas técnicas fundamentais:**
+- **AIDA**: Atenção → Interesse → Desejo → Ação
+- **PAS**: Problema → Agitação → Solução  
+- **Storytelling**: Conecte emocionalmente com histórias
+- **Prova social**: Use números, depoimentos, cases
+
+💡 **Dicas práticas:**
+✅ Foque nos benefícios, não características
+✅ Use linguagem do seu público-alvo
+✅ Crie urgência e escassez genuínas
+✅ Tenha apenas 1 call-to-action por copy
+
+Quer que eu seja mais específico? Me conta mais detalhes sobre o que você precisa criar! 🚀`
 }

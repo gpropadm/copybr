@@ -1,8 +1,9 @@
 'use client'
 
-import { useState } from 'react'
-import { Send, Trash2, Edit3 } from 'lucide-react'
+import { useState, useEffect, useRef } from 'react'
+import { Send, Trash2, Edit3, MessageCircle, Zap, Loader2 } from 'lucide-react'
 import Button from '@/components/ui/Button'
+import { Card, CardContent } from '@/components/ui/Card'
 
 interface Chat {
   id: string
@@ -16,83 +17,166 @@ interface Message {
   role: 'user' | 'assistant'
   content: string
   timestamp: Date
+  wordCount?: number
+}
+
+interface UsageInfo {
+  wordsUsed: number
+  wordsLimit: number
+  planType: string
 }
 
 export default function ChatPage() {
-  const [chats, setChats] = useState<Chat[]>([
-    {
-      id: '1',
-      title: 'Copy para E-commerce',
-      messages: [
-        {
-          id: '1',
-          role: 'user',
-          content: 'Preciso criar um copy para vender tênis esportivos',
-          timestamp: new Date()
-        },
-        {
-          id: '2',
-          role: 'assistant',
-          content: '🏃‍♂️ **CORRA ATRÁS DOS SEUS SONHOS!**\n\nTênis Ultra Performance - O que você estava esperando para dar o próximo passo?\n\n✅ Tecnologia anti-impacto\n✅ Design moderno e confortável\n✅ Durabilidade comprovada\n\n*Frete GRÁTIS para todo Brasil*\n💥 **OFERTA RELÂMPAGO: 30% OFF até meia-noite!**',
-          timestamp: new Date()
-        }
-      ],
-      createdAt: new Date()
-    },
-    {
-      id: '2',
-      title: 'Email Marketing',
-      messages: [
-        {
-          id: '3',
-          role: 'user',
-          content: 'Como criar um email de Black Friday que converta?',
-          timestamp: new Date()
-        }
-      ],
-      createdAt: new Date()
-    }
-  ])
-
-  const [selectedChat, setSelectedChat] = useState<string>('1')
+  const [chats, setChats] = useState<Chat[]>([])
+  const [selectedChat, setSelectedChat] = useState<string>('')
   const [newMessage, setNewMessage] = useState('')
   const [showDeleteConfirm, setShowDeleteConfirm] = useState<string | null>(null)
+  const [isLoading, setIsLoading] = useState(false)
+  const [usage, setUsage] = useState<UsageInfo | null>(null)
+  const messagesEndRef = useRef<HTMLDivElement>(null)
 
   const currentChat = chats.find(chat => chat.id === selectedChat)
 
-  const handleSendMessage = () => {
-    if (!newMessage.trim() || !selectedChat) return
+  const scrollToBottom = () => {
+    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' })
+  }
 
-    const message: Message = {
+  useEffect(() => {
+    scrollToBottom()
+  }, [chats])
+
+  useEffect(() => {
+    fetchUsage()
+    initializeChat()
+  }, [])
+
+  const fetchUsage = async () => {
+    try {
+      const userData = localStorage.getItem('auth_user')
+      let headers = {}
+      
+      if (userData) {
+        const user = JSON.parse(userData)
+        headers = { 'x-user-id': user.id }
+      }
+      
+      const response = await fetch('/api/user/subscription', { headers })
+      const data = await response.json()
+      
+      if (response.ok) {
+        setUsage({
+          wordsUsed: data.wordsUsed || 0,
+          wordsLimit: data.planType === 'free' ? 2000 : -1,
+          planType: data.planType
+        })
+      }
+    } catch (error) {
+      console.error('Erro ao buscar dados de uso:', error)
+    }
+  }
+
+  const initializeChat = () => {
+    if (chats.length === 0) {
+      createNewChat(true) // true = primeiro chat com mensagem de boas-vindas
+    }
+  }
+
+  const canSendMessage = () => {
+    if (!usage) return false
+    if (usage.wordsLimit === -1) return true // Plano ilimitado
+    return usage.wordsUsed < usage.wordsLimit
+  }
+
+  const handleSendMessage = async () => {
+    if (!newMessage.trim() || !selectedChat || isLoading) return
+
+    // Verificar limite de palavras
+    if (!canSendMessage()) {
+      alert('Você atingiu o limite de palavras do seu plano. Faça upgrade para continuar!')
+      return
+    }
+
+    const userMessage: Message = {
       id: Date.now().toString(),
       role: 'user',
-      content: newMessage,
+      content: newMessage.trim(),
       timestamp: new Date()
     }
 
     setChats(prev => prev.map(chat => 
       chat.id === selectedChat 
-        ? { ...chat, messages: [...chat.messages, message] }
+        ? { ...chat, messages: [...chat.messages, userMessage] }
         : chat
     ))
 
+    const messageToSend = newMessage.trim()
     setNewMessage('')
+    setIsLoading(true)
 
-    // Simular resposta da IA
-    setTimeout(() => {
-      const aiResponse: Message = {
-        id: (Date.now() + 1).toString(),
-        role: 'assistant',
-        content: 'Essa é uma resposta simulada da IA. Em breve teremos integração real com modelos de linguagem para gerar copies incríveis!',
-        timestamp: new Date()
+    try {
+      const userData = localStorage.getItem('auth_user')
+      let headers = { 'Content-Type': 'application/json' }
+      
+      if (userData) {
+        const user = JSON.parse(userData)
+        headers = { ...headers, 'x-user-id': user.id }
       }
 
+      const currentChatMessages = chats.find(c => c.id === selectedChat)?.messages || []
+
+      const response = await fetch('/api/chat', {
+        method: 'POST',
+        headers,
+        body: JSON.stringify({
+          message: messageToSend,
+          history: [...currentChatMessages, userMessage].slice(-10) // Últimas 10 mensagens para contexto
+        })
+      })
+
+      const data = await response.json()
+
+      if (response.ok) {
+        const assistantMessage: Message = {
+          id: (Date.now() + 1).toString(),
+          role: 'assistant',
+          content: data.response,
+          timestamp: new Date(),
+          wordCount: data.wordCount
+        }
+
+        setChats(prev => prev.map(chat => 
+          chat.id === selectedChat 
+            ? { ...chat, messages: [...chat.messages, assistantMessage] }
+            : chat
+        ))
+        
+        // Atualizar contador de uso
+        if (usage) {
+          setUsage(prev => prev ? {
+            ...prev,
+            wordsUsed: prev.wordsUsed + (data.wordCount || 0)
+          } : null)
+        }
+      } else {
+        throw new Error(data.error || 'Erro ao processar mensagem')
+      }
+    } catch (error) {
+      console.error('Erro no chat:', error)
+      const errorMessage: Message = {
+        id: (Date.now() + 1).toString(),
+        role: 'assistant',
+        content: '❌ Desculpe, ocorreu um erro. Tente novamente.',
+        timestamp: new Date()
+      }
+      
       setChats(prev => prev.map(chat => 
         chat.id === selectedChat 
-          ? { ...chat, messages: [...chat.messages, aiResponse] }
+          ? { ...chat, messages: [...chat.messages, errorMessage] }
           : chat
       ))
-    }, 1000)
+    } finally {
+      setIsLoading(false)
+    }
   }
 
   const handleDeleteChat = (chatId: string) => {
@@ -103,13 +187,21 @@ export default function ChatPage() {
     setShowDeleteConfirm(null)
   }
 
-  const createNewChat = () => {
+  const createNewChat = (isFirst = false) => {
+    const welcomeMessage: Message = {
+      id: 'welcome',
+      role: 'assistant',
+      content: 'Olá! 👋 Sou seu assistente de copywriting.\n\nPode me pedir qualquer coisa:\n• "Crie um copy para Instagram sobre meu produto"\n• "Escreva um email de follow-up"\n• "Gere headlines para minha landing page"\n\nO que você gostaria de criar hoje?',
+      timestamp: new Date()
+    }
+
     const newChat: Chat = {
       id: Date.now().toString(),
-      title: 'Novo Chat',
-      messages: [],
+      title: isFirst ? 'Chat de Boas-vindas' : 'Novo Chat',
+      messages: isFirst ? [welcomeMessage] : [],
       createdAt: new Date()
     }
+    
     setChats(prev => [newChat, ...prev])
     setSelectedChat(newChat.id)
   }
@@ -119,9 +211,40 @@ export default function ChatPage() {
       {/* Lista de Chats */}
       <div className="w-80 border-r border-gray-200 flex flex-col">
         <div className="p-4 border-b border-gray-200">
-          <Button onClick={createNewChat} className="w-full">
+          <Button onClick={() => createNewChat()} className="w-full mb-3">
             Novo Chat
           </Button>
+          
+          {/* Usage Info */}
+          {usage && (
+            <Card className="mb-0">
+              <CardContent className="p-3">
+                <div className="flex items-center justify-between mb-2">
+                  <div className="flex items-center gap-1">
+                    <Zap className="h-3 w-3 text-blue-600" />
+                    <span className="text-xs font-medium text-gray-700">
+                      Palavras
+                    </span>
+                  </div>
+                  <div className="text-xs text-gray-600">
+                    {usage.wordsUsed} / {usage.wordsLimit === -1 ? '∞' : usage.wordsLimit}
+                  </div>
+                </div>
+                
+                {usage.planType === 'free' && (
+                  <div className="w-full bg-gray-200 rounded-full h-1.5">
+                    <div 
+                      className={`h-1.5 rounded-full transition-all duration-300 ${
+                        usage.wordsUsed >= usage.wordsLimit ? 'bg-red-500' :
+                        usage.wordsUsed >= usage.wordsLimit * 0.8 ? 'bg-orange-500' : 'bg-blue-500'
+                      }`}
+                      style={{ width: `${Math.min((usage.wordsUsed / usage.wordsLimit) * 100, 100)}%` }}
+                    ></div>
+                  </div>
+                )}
+              </CardContent>
+            </Card>
+          )}
         </div>
         
         <div className="flex-1 overflow-y-auto">
@@ -198,10 +321,24 @@ export default function ChatPage() {
                         hour: '2-digit', 
                         minute: '2-digit' 
                       })}
+                      {message.wordCount && (
+                        <span className="ml-2">• {message.wordCount} palavras</span>
+                      )}
                     </p>
                   </div>
                 </div>
               ))}
+              
+              {isLoading && (
+                <div className="flex justify-start">
+                  <div className="bg-gray-100 rounded-lg px-4 py-2 flex items-center gap-2">
+                    <Loader2 className="h-4 w-4 animate-spin" />
+                    <span className="text-gray-600">Gerando resposta...</span>
+                  </div>
+                </div>
+              )}
+              
+              <div ref={messagesEndRef} />
             </div>
 
             {/* Input de Mensagem */}
@@ -211,14 +348,41 @@ export default function ChatPage() {
                   type="text"
                   value={newMessage}
                   onChange={(e) => setNewMessage(e.target.value)}
-                  onKeyPress={(e) => e.key === 'Enter' && handleSendMessage()}
-                  placeholder="Digite sua mensagem..."
-                  className="flex-1 px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#693ee0] focus:border-[#693ee0]"
+                  onKeyPress={(e) => e.key === 'Enter' && !e.shiftKey && handleSendMessage()}
+                  placeholder={
+                    canSendMessage() 
+                      ? "Digite sua mensagem..." 
+                      : "Limite de palavras atingido"
+                  }
+                  disabled={isLoading || !canSendMessage()}
+                  className="flex-1 px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#693ee0] focus:border-[#693ee0] disabled:bg-gray-100"
                 />
-                <Button onClick={handleSendMessage} disabled={!newMessage.trim()}>
-                  <Send className="h-4 w-4" />
+                <Button 
+                  onClick={handleSendMessage} 
+                  disabled={!newMessage.trim() || isLoading || !canSendMessage()}
+                >
+                  {isLoading ? (
+                    <Loader2 className="h-4 w-4 animate-spin" />
+                  ) : (
+                    <Send className="h-4 w-4" />
+                  )}
                 </Button>
               </div>
+              
+              {!canSendMessage() && usage?.planType === 'free' && (
+                <div className="mt-2 text-center">
+                  <p className="text-sm text-red-600 mb-2">
+                    Você atingiu o limite de {usage.wordsLimit} palavras do plano FREE
+                  </p>
+                  <Button 
+                    size="sm" 
+                    onClick={() => window.location.href = '/dashboard/planos'}
+                    className="bg-orange-600 hover:bg-orange-700"
+                  >
+                    Fazer Upgrade
+                  </Button>
+                </div>
+              )}
             </div>
           </>
         ) : (

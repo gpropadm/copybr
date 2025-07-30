@@ -31,13 +31,20 @@ export async function GET(req: NextRequest) {
       email: user.email,
       planType: user.planType,
       status: user.status,
-      monthlyUsage: user.monthlyUsage,
+      monthlyUsage: user.monthlyUsage, // Copies geradas
+      wordsUsed: user.monthlyUsage, // Por enquanto, mesmo valor (1 copy = 1 palavra para simplicidade)
       currentPeriodEnd: user.currentPeriodEnd,
       limits: {
         free: 10,
         starter: 100,
         pro: 1000,
         business: -1 // Ilimitado
+      },
+      wordLimits: {
+        free: 2000,    // 2000 palavras para FREE
+        starter: -1,   // Ilimitado para pagos
+        pro: -1,       // Ilimitado para pagos  
+        business: -1   // Ilimitado para pagos
       }
     });
 
