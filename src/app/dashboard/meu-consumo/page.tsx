@@ -138,14 +138,16 @@ export default function MeuConsumoPage() {
         {/* Current Plan */}
         <Card className="mb-6">
           <CardHeader>
-            <CardTitle className="flex items-center justify-between">
+            <CardTitle className="flex items-center justify-between text-lg">
               <span className="flex items-center gap-2">
                 <usageData.planIcon className="h-5 w-5 text-blue-600" />
-                Plano Atual: {usageData.planName}
+                <span className="text-sm text-gray-600">Plano Atual:</span>
+                <span className="text-base font-semibold text-gray-900">{usageData.planName}</span>
               </span>
               <Button 
                 variant="outline" 
                 size="sm"
+                className="text-xs px-3 py-1"
                 onClick={() => window.location.href = '/dashboard/planos'}
               >
                 Alterar Plano
@@ -153,18 +155,18 @@ export default function MeuConsumoPage() {
             </CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-              <div className="text-center">
-                <div className="text-2xl font-bold text-gray-900">{usageData.planName}</div>
-                <div className="text-sm text-gray-600">Plano Ativo</div>
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+              <div className="text-center p-4 bg-gray-50 rounded-lg">
+                <div className="text-lg font-semibold text-gray-900 mb-1">{usageData.planName}</div>
+                <div className="text-xs text-gray-500 uppercase tracking-wide">Plano Ativo</div>
               </div>
-              <div className="text-center">
-                <div className="text-2xl font-bold text-blue-600">{totalUsageThisMonth}</div>
-                <div className="text-sm text-gray-600">Total Usado</div>
+              <div className="text-center p-4 bg-blue-50 rounded-lg">
+                <div className="text-lg font-semibold text-blue-600 mb-1">{totalUsageThisMonth}</div>
+                <div className="text-xs text-gray-500 uppercase tracking-wide">Total Usado</div>
               </div>
-              <div className="text-center">
-                <div className="text-2xl font-bold text-green-600">{resetDate}</div>
-                <div className="text-sm text-gray-600">Próximo Reset</div>
+              <div className="text-center p-4 bg-green-50 rounded-lg">
+                <div className="text-lg font-semibold text-green-600 mb-1">{resetDate}</div>
+                <div className="text-xs text-gray-500 uppercase tracking-wide">Próximo Reset</div>
               </div>
             </div>
           </CardContent>
@@ -174,19 +176,19 @@ export default function MeuConsumoPage() {
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
           {/* Copies Usage */}
           <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <TrendingUp className="h-5 w-5 text-blue-600" />
-                Copies Utilizadas
+            <CardHeader className="pb-3">
+              <CardTitle className="flex items-center gap-2 text-base">
+                <TrendingUp className="h-4 w-4 text-blue-600" />
+                <span className="text-sm font-medium text-gray-700">Copies Utilizadas</span>
               </CardTitle>
             </CardHeader>
             <CardContent>
-              <div className="space-y-4">
-                <div className="flex justify-between items-center">
-                  <span className="text-3xl font-bold text-gray-900">
+              <div className="space-y-3">
+                <div className="flex justify-between items-baseline">
+                  <span className="text-2xl font-bold text-gray-900">
                     {usageData.copiesUsed}
                   </span>
-                  <span className="text-lg text-gray-600">
+                  <span className="text-sm text-gray-500">
                     / {usageData.copiesLimit === 999999 ? '∞' : usageData.copiesLimit}
                   </span>
                 </div>
@@ -201,7 +203,7 @@ export default function MeuConsumoPage() {
                   ></div>
                 </div>
                 
-                <div className="flex justify-between text-sm text-gray-600">
+                <div className="flex justify-between text-xs text-gray-500">
                   <span>{copiesPercentage}% usado</span>
                   <span>
                     {usageData.copiesLimit === 999999 
@@ -216,19 +218,19 @@ export default function MeuConsumoPage() {
 
           {/* Prompts Usage */}
           <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <Zap className="h-5 w-5 text-purple-600" />
-                Prompts Utilizados
+            <CardHeader className="pb-3">
+              <CardTitle className="flex items-center gap-2 text-base">
+                <Zap className="h-4 w-4 text-purple-600" />
+                <span className="text-sm font-medium text-gray-700">Prompts Utilizados</span>
               </CardTitle>
             </CardHeader>
             <CardContent>
-              <div className="space-y-4">
-                <div className="flex justify-between items-center">
-                  <span className="text-3xl font-bold text-gray-900">
+              <div className="space-y-3">
+                <div className="flex justify-between items-baseline">
+                  <span className="text-2xl font-bold text-gray-900">
                     {usageData.promptsUsed}
                   </span>
-                  <span className="text-lg text-gray-600">
+                  <span className="text-sm text-gray-500">
                     / {usageData.promptsLimit === 999999 ? '∞' : usageData.promptsLimit}
                   </span>
                 </div>
@@ -243,7 +245,7 @@ export default function MeuConsumoPage() {
                   ></div>
                 </div>
                 
-                <div className="flex justify-between text-sm text-gray-600">
+                <div className="flex justify-between text-xs text-gray-500">
                   <span>{promptsPercentage}% usado</span>
                   <span>
                     {usageData.promptsLimit === 999999 
@@ -259,10 +261,10 @@ export default function MeuConsumoPage() {
 
         {/* Usage History */}
         <Card className="mb-6">
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <Calendar className="h-5 w-5 text-green-600" />
-              Histórico dos Últimos 7 Dias
+          <CardHeader className="pb-3">
+            <CardTitle className="flex items-center gap-2 text-base">
+              <Calendar className="h-4 w-4 text-green-600" />
+              <span className="text-sm font-medium text-gray-700">Histórico dos Últimos 7 Dias</span>
             </CardTitle>
           </CardHeader>
           <CardContent>
