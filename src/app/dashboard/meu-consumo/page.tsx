@@ -35,31 +35,9 @@ export default function MeuConsumoPage() {
             promptsLimit: data.planType === 'free' ? 2 : data.planType === 'starter' ? 20 : data.planType === 'pro' ? 100 : 999999,
             planName: data.planType.toUpperCase(),
             planIcon: data.planType === 'free' ? Star : data.planType === 'starter' ? Zap : data.planType === 'pro' ? Crown : Building,
-            resetDate: (() => {
-              try {
-                console.log('🔍 Debug currentPeriodEnd:', data.currentPeriodEnd, typeof data.currentPeriodEnd);
-                
-                if (data.currentPeriodEnd) {
-                  // Se for string ISO, usar diretamente
-                  const date = new Date(data.currentPeriodEnd);
-                  console.log('📅 Parsed date:', date, 'Valid:', !isNaN(date.getTime()));
-                  
-                  if (!isNaN(date.getTime())) {
-                    const formatted = date.toLocaleDateString('pt-BR');
-                    console.log('✅ Formatted date:', formatted);
-                    return formatted;
-                  }
-                }
-                
-                // Fallback
-                const fallback = new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toLocaleDateString('pt-BR');
-                console.log('⚠️ Using fallback date:', fallback);
-                return fallback;
-              } catch (error) {
-                console.error('❌ Date parsing error:', error);
-                return new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toLocaleDateString('pt-BR');
-              }
-            })(),
+            resetDate: data.currentPeriodEnd ? 
+              new Date(data.currentPeriodEnd).toLocaleDateString('pt-BR') :
+              new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toLocaleDateString('pt-BR'),
             dailyUsage: [] // Histórico vazio para usuário novo
           };
           
