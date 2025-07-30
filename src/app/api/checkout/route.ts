@@ -38,7 +38,10 @@ export async function POST(req: NextRequest) {
   } catch (error) {
     console.error('Erro ao criar checkout:', error);
     return NextResponse.json(
-      { error: 'Erro interno do servidor' },
+      { 
+        error: 'Erro interno do servidor',
+        details: error instanceof Error ? error.message : String(error)
+      },
       { status: 500 }
     );
   }

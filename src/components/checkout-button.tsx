@@ -46,7 +46,8 @@ export function CheckoutButton({
       const data = await response.json();
 
       if (!response.ok) {
-        throw new Error(data.error || 'Erro ao processar pagamento');
+        console.error('Erro na API:', data);
+        throw new Error(data.details || data.error || 'Erro ao processar pagamento');
       }
 
       // Redirecionar para checkout do Stripe
