@@ -4,6 +4,7 @@ import { useState } from 'react'
 import { Check, Zap, Crown, Building, Star, ArrowRight } from 'lucide-react'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/Card'
 import { CheckoutButton } from '@/components/checkout-button'
+import { useAuth } from '@/contexts/AuthContext'
 
 interface Plan {
   id: string
@@ -24,6 +25,7 @@ interface Plan {
 }
 
 export default function PlanosPage() {
+  const { user } = useAuth()
   const [billingCycle, setBillingCycle] = useState<'monthly' | 'yearly'>('monthly')
 
   const plans: Plan[] = [
@@ -243,6 +245,8 @@ export default function PlanosPage() {
                 {/* CTA Button */}
                 <CheckoutButton
                   planType={plan.id as any}
+                  userId={user?.id || 'demo-user'}
+                  userEmail={user?.email || 'demo@copybr.com.br'}
                   className={`w-full mt-6 ${
                     plan.popular
                       ? 'bg-blue-600 hover:bg-blue-700'
@@ -296,6 +300,8 @@ export default function PlanosPage() {
           </p>
           <CheckoutButton
             planType="free"
+            userId={user?.id || 'demo-user'}
+            userEmail={user?.email || 'demo@copybr.com.br'}
             className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700"
           >
             Começar Agora Grátis
