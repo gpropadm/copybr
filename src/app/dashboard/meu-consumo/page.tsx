@@ -24,7 +24,16 @@ export default function MeuConsumoPage() {
     // Buscar dados reais da API
     const fetchUserData = async () => {
       try {
-        const response = await fetch('/api/user/subscription');
+        // Obter dados do usuário logado
+        const userData = localStorage.getItem('auth_user')
+        let headers = {}
+        
+        if (userData) {
+          const user = JSON.parse(userData)
+          headers = { 'x-user-id': user.id }
+        }
+        
+        const response = await fetch('/api/user/subscription', { headers });
         const data = await response.json();
         
         if (response.ok) {

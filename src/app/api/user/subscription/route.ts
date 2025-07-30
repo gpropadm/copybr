@@ -3,8 +3,8 @@ import { Database } from '@/lib/database';
 
 export async function GET(req: NextRequest) {
   try {
-    // Por enquanto, usar userId demo - depois integrar com auth
-    const userId = 'demo-user';
+    // Pegar userId do header ou usar demo
+    const userId = req.headers.get('x-user-id') || 'demo-user';
     
     // Buscar usuário no banco
     let user = await Database.getUser(userId);
