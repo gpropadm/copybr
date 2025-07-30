@@ -192,6 +192,48 @@ export default function MeuConsumoPage() {
 
         {/* Usage Stats */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
+          {/* Projects Usage - PRIMEIRO CARD */}
+          <Card>
+            <CardHeader className="pb-3">
+              <CardTitle className="flex items-center gap-2 text-base">
+                <Calendar className="h-4 w-4 text-green-600" />
+                <span className="text-sm font-medium text-gray-700">Projetos Criados</span>
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="space-y-3">
+                <div className="flex justify-between items-baseline">
+                  <span className="text-2xl font-bold text-gray-900">
+                    {usageData.projectsCreated}
+                  </span>
+                  <span className="text-sm text-gray-500">
+                    / {usageData.projectsLimit === 999999 ? '∞' : usageData.projectsLimit}
+                  </span>
+                </div>
+                
+                <div className="w-full bg-gray-200 rounded-full h-3">
+                  <div 
+                    className={`h-3 rounded-full transition-all duration-300 ${
+                      usageData.projectsCreated >= (usageData.projectsLimit * 0.7) ? 'bg-red-500' :
+                      usageData.projectsCreated >= (usageData.projectsLimit * 0.5) ? 'bg-orange-500' : 'bg-green-500'
+                    }`}
+                    style={{ width: `${Math.min(projectsPercentage, 100)}%` }}
+                  ></div>
+                </div>
+                
+                <div className="flex justify-between text-xs text-gray-500">
+                  <span>{projectsPercentage}% usado</span>
+                  <span>
+                    {usageData.projectsLimit === 999999 
+                      ? 'Ilimitado' 
+                      : `${usageData.projectsLimit - usageData.projectsCreated} restantes`
+                    }
+                  </span>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+
           {/* Copies Usage */}
           <Card>
             <CardHeader className="pb-3">
@@ -214,8 +256,8 @@ export default function MeuConsumoPage() {
                 <div className="w-full bg-gray-200 rounded-full h-3">
                   <div 
                     className={`h-3 rounded-full transition-all duration-300 ${
-                      copiesPercentage >= 100 ? 'bg-red-500' :
-                      copiesPercentage >= 80 ? 'bg-yellow-500' : 'bg-blue-500'
+                      usageData.copiesUsed >= (usageData.copiesLimit * 0.7) ? 'bg-red-500' :
+                      usageData.copiesUsed >= (usageData.copiesLimit * 0.5) ? 'bg-orange-500' : 'bg-green-500'
                     }`}
                     style={{ width: `${Math.min(copiesPercentage, 100)}%` }}
                   ></div>
@@ -227,48 +269,6 @@ export default function MeuConsumoPage() {
                     {usageData.copiesLimit === 999999 
                       ? 'Ilimitado' 
                       : `${usageData.copiesLimit - usageData.copiesUsed} restantes`
-                    }
-                  </span>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-
-          {/* Projects Usage */}
-          <Card>
-            <CardHeader className="pb-3">
-              <CardTitle className="flex items-center gap-2 text-base">
-                <Calendar className="h-4 w-4 text-green-600" />
-                <span className="text-sm font-medium text-gray-700">Projetos Criados</span>
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="space-y-3">
-                <div className="flex justify-between items-baseline">
-                  <span className="text-2xl font-bold text-gray-900">
-                    {usageData.projectsCreated}
-                  </span>
-                  <span className="text-sm text-gray-500">
-                    / {usageData.projectsLimit === 999999 ? '∞' : usageData.projectsLimit}
-                  </span>
-                </div>
-                
-                <div className="w-full bg-gray-200 rounded-full h-3">
-                  <div 
-                    className={`h-3 rounded-full transition-all duration-300 ${
-                      projectsPercentage >= 100 ? 'bg-red-500' :
-                      projectsPercentage >= 80 ? 'bg-yellow-500' : 'bg-green-500'
-                    }`}
-                    style={{ width: `${Math.min(projectsPercentage, 100)}%` }}
-                  ></div>
-                </div>
-                
-                <div className="flex justify-between text-xs text-gray-500">
-                  <span>{projectsPercentage}% usado</span>
-                  <span>
-                    {usageData.projectsLimit === 999999 
-                      ? 'Ilimitado' 
-                      : `${usageData.projectsLimit - usageData.projectsCreated} restantes`
                     }
                   </span>
                 </div>
@@ -298,8 +298,8 @@ export default function MeuConsumoPage() {
                 <div className="w-full bg-gray-200 rounded-full h-3">
                   <div 
                     className={`h-3 rounded-full transition-all duration-300 ${
-                      promptsPercentage >= 100 ? 'bg-red-500' :
-                      promptsPercentage >= 80 ? 'bg-yellow-500' : 'bg-purple-500'
+                      usageData.promptsUsed >= (usageData.promptsLimit * 0.7) ? 'bg-red-500' :
+                      usageData.promptsUsed >= (usageData.promptsLimit * 0.5) ? 'bg-orange-500' : 'bg-green-500'
                     }`}
                     style={{ width: `${Math.min(promptsPercentage, 100)}%` }}
                   ></div>
