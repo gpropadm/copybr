@@ -28,7 +28,7 @@ export async function POST(request: NextRequest) {
     }
 
     // Validar se o plano existe
-    const validPlans: PlanType[] = ['pro', 'premium']
+    const validPlans: PlanType[] = ['starter', 'pro', 'business']
     if (!validPlans.includes(planType)) {
       return NextResponse.json(
         { error: 'Plano inválido' },
