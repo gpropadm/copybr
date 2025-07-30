@@ -393,7 +393,7 @@ Inclua: gancho inicial impactante, benefícios do produto, call-to-action forte,
               <div>
                 <h4 className="font-medium text-gray-900 mb-2">🎯 Modos de Análise:</h4>
                 <ul className="space-y-1">
-                  <li>• <strong>Apenas Prompt:</strong> Para usar em DALL-E, Midjourney, etc.</li>
+                  <li>• <strong>Apenas Prompt:</strong> Gera descrição detalhada da imagem</li>
                   <li>• <strong>Copy + Prompt:</strong> Gera copy de vendas + prompt</li>
                   <li>• Copy ideal para Instagram, Facebook, LinkedIn</li>
                   <li>• Funciona bem com produtos, comida, tecnologia</li>
