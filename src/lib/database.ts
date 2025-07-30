@@ -86,6 +86,30 @@ export class Database {
       return { allowed: false, reason: 'Usuário não encontrado' };
     }
 
+    // Verificar se o período expirou e resetar automaticamente
+    const now = new Date();
+    if (now > user.currentPeriodEnd) {
+      console.log(`🔄 Período expirado para ${userId}, resetando...`);
+      
+      // Resetar uso
+      await this.resetMonthlyUsage(userId);
+      
+      // Para planos gratuitos, estender período
+      if (user.planType === 'free') {
+        await this.upsertUser({
+          userId,
+          currentPeriodEnd: new Date(now.getTime() + 30 * 24 * 60 * 60 * 1000)
+        });
+      }
+      
+      // Atualizar referência local
+      const updatedUser = users.get(userId);
+      if (updatedUser) {
+        user.monthlyUsage = updatedUser.monthlyUsage;
+        user.currentPeriodEnd = updatedUser.currentPeriodEnd;
+      }
+    }
+
     // Verificar limites por plano
     const limits = {
       free: 10,
