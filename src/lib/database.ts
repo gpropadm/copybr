@@ -12,10 +12,20 @@ export interface UserSubscription {
   monthlyUsage: number;
   createdAt: Date;
   updatedAt: Date;
+  emailVerified: boolean;
+}
+
+export interface EmailVerification {
+  email: string;
+  code: string;
+  expiresAt: Date;
+  attempts: number;
+  createdAt: Date;
 }
 
 // Armazenamento temporário em memória
 const users: Map<string, UserSubscription> = new Map();
+const emailVerifications: Map<string, EmailVerification> = new Map();
 
 export class Database {
   // Criar ou atualizar usuário
@@ -32,7 +42,8 @@ export class Database {
       currentPeriodEnd: data.currentPeriodEnd || existing?.currentPeriodEnd || new Date(Date.now() + 30 * 24 * 60 * 60 * 1000),
       monthlyUsage: data.monthlyUsage !== undefined ? data.monthlyUsage : existing?.monthlyUsage || 0,
       createdAt: existing?.createdAt || new Date(),
-      updatedAt: new Date()
+      updatedAt: new Date(),
+      emailVerified: data.emailVerified !== undefined ? data.emailVerified : existing?.emailVerified || false
     };
     
     users.set(data.userId, user);
@@ -150,6 +161,85 @@ export class Database {
   // Limpar todos os dados (para debug)
   static async clearAll(): Promise<void> {
     users.clear();
+    emailVerifications.clear();
     console.log('🗑️ Todos os dados limpos');
+  }
+
+  // ===== VERIFICAÇÃO DE EMAIL =====
+
+  // Gerar código de verificação
+  static generateVerificationCode(): string {
+    return Math.floor(100000 + Math.random() * 900000).toString(); // 6 dígitos
+  }
+
+  // Criar código de verificação
+  static async createEmailVerification(email: string): Promise<string> {
+    const code = this.generateVerificationCode();
+    const verification: EmailVerification = {
+      email,
+      code,
+      expiresAt: new Date(Date.now() + 15 * 60 * 1000), // 15 minutos
+      attempts: 0,
+      createdAt: new Date()
+    };
+    
+    emailVerifications.set(email, verification);
+    console.log(`📧 Código gerado para ${email}: ${code}`);
+    return code;
+  }
+
+  // Verificar código
+  static async verifyEmailCode(email: string, code: string): Promise<{ success: boolean; message: string }> {
+    const verification = emailVerifications.get(email);
+    
+    if (!verification) {
+      return { success: false, message: 'Código não encontrado. Solicite um novo código.' };
+    }
+
+    // Verificar se expirou
+    if (new Date() > verification.expiresAt) {
+      emailVerifications.delete(email);
+      return { success: false, message: 'Código expirado. Solicite um novo código.' };
+    }
+
+    // Incrementar tentativas
+    verification.attempts++;
+
+    // Verificar limite de tentativas
+    if (verification.attempts > 3) {
+      emailVerifications.delete(email);
+      return { success: false, message: 'Muitas tentativas. Solicite um novo código.' };
+    }
+
+    // Verificar código
+    if (verification.code !== code) {
+      return { success: false, message: `Código incorreto. Tentativas restantes: ${4 - verification.attempts}` };
+    }
+
+    // Sucesso - remover código usado
+    emailVerifications.delete(email);
+    return { success: true, message: 'Email verificado com sucesso!' };
+  }
+
+  // Marcar email como verificado
+  static async markEmailAsVerified(userId: string): Promise<void> {
+    const user = users.get(userId);
+    if (user) {
+      user.emailVerified = true;
+      user.updatedAt = new Date();
+      users.set(userId, user);
+      console.log(`✅ Email verificado para usuário ${userId}`);
+    }
+  }
+
+  // Limpar códigos expirados (executar periodicamente)
+  static async cleanExpiredCodes(): Promise<void> {
+    const now = new Date();
+    for (const [email, verification] of emailVerifications.entries()) {
+      if (now > verification.expiresAt) {
+        emailVerifications.delete(email);
+        console.log(`🗑️ Código expirado removido: ${email}`);
+      }
+    }
   }
 }
