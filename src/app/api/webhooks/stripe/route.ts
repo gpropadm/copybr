@@ -101,7 +101,7 @@ async function handleSubscriptionUpdated(subscription: Stripe.Subscription) {
       userId,
       planType,
       status: subscription.status as any,
-      currentPeriodEnd: new Date(subscription.current_period_end * 1000)
+      currentPeriodEnd: new Date((subscription as any).current_period_end * 1000)
     });
 
     console.log(`✅ Assinatura do usuário ${userId} atualizada para ${planType}`);
@@ -125,7 +125,7 @@ async function handleSubscriptionDeleted(subscription: Stripe.Subscription) {
       userId,
       planType: 'free',
       status: 'canceled',
-      currentPeriodEnd: new Date(subscription.current_period_end * 1000)
+      currentPeriodEnd: new Date((subscription as any).current_period_end * 1000)
     });
 
     console.log(`✅ Usuário ${userId} cancelado - volta para plano gratuito`);
