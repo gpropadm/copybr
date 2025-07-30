@@ -200,10 +200,10 @@ Inclua: gancho inicial impactante, benefícios do produto, call-to-action forte,
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
           {/* Upload Area */}
           <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <ImageIcon className="h-5 w-5" />
-                Sua Imagem
+            <CardHeader className="pb-3">
+              <CardTitle className="flex items-center gap-2 text-base">
+                <ImageIcon className="h-4 w-4 text-blue-600" />
+                <span className="text-sm font-medium text-gray-700">Sua Imagem</span>
               </CardTitle>
             </CardHeader>
             <CardContent>
@@ -279,17 +279,17 @@ Inclua: gancho inicial impactante, benefícios do produto, call-to-action forte,
             {/* Copy Mode - 5 Copies */}
             {analysisMode === 'copy+prompt' ? (
               <Card>
-                <CardHeader>
-                  <CardTitle className="flex items-center gap-2">
-                    <Copy className="h-5 w-5" />
-                    Copies para Redes Sociais
+                <CardHeader className="pb-3">
+                  <CardTitle className="flex items-center gap-2 text-base">
+                    <Copy className="h-4 w-4 text-green-600" />
+                    <span className="text-sm font-medium text-gray-700">Copies para Redes Sociais</span>
                   </CardTitle>
                 </CardHeader>
                 <CardContent>
                   {copies.length === 0 ? (
-                    <div className="text-center text-gray-500 py-12">
-                      <Copy className="h-12 w-12 text-gray-300 mx-auto mb-4" />
-                      <p>Faça upload de uma imagem para gerar copies promocionais</p>
+                    <div className="text-center text-gray-500 py-8">
+                      <Copy className="h-10 w-10 text-gray-300 mx-auto mb-3" />
+                      <p className="text-sm">Faça upload de uma imagem para gerar copies promocionais</p>
                     </div>
                   ) : (
                     <div className="space-y-4">
@@ -332,11 +332,11 @@ Inclua: gancho inicial impactante, benefícios do produto, call-to-action forte,
             ) : (
               /* Prompt Mode */
               <Card>
-                <CardHeader>
-                  <CardTitle className="flex items-center justify-between">
+                <CardHeader className="pb-3">
+                  <CardTitle className="flex items-center justify-between text-base">
                     <span className="flex items-center gap-2">
-                      <Sparkles className="h-5 w-5" />
-                      Prompt Gerado
+                      <Sparkles className="h-4 w-4 text-purple-600" />
+                      <span className="text-sm font-medium text-gray-700">Prompt Gerado</span>
                     </span>
                     {prompt && (
                       <Button size="sm" variant="outline" onClick={copyPrompt}>
@@ -348,9 +348,9 @@ Inclua: gancho inicial impactante, benefícios do produto, call-to-action forte,
                 </CardHeader>
                 <CardContent>
                   {!prompt ? (
-                    <div className="text-center text-gray-500 py-12">
-                      <Sparkles className="h-12 w-12 text-gray-300 mx-auto mb-4" />
-                      <p>Faça upload de uma imagem para gerar o prompt</p>
+                    <div className="text-center text-gray-500 py-8">
+                      <Sparkles className="h-10 w-10 text-gray-300 mx-auto mb-3" />
+                      <p className="text-sm">Faça upload de uma imagem para gerar o prompt</p>
                     </div>
                   ) : (
                     <div className="space-y-4">
