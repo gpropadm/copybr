@@ -109,11 +109,7 @@ export async function createCheckoutSession(
       value: plan.price,
       dueDate: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000), // 7 dias para pagar
       description: `${plan.name} - CopyBR`,
-      externalReference: `${userId}-${planType}`,
-      callback: {
-        successUrl: `${process.env.NEXT_PUBLIC_APP_URL || 'https://copybr.vercel.app'}/dashboard?success=true`,
-        autoRedirect: true
-      }
+      externalReference: `${userId}-${planType}`
     })
     console.log('✅ Cobrança criada:', payment.id);
 
