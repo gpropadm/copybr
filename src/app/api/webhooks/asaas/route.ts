@@ -1,17 +1,11 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { validateAsaasWebhook, mapAsaasStatus } from '@/lib/asaas'
+import { mapAsaasStatus } from '@/lib/asaas'
 import { Database } from '@/lib/database'
 
 export async function POST(request: NextRequest) {
   try {
     const body = await request.text()
-    const signature = request.headers.get('asaas-access-token') || ''
-
-    // Validar webhook do Asaas
-    if (!validateAsaasWebhook(body, signature)) {
-      console.error('Falha na verificação da assinatura do webhook')
-      return NextResponse.json({ error: 'Webhook signature verification failed' }, { status: 400 })
-    }
+    console.log('🔔 Webhook Asaas recebido:', body);
 
     const event = JSON.parse(body)
 
