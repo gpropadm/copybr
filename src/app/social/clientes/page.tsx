@@ -1083,6 +1083,259 @@ export default function ClientesPage() {
           </div>
         </div>
       )}
+
+      {/* Modal Novo Cliente */}
+      {showAddModal && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
+          <div className="bg-white rounded-xl max-w-2xl w-full max-h-[90vh] overflow-y-auto">
+            <div className="p-6">
+              {/* Header */}
+              <div className="flex items-center justify-between mb-6">
+                <div>
+                  <h2 className="text-2xl font-bold text-gray-900">Novo Cliente</h2>
+                  <p className="text-gray-600">Adicionar um novo cliente ao sistema</p>
+                </div>
+                <button
+                  onClick={() => setShowAddModal(false)}
+                  className="p-2 hover:bg-gray-100 rounded-lg transition-colors"
+                >
+                  <X className="h-6 w-6 text-gray-400" />
+                </button>
+              </div>
+
+              {/* Form */}
+              <form className="space-y-6">
+                {/* Informações Básicas */}
+                <div>
+                  <h3 className="text-lg font-semibold text-gray-900 mb-4">Informações Básicas</h3>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-2">
+                        Nome da Empresa *
+                      </label>
+                      <input
+                        type="text"
+                        required
+                        placeholder="Ex: MinhaEmpresa Ltda"
+                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#693ee0] focus:border-transparent"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-2">
+                        Setor *
+                      </label>
+                      <select
+                        required
+                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#693ee0] focus:border-transparent"
+                      >
+                        <option value="">Selecione o setor</option>
+                        <option value="E-commerce">E-commerce</option>
+                        <option value="Tecnologia">Tecnologia</option>
+                        <option value="Alimentação">Alimentação</option>
+                        <option value="Fitness">Fitness</option>
+                        <option value="Moda">Moda</option>
+                        <option value="Educação">Educação</option>
+                        <option value="Saúde">Saúde</option>
+                        <option value="Imobiliário">Imobiliário</option>
+                        <option value="Consultoria">Consultoria</option>
+                        <option value="Outros">Outros</option>
+                      </select>
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-2">
+                        Email *
+                      </label>
+                      <input
+                        type="email"
+                        required
+                        placeholder="contato@empresa.com"
+                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#693ee0] focus:border-transparent"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-2">
+                        Telefone *
+                      </label>
+                      <input
+                        type="tel"
+                        required
+                        placeholder="(11) 99999-9999"
+                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#693ee0] focus:border-transparent"
+                      />
+                    </div>
+                    <div className="md:col-span-2">
+                      <label className="block text-sm font-medium text-gray-700 mb-2">
+                        Website
+                      </label>
+                      <input
+                        type="url"
+                        placeholder="https://www.empresa.com"
+                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#693ee0] focus:border-transparent"
+                      />
+                    </div>
+                  </div>
+                </div>
+
+                {/* Configurações Iniciais */}
+                <div>
+                  <h3 className="text-lg font-semibold text-gray-900 mb-4">Configurações Iniciais</h3>
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-2">
+                        Plano *
+                      </label>
+                      <select
+                        required
+                        defaultValue="starter"
+                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#693ee0] focus:border-transparent"
+                      >
+                        <option value="starter">Starter - R$ 5.000/mês</option>
+                        <option value="pro">Pro - R$ 15.000/mês</option>
+                        <option value="enterprise">Enterprise - R$ 35.000/mês</option>
+                      </select>
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-2">
+                        Status Inicial
+                      </label>
+                      <select
+                        defaultValue="setup"
+                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#693ee0] focus:border-transparent"
+                      >
+                        <option value="setup">Setup (Configurando)</option>
+                        <option value="active">Ativo</option>
+                        <option value="paused">Pausado</option>
+                      </select>
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-2">
+                        Orçamento Mensal *
+                      </label>
+                      <input
+                        type="number"
+                        required
+                        placeholder="5000"
+                        min="1000"
+                        step="1000"
+                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#693ee0] focus:border-transparent"
+                      />
+                    </div>
+                  </div>
+                </div>
+
+                {/* Equipe */}
+                <div>
+                  <h3 className="text-lg font-semibold text-gray-900 mb-4">Equipe Responsável</h3>
+                  <div className="space-y-4">
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-2">
+                        Manager Principal *
+                      </label>
+                      <input
+                        type="text"
+                        required
+                        placeholder="Nome do responsável principal"
+                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#693ee0] focus:border-transparent"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-2">
+                        Editores (separados por vírgula)
+                      </label>
+                      <input
+                        type="text"
+                        placeholder="Editor 1, Editor 2, Editor 3"
+                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#693ee0] focus:border-transparent"
+                      />
+                      <p className="text-xs text-gray-500 mt-1">Deixe em branco se ainda não tiver editores definidos</p>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Plataformas */}
+                <div>
+                  <h3 className="text-lg font-semibold text-gray-900 mb-4">Plataformas a Conectar</h3>
+                  <p className="text-sm text-gray-600 mb-4">Selecione as redes sociais que serão gerenciadas para este cliente:</p>
+                  <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
+                    {['instagram', 'facebook', 'linkedin', 'twitter', 'youtube', 'tiktok'].map((platform) => {
+                      const PlatformIcon = getPlatformIcon(platform)
+                      return (
+                        <div key={platform} className="flex items-center justify-between p-3 border border-gray-200 rounded-lg hover:bg-gray-50">
+                          <div className="flex items-center gap-3">
+                            <PlatformIcon className="h-5 w-5 text-gray-600" />
+                            <span className="font-medium text-gray-900 capitalize">{platform}</span>
+                          </div>
+                          <label className="relative inline-flex items-center cursor-pointer">
+                            <input
+                              type="checkbox"
+                              className="sr-only peer"
+                            />
+                            <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-purple-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-[#693ee0]"></div>
+                          </label>
+                        </div>
+                      )
+                    })}
+                  </div>
+                </div>
+
+                {/* Configurações Avançadas */}
+                <div>
+                  <h3 className="text-lg font-semibold text-gray-900 mb-4">Configurações Avançadas</h3>
+                  <div className="space-y-4">
+                    <div className="flex items-center justify-between p-4 bg-gray-50 rounded-lg">
+                      <div>
+                        <h4 className="font-medium text-gray-900">Auto-aprovação</h4>
+                        <p className="text-sm text-gray-600">Posts são publicados automaticamente sem aprovação manual</p>
+                      </div>
+                      <label className="relative inline-flex items-center cursor-pointer">
+                        <input
+                          type="checkbox"
+                          className="sr-only peer"
+                        />
+                        <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-purple-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-[#693ee0]"></div>
+                      </label>
+                    </div>
+
+                    <div className="flex items-center justify-between p-4 bg-gray-50 rounded-lg">
+                      <div>
+                        <h4 className="font-medium text-gray-900">White Label</h4>
+                        <p className="text-sm text-gray-600">Interface personalizada com a marca do cliente</p>
+                      </div>
+                      <label className="relative inline-flex items-center cursor-pointer">
+                        <input
+                          type="checkbox"
+                          className="sr-only peer"
+                        />
+                        <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-purple-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-[#693ee0]"></div>
+                      </label>
+                    </div>
+                  </div>
+                </div>
+              </form>
+
+              {/* Actions */}
+              <div className="flex gap-3 mt-8 pt-6 border-t border-gray-200">
+                <button
+                  onClick={() => {
+                    // Aqui seria implementada a lógica de criar cliente
+                    alert('Cliente criado com sucesso! 🎉')
+                    setShowAddModal(false)
+                  }}
+                  className="flex-1 bg-[#693ee0] text-white px-6 py-3 rounded-lg hover:bg-[#5a32d1] transition-colors font-medium"
+                >
+                  Criar Cliente
+                </button>
+                <button
+                  onClick={() => setShowAddModal(false)}
+                  className="px-6 py-3 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors font-medium"
+                >
+                  Cancelar
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   )
 }
