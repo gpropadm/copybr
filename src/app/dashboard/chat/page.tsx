@@ -144,11 +144,24 @@ export default function ChatPage() {
           wordCount: data.wordCount
         }
 
-        setChats(prev => prev.map(chat => 
-          chat.id === selectedChat 
-            ? { ...chat, messages: [...chat.messages, assistantMessage] }
-            : chat
-        ))
+        setChats(prev => prev.map(chat => {
+          if (chat.id === selectedChat) {
+            const updatedChat = { ...chat, messages: [...chat.messages, assistantMessage] }
+            
+            // Se é a primeira resposta da IA e o título ainda é genérico, atualizar título
+            if (updatedChat.messages.length === 2 && (chat.title === 'Novo Chat' || chat.title === 'Chat de Boas-vindas')) {
+              const firstUserMessage = updatedChat.messages.find(m => m.role === 'user')?.content || ''
+              // Criar título baseado na primeira pergunta (máximo 40 caracteres)
+              const newTitle = firstUserMessage.length > 40 
+                ? firstUserMessage.substring(0, 37) + '...'
+                : firstUserMessage
+              updatedChat.title = newTitle
+            }
+            
+            return updatedChat
+          }
+          return chat
+        }))
         
         // Atualizar contador de uso
         if (usage) {
@@ -310,7 +323,7 @@ export default function ChatPage() {
                   <div
                     className={`max-w-xs lg:max-w-2xl px-4 py-3 rounded-2xl ${
                       message.role === 'user'
-                        ? 'bg-blue-600 text-white ml-auto'
+                        ? 'bg-[#693ee0] text-white ml-auto'
                         : 'bg-gray-50 text-gray-900 border border-gray-200'
                     }`}
                   >
@@ -318,7 +331,7 @@ export default function ChatPage() {
                       {message.content}
                     </p>
                     <p className={`text-xs mt-2 ${
-                      message.role === 'user' ? 'text-blue-100' : 'text-gray-500'
+                      message.role === 'user' ? 'text-purple-100' : 'text-gray-500'
                     }`}>
                       {message.timestamp.toLocaleTimeString('pt-BR', { 
                         hour: '2-digit', 
@@ -346,46 +359,29 @@ export default function ChatPage() {
             </div>
 
             {/* Input de Mensagem */}
-            <div className="p-6 border-t border-gray-200 bg-white">
-              <div className="flex items-end space-x-4 max-w-4xl mx-auto">
-                <div className="flex-1 relative">
-                  <textarea
-                    value={newMessage}
-                    onChange={(e) => setNewMessage(e.target.value)}
-                    onKeyDown={(e) => {
-                      if (e.key === 'Enter' && !e.shiftKey) {
-                        e.preventDefault()
-                        handleSendMessage()
-                      }
-                    }}
-                    placeholder={
-                      canSendMessage() 
-                        ? "Digite sua mensagem... (Shift+Enter para nova linha)" 
-                        : "Limite de palavras atingido"
-                    }
-                    disabled={isLoading || !canSendMessage()}
-                    rows={1}
-                    className="w-full px-4 py-3 pr-12 border border-gray-300 rounded-2xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 disabled:bg-gray-100 resize-none text-[15px] leading-relaxed font-normal min-h-[52px] max-h-32 overflow-y-auto"
-                    style={{ 
-                      height: 'auto',
-                      minHeight: '52px'
-                    }}
-                    onInput={(e) => {
-                      const target = e.target as HTMLTextAreaElement
-                      target.style.height = 'auto'
-                      target.style.height = Math.min(target.scrollHeight, 128) + 'px'
-                    }}
-                  />
-                </div>
+            <div className="p-4 border-t border-gray-200 bg-white">
+              <div className="flex space-x-2">
+                <input
+                  type="text"
+                  value={newMessage}
+                  onChange={(e) => setNewMessage(e.target.value)}
+                  onKeyDown={(e) => e.key === 'Enter' && !e.shiftKey && handleSendMessage()}
+                  placeholder={
+                    canSendMessage() 
+                      ? "Digite sua mensagem..." 
+                      : "Limite de palavras atingido"
+                  }
+                  disabled={isLoading || !canSendMessage()}
+                  className="flex-1 px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#693ee0] focus:border-[#693ee0] disabled:bg-gray-100"
+                />
                 <Button 
                   onClick={handleSendMessage} 
                   disabled={!newMessage.trim() || isLoading || !canSendMessage()}
-                  className="rounded-2xl px-4 py-3 min-w-[52px] h-[52px] flex items-center justify-center"
                 >
                   {isLoading ? (
-                    <Loader2 className="h-5 w-5 animate-spin" />
+                    <Loader2 className="h-4 w-4 animate-spin" />
                   ) : (
-                    <Send className="h-5 w-5" />
+                    <Send className="h-4 w-4" />
                   )}
                 </Button>
               </div>
