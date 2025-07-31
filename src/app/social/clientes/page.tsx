@@ -30,7 +30,8 @@ import {
   Globe,
   MapPin,
   User,
-  Briefcase
+  Briefcase,
+  X
 } from 'lucide-react'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/Card'
 import Button from '@/components/ui/Button'
@@ -659,6 +660,191 @@ export default function ClientesPage() {
           </Card>
         )}
       </div>
+
+      {/* Modal Ver Detalhes */}
+      {selectedClient && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
+          <div className="bg-white rounded-xl max-w-4xl w-full max-h-[90vh] overflow-y-auto">
+            <div className="p-6">
+              {/* Header */}
+              <div className="flex items-start justify-between mb-6">
+                <div className="flex items-center gap-4">
+                  <div className="w-16 h-16 bg-gradient-to-br from-[#693ee0] to-purple-600 rounded-full flex items-center justify-center text-white text-xl font-bold">
+                    {selectedClient.name.charAt(0)}
+                  </div>
+                  <div>
+                    <h2 className="text-2xl font-bold text-gray-900">{selectedClient.name}</h2>
+                    <p className="text-gray-600">{selectedClient.industry}</p>
+                    <div className="flex items-center gap-2 mt-1">
+                      <span className={`px-2 py-1 rounded-full text-xs font-medium ${
+                        selectedClient.status === 'active' ? 'bg-green-100 text-green-800' :
+                        selectedClient.status === 'paused' ? 'bg-yellow-100 text-yellow-800' :
+                        selectedClient.status === 'setup' ? 'bg-blue-100 text-blue-800' :
+                        'bg-gray-100 text-gray-800'
+                      }`}>
+                        {selectedClient.status === 'active' ? 'Ativo' :
+                         selectedClient.status === 'paused' ? 'Pausado' :
+                         selectedClient.status === 'setup' ? 'Setup' : 'Arquivado'}
+                      </span>
+                      <span className="text-sm text-gray-600">• {selectedClient.tier}</span>
+                    </div>
+                  </div>
+                </div>
+                <button
+                  onClick={() => setSelectedClient(null)}
+                  className="p-2 hover:bg-gray-100 rounded-lg transition-colors"
+                >
+                  <X className="h-6 w-6 text-gray-400" />
+                </button>
+              </div>
+
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                {/* Left Column */}
+                <div className="space-y-6">
+                  <div>
+                    <h3 className="font-semibold text-gray-900 mb-3">Métricas Principais</h3>
+                    <div className="grid grid-cols-2 gap-4">
+                      <div className="bg-blue-50 p-4 rounded-lg">
+                        <p className="text-sm text-blue-600">Total Seguidores</p>
+                        <p className="text-xl font-bold text-blue-900">{formatNumber(selectedClient.totalFollowers)}</p>
+                      </div>
+                      <div className="bg-green-50 p-4 rounded-lg">
+                        <p className="text-sm text-green-600">Crescimento Mensal</p>
+                        <p className="text-xl font-bold text-green-900">+{selectedClient.monthlyGrowth}%</p>
+                      </div>
+                      <div className="bg-purple-50 p-4 rounded-lg">
+                        <p className="text-sm text-purple-600">ROI Mensal</p>
+                        <p className="text-xl font-bold text-purple-900">{selectedClient.monthlyROI}%</p>
+                      </div>
+                      <div className="bg-yellow-50 p-4 rounded-lg">
+                        <p className="text-sm text-yellow-600">Orçamento Mensal</p>
+                        <p className="text-xl font-bold text-yellow-900">{formatCurrency(selectedClient.monthlyBudget)}</p>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div>
+                    <h3 className="font-semibold text-gray-900 mb-3">Plataformas Conectadas</h3>
+                    <div className="space-y-3">
+                      {Object.entries(selectedClient.platforms).map(([platformKey, platformData]) => {
+                        if (!platformData?.connected) return null
+                        const PlatformIcon = getPlatformIcon(platformKey)
+                        return (
+                          <div key={platformKey} className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+                            <div className="flex items-center gap-3">
+                              <PlatformIcon className="h-5 w-5 text-gray-600" />
+                              <div>
+                                <p className="font-medium text-gray-900 capitalize">{platformKey}</p>
+                                <p className="text-sm text-gray-600">{formatNumber(platformData.followers)} seguidores</p>
+                              </div>
+                            </div>
+                            <div className="text-right">
+                              <p className="text-sm font-medium text-green-600">+{selectedClient.monthlyGrowth}%</p>
+                              <p className="text-xs text-gray-500">este mês</p>
+                            </div>
+                          </div>
+                        )
+                      }).filter(Boolean)}
+                    </div>
+                  </div>
+                </div>
+
+                {/* Right Column */}
+                <div className="space-y-6">
+                  <div>
+                    <h3 className="font-semibold text-gray-900 mb-3">Equipe</h3>
+                    <div className="space-y-3">
+                      <div className="p-3 bg-gray-50 rounded-lg">
+                        <div className="flex items-center gap-3">
+                          <div className="w-8 h-8 bg-[#693ee0] rounded-full flex items-center justify-center text-white text-sm font-semibold">
+                            {selectedClient.team.manager.charAt(0)}
+                          </div>
+                          <div>
+                            <p className="font-medium text-gray-900">{selectedClient.team.manager}</p>
+                            <p className="text-sm text-gray-600">Manager Principal</p>
+                          </div>
+                        </div>
+                      </div>
+                      <div className="p-3 bg-gray-50 rounded-lg">
+                        <p className="text-sm font-medium text-gray-900 mb-2">Editores ({selectedClient.team.editors.length})</p>
+                        <div className="flex flex-wrap gap-2">
+                          {selectedClient.team.editors.map((editor, index) => (
+                            <span key={index} className="px-2 py-1 bg-blue-100 text-blue-800 rounded-full text-xs">
+                              {editor}
+                            </span>
+                          ))}
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div>
+                    <h3 className="font-semibold text-gray-900 mb-3">Configurações</h3>
+                    <div className="space-y-3">
+                      <div className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+                        <span className="text-sm font-medium text-gray-900">Auto-aprovação</span>
+                        <span className={`px-2 py-1 rounded-full text-xs font-medium ${
+                          selectedClient.settings.autoApproval ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'
+                        }`}>
+                          {selectedClient.settings.autoApproval ? 'Ativo' : 'Inativo'}
+                        </span>
+                      </div>
+                      <div className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+                        <span className="text-sm font-medium text-gray-900">White Label</span>
+                        <span className={`px-2 py-1 rounded-full text-xs font-medium ${
+                          selectedClient.settings.whiteLabel ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'
+                        }`}>
+                          {selectedClient.settings.whiteLabel ? 'Ativo' : 'Inativo'}
+                        </span>
+                      </div>
+                      <div className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+                        <span className="text-sm font-medium text-gray-900">Timezone</span>
+                        <span className="text-sm text-gray-600">América/São_Paulo</span>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div>
+                    <h3 className="font-semibold text-gray-900 mb-3">Performance Recente</h3>
+                    <div className="bg-gradient-to-br from-[#693ee0] to-purple-600 p-4 rounded-lg text-white">
+                      <div className="grid grid-cols-2 gap-4">
+                        <div>
+                          <p className="text-sm opacity-90">Posts este mês</p>
+                          <p className="text-xl font-bold">47</p>
+                        </div>
+                        <div>
+                          <p className="text-sm opacity-90">Engajamento médio</p>
+                          <p className="text-xl font-bold">8.4%</p>
+                        </div>
+                        <div>
+                          <p className="text-sm opacity-90">Alcance total</p>
+                          <p className="text-xl font-bold">2.1M</p>
+                        </div>
+                        <div>
+                          <p className="text-sm opacity-90">Conversões</p>
+                          <p className="text-xl font-bold">89</p>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <div className="flex gap-3 mt-6 pt-6 border-t border-gray-200">
+                <button className="flex-1 bg-[#693ee0] text-white px-6 py-3 rounded-lg hover:bg-[#5a32d1] transition-colors font-medium">
+                  Editar Cliente
+                </button>
+                <button className="px-6 py-3 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors font-medium">
+                  Ver Relatórios
+                </button>
+                <button className="px-6 py-3 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors font-medium">
+                  Configurações
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   )
 }
