@@ -8,11 +8,11 @@ import {
   AlertTriangle,
   TrendingUp,
   TrendingDown,
+  X,
   Users,
   Brain,
   Target,
   CheckCircle,
-  XCircle,
   Clock,
   Search,
   Filter,
@@ -1058,7 +1058,7 @@ export default function PremiumPage() {
                   onClick={() => setSelectedInfluencer(null)}
                   className="p-2 hover:bg-gray-100 rounded-lg transition-colors"
                 >
-                  <XCircle className="h-6 w-6 text-gray-400" />
+                  <X className="h-6 w-6 text-gray-400" />
                 </button>
               </div>
 

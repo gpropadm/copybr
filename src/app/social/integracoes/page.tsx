@@ -52,7 +52,7 @@ import {
   Wifi,
   WifiOff,
   CheckCircle,
-  XCircle,
+  X,
   MinusCircle,
   ArrowUpRight,
   ArrowDownRight,
@@ -513,7 +513,7 @@ export default function IntegracoesPage() {
   const getStatusInfo = (status: string) => {
     const statuses = {
       connected: { name: 'Conectado', color: 'bg-green-100 text-green-800', icon: CheckCircle },
-      disconnected: { name: 'Desconectado', color: 'bg-gray-100 text-gray-800', icon: XCircle },
+      disconnected: { name: 'Desconectado', color: 'bg-gray-100 text-gray-800', icon: X },
       error: { name: 'Erro', color: 'bg-red-100 text-red-800', icon: AlertTriangle },
       pending: { name: 'Pendente', color: 'bg-yellow-100 text-yellow-800', icon: Clock },
       limited: { name: 'Limitado', color: 'bg-orange-100 text-orange-800', icon: MinusCircle }

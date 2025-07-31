@@ -37,7 +37,8 @@ import {
   RefreshCw,
   Download,
   Upload,
-  Link as LinkIcon
+  Link as LinkIcon,
+  X
 } from 'lucide-react'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/Card'
 import Button from '@/components/ui/Button'
