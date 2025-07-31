@@ -30,7 +30,8 @@ import {
   Home,
   Sparkles,
   BookOpen,
-  Copy
+  Copy,
+  Activity
 } from 'lucide-react'
 import { ThemeProvider, useTheme } from '@/contexts/ThemeContext'
 import { useAuth } from '@/contexts/AuthContext'
@@ -86,7 +87,7 @@ function DashboardContent({
       color: 'text-blue-600'
     },
     {
-      icon: TrendingUp,
+      icon: Activity,
       label: 'Social Media',
       href: '/social',
       color: 'text-pink-600'
