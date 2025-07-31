@@ -645,7 +645,7 @@ export default function ROIPage() {
                       
                       <div className="flex gap-2">
                         <Button 
-                          variant={model.isActive ? "outline" : "default"} 
+                          variant={model.isActive ? "outline" : "primary"} 
                           size="sm" 
                           className="flex-1"
                         >
