@@ -86,6 +86,12 @@ function DashboardContent({
       color: 'text-blue-600'
     },
     {
+      icon: TrendingUp,
+      label: 'Social Media',
+      href: '/social',
+      color: 'text-pink-600'
+    },
+    {
       icon: Plus,
       label: 'Novo Projeto',
       href: '/dashboard/novo-projeto',
