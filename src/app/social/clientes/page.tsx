@@ -93,6 +93,7 @@ export default function ClientesPage() {
   const [filterTier, setFilterTier] = useState('all')
   const [showAddModal, setShowAddModal] = useState(false)
   const [selectedClient, setSelectedClient] = useState<Client | null>(null)
+  const [editingClient, setEditingClient] = useState<Client | null>(null)
   const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid')
 
   // Dados simulados - em produção viriam da API
@@ -551,6 +552,7 @@ export default function ClientesPage() {
                         variant="outline" 
                         size="sm" 
                         className="flex-1"
+                        onClick={() => setEditingClient(client)}
                       >
                         <Edit className="h-3 w-3 mr-1" />
                         Editar
@@ -639,7 +641,10 @@ export default function ClientesPage() {
                               >
                                 <Eye className="h-4 w-4 text-gray-600" />
                               </button>
-                              <button className="p-1 hover:bg-gray-200 rounded">
+                              <button 
+                                className="p-1 hover:bg-gray-200 rounded"
+                                onClick={() => setEditingClient(client)}
+                              >
                                 <Edit className="h-4 w-4 text-gray-600" />
                               </button>
                               <button className="p-1 hover:bg-gray-200 rounded">
@@ -839,6 +844,239 @@ export default function ClientesPage() {
                 </button>
                 <button className="px-6 py-3 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors font-medium">
                   Configurações
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Modal Editar Cliente */}
+      {editingClient && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
+          <div className="bg-white rounded-xl max-w-2xl w-full max-h-[90vh] overflow-y-auto">
+            <div className="p-6">
+              {/* Header */}
+              <div className="flex items-center justify-between mb-6">
+                <div>
+                  <h2 className="text-2xl font-bold text-gray-900">Editar Cliente</h2>
+                  <p className="text-gray-600">{editingClient.name}</p>
+                </div>
+                <button
+                  onClick={() => setEditingClient(null)}
+                  className="p-2 hover:bg-gray-100 rounded-lg transition-colors"
+                >
+                  <X className="h-6 w-6 text-gray-400" />
+                </button>
+              </div>
+
+              {/* Form */}
+              <form className="space-y-6">
+                {/* Informações Básicas */}
+                <div>
+                  <h3 className="text-lg font-semibold text-gray-900 mb-4">Informações Básicas</h3>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-2">
+                        Nome da Empresa
+                      </label>
+                      <input
+                        type="text"
+                        defaultValue={editingClient.name}
+                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#693ee0] focus:border-transparent"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-2">
+                        Setor
+                      </label>
+                      <input
+                        type="text"
+                        defaultValue={editingClient.industry}
+                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#693ee0] focus:border-transparent"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-2">
+                        Email
+                      </label>
+                      <input
+                        type="email"
+                        defaultValue={editingClient.email}
+                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#693ee0] focus:border-transparent"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-2">
+                        Telefone
+                      </label>
+                      <input
+                        type="tel"
+                        defaultValue={editingClient.phone}
+                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#693ee0] focus:border-transparent"
+                      />
+                    </div>
+                  </div>
+                </div>
+
+                {/* Configurações da Conta */}
+                <div>
+                  <h3 className="text-lg font-semibold text-gray-900 mb-4">Configurações da Conta</h3>
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-2">
+                        Status
+                      </label>
+                      <select
+                        defaultValue={editingClient.status}
+                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#693ee0] focus:border-transparent"
+                      >
+                        <option value="active">Ativo</option>
+                        <option value="paused">Pausado</option>
+                        <option value="setup">Setup</option>
+                        <option value="archived">Arquivado</option>
+                      </select>
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-2">
+                        Plano
+                      </label>
+                      <select
+                        defaultValue={editingClient.tier}
+                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#693ee0] focus:border-transparent"
+                      >
+                        <option value="starter">Starter</option>
+                        <option value="pro">Pro</option>
+                        <option value="enterprise">Enterprise</option>
+                      </select>
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-2">
+                        Orçamento Mensal
+                      </label>
+                      <input
+                        type="number"
+                        defaultValue={editingClient.monthlyBudget}
+                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#693ee0] focus:border-transparent"
+                        placeholder="15000"
+                      />
+                    </div>
+                  </div>
+                </div>
+
+                {/* Equipe */}
+                <div>
+                  <h3 className="text-lg font-semibold text-gray-900 mb-4">Equipe</h3>
+                  <div className="space-y-4">
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-2">
+                        Manager Principal
+                      </label>
+                      <input
+                        type="text"
+                        defaultValue={editingClient.team.manager}
+                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#693ee0] focus:border-transparent"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-2">
+                        Editores (separados por vírgula)
+                      </label>
+                      <input
+                        type="text"
+                        defaultValue={editingClient.team.editors.join(', ')}
+                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#693ee0] focus:border-transparent"
+                        placeholder="Editor 1, Editor 2, Editor 3"
+                      />
+                    </div>
+                  </div>
+                </div>
+
+                {/* Configurações Avançadas */}
+                <div>
+                  <h3 className="text-lg font-semibold text-gray-900 mb-4">Configurações Avançadas</h3>
+                  <div className="space-y-4">
+                    <div className="flex items-center justify-between p-4 bg-gray-50 rounded-lg">
+                      <div>
+                        <h4 className="font-medium text-gray-900">Auto-aprovação</h4>
+                        <p className="text-sm text-gray-600">Posts são publicados automaticamente sem aprovação manual</p>
+                      </div>
+                      <label className="relative inline-flex items-center cursor-pointer">
+                        <input
+                          type="checkbox"
+                          defaultChecked={editingClient.settings.autoApproval}
+                          className="sr-only peer"
+                        />
+                        <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-purple-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-[#693ee0]"></div>
+                      </label>
+                    </div>
+
+                    <div className="flex items-center justify-between p-4 bg-gray-50 rounded-lg">
+                      <div>
+                        <h4 className="font-medium text-gray-900">White Label</h4>
+                        <p className="text-sm text-gray-600">Interface personalizada com a marca do cliente</p>
+                      </div>
+                      <label className="relative inline-flex items-center cursor-pointer">
+                        <input
+                          type="checkbox"
+                          defaultChecked={editingClient.settings.whiteLabel}
+                          className="sr-only peer"
+                        />
+                        <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-purple-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-[#693ee0]"></div>
+                      </label>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Plataformas */}
+                <div>
+                  <h3 className="text-lg font-semibold text-gray-900 mb-4">Plataformas Conectadas</h3>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    {Object.entries(editingClient.platforms).map(([platformKey, platformData]) => {
+                      const PlatformIcon = getPlatformIcon(platformKey)
+                      return (
+                        <div key={platformKey} className="flex items-center justify-between p-3 border border-gray-200 rounded-lg">
+                          <div className="flex items-center gap-3">
+                            <PlatformIcon className="h-5 w-5 text-gray-600" />
+                            <div>
+                              <p className="font-medium text-gray-900 capitalize">{platformKey}</p>
+                              {platformData?.connected && (
+                                <p className="text-sm text-gray-600">{formatNumber(platformData.followers)} seguidores</p>
+                              )}
+                            </div>
+                          </div>
+                          <label className="relative inline-flex items-center cursor-pointer">
+                            <input
+                              type="checkbox"
+                              defaultChecked={platformData?.connected || false}
+                              className="sr-only peer"
+                            />
+                            <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-purple-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-[#693ee0]"></div>
+                          </label>
+                        </div>
+                      )
+                    })}
+                  </div>
+                </div>
+              </form>
+
+              {/* Actions */}
+              <div className="flex gap-3 mt-8 pt-6 border-t border-gray-200">
+                <button
+                  onClick={() => {
+                    // Aqui seria implementada a lógica de salvar
+                    alert('Alterações salvas com sucesso!')
+                    setEditingClient(null)
+                  }}
+                  className="flex-1 bg-[#693ee0] text-white px-6 py-3 rounded-lg hover:bg-[#5a32d1] transition-colors font-medium"
+                >
+                  Salvar Alterações
+                </button>
+                <button
+                  onClick={() => setEditingClient(null)}
+                  className="px-6 py-3 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors font-medium"
+                >
+                  Cancelar
                 </button>
               </div>
             </div>
