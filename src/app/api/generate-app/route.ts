@@ -103,6 +103,282 @@ Por favor, gere um código HTML completo com Tailwind CSS que seja:
 function generateFallbackCode(prompt: string): string {
   const lowerPrompt = prompt.toLowerCase()
   
+  if (lowerPrompt.includes('delivery') || lowerPrompt.includes('restaurante') || lowerPrompt.includes('comida') || lowerPrompt.includes('pedido')) {
+    return `<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DeliveryApp - Peça já!</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-50">
+    <!-- Header Colorido -->
+    <header class="bg-gradient-to-r from-orange-500 to-red-500 text-white p-4 shadow-lg">
+        <div class="max-w-6xl mx-auto flex items-center justify-between">
+            <h1 class="text-2xl font-bold">🍕 DeliveryApp</h1>
+            <div class="flex items-center space-x-4">
+                <span class="text-sm">📍 São Paulo, SP</span>
+                <div class="bg-white text-orange-500 px-3 py-1 rounded-full text-sm font-semibold">🛒 3 itens</div>
+            </div>
+        </div>
+    </header>
+
+    <!-- Barra de Pesquisa -->
+    <div class="max-w-6xl mx-auto p-4">
+        <div class="relative mb-6">
+            <input type="text" placeholder="Buscar restaurantes ou pratos..." 
+                   class="w-full px-4 py-3 pl-12 border border-gray-200 rounded-xl focus:ring-2 focus:ring-orange-500 focus:border-transparent shadow-sm">
+            <svg class="absolute left-4 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
+            </svg>
+        </div>
+
+        <!-- Categorias de Comida -->
+        <div class="flex space-x-4 mb-8 overflow-x-auto pb-2">
+            <button class="bg-orange-500 text-white px-6 py-3 rounded-full whitespace-nowrap font-medium shadow-sm hover:bg-orange-600 transition-colors">🍕 Pizza</button>
+            <button class="bg-white text-gray-700 px-6 py-3 rounded-full whitespace-nowrap font-medium shadow-sm border hover:bg-gray-50 transition-colors">🍔 Burgers</button>
+            <button class="bg-white text-gray-700 px-6 py-3 rounded-full whitespace-nowrap font-medium shadow-sm border hover:bg-gray-50 transition-colors">🍜 Asiática</button>
+            <button class="bg-white text-gray-700 px-6 py-3 rounded-full whitespace-nowrap font-medium shadow-sm border hover:bg-gray-50 transition-colors">🥗 Saudável</button>
+            <button class="bg-white text-gray-700 px-6 py-3 rounded-full whitespace-nowrap font-medium shadow-sm border hover:bg-gray-50 transition-colors">🍰 Sobremesas</button>
+            <button class="bg-white text-gray-700 px-6 py-3 rounded-full whitespace-nowrap font-medium shadow-sm border hover:bg-gray-50 transition-colors">🥤 Bebidas</button>
+        </div>
+
+        <!-- Restaurantes em Cards -->
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            <!-- Restaurante 1 -->
+            <div class="bg-white rounded-xl shadow-lg overflow-hidden hover:shadow-xl transition-shadow cursor-pointer">
+                <div class="h-48 bg-gradient-to-r from-red-400 to-pink-500 flex items-center justify-center relative">
+                    <span class="text-6xl">🍕</span>
+                    <div class="absolute top-3 right-3 bg-green-500 text-white px-2 py-1 rounded-full text-xs font-bold">
+                        ABERTO
+                    </div>
+                </div>
+                <div class="p-4">
+                    <h3 class="text-xl font-bold text-gray-800 mb-2">Pizza Express</h3>
+                    <div class="flex items-center mb-2">
+                        <div class="flex text-yellow-400">
+                            ⭐⭐⭐⭐⭐
+                        </div>
+                        <span class="text-gray-600 text-sm ml-2">4.8 (127 avaliações)</span>
+                    </div>
+                    <p class="text-gray-600 text-sm mb-3">Pizzas artesanais • 25-35 min • R$ 8,90 entrega</p>
+                    <div class="flex items-center justify-between">
+                        <span class="text-green-600 font-bold">Frete Grátis</span>
+                        <button class="bg-orange-500 hover:bg-orange-600 text-white px-4 py-2 rounded-lg font-medium transition-colors">
+                            Ver Cardápio
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Restaurante 2 -->
+            <div class="bg-white rounded-xl shadow-lg overflow-hidden hover:shadow-xl transition-shadow cursor-pointer">
+                <div class="h-48 bg-gradient-to-r from-green-400 to-blue-500 flex items-center justify-center relative">
+                    <span class="text-6xl">🍔</span>
+                    <div class="absolute top-3 right-3 bg-green-500 text-white px-2 py-1 rounded-full text-xs font-bold">
+                        ABERTO
+                    </div>
+                </div>
+                <div class="p-4">
+                    <h3 class="text-xl font-bold text-gray-800 mb-2">Burger Premium</h3>
+                    <div class="flex items-center mb-2">
+                        <div class="flex text-yellow-400">
+                            ⭐⭐⭐⭐⭐
+                        </div>
+                        <span class="text-gray-600 text-sm ml-2">4.6 (89 avaliações)</span>
+                    </div>
+                    <p class="text-gray-600 text-sm mb-3">Hamburgers gourmet • 15-25 min • R$ 5,90 entrega</p>
+                    <div class="flex items-center justify-between">
+                        <span class="text-orange-600 font-bold">Promoção</span>
+                        <button class="bg-orange-500 hover:bg-orange-600 text-white px-4 py-2 rounded-lg font-medium transition-colors">
+                            Ver Cardápio
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Restaurante 3 -->
+            <div class="bg-white rounded-xl shadow-lg overflow-hidden hover:shadow-xl transition-shadow cursor-pointer">
+                <div class="h-48 bg-gradient-to-r from-purple-400 to-pink-500 flex items-center justify-center relative">
+                    <span class="text-6xl">🍜</span>
+                    <div class="absolute top-3 right-3 bg-green-500 text-white px-2 py-1 rounded-full text-xs font-bold">
+                        ABERTO
+                    </div>
+                </div>
+                <div class="p-4">
+                    <h3 class="text-xl font-bold text-gray-800 mb-2">Sushi Zen</h3>
+                    <div class="flex items-center mb-2">
+                        <div class="flex text-yellow-400">
+                            ⭐⭐⭐⭐⭐
+                        </div>
+                        <span class="text-gray-600 text-sm ml-2">4.9 (203 avaliações)</span>
+                    </div>
+                    <p class="text-gray-600 text-sm mb-3">Comida japonesa • 30-40 min • R$ 12,90 entrega</p>
+                    <div class="flex items-center justify-between">
+                        <span class="text-blue-600 font-bold">Novo</span>
+                        <button class="bg-orange-500 hover:bg-orange-600 text-white px-4 py-2 rounded-lg font-medium transition-colors">
+                            Ver Cardápio
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Restaurante 4 -->
+            <div class="bg-white rounded-xl shadow-lg overflow-hidden hover:shadow-xl transition-shadow cursor-pointer">
+                <div class="h-48 bg-gradient-to-r from-yellow-400 to-orange-500 flex items-center justify-center relative">
+                    <span class="text-6xl">🌮</span>
+                    <div class="absolute top-3 right-3 bg-green-500 text-white px-2 py-1 rounded-full text-xs font-bold">
+                        ABERTO
+                    </div>
+                </div>
+                <div class="p-4">
+                    <h3 class="text-xl font-bold text-gray-800 mb-2">Taco Loco</h3>
+                    <div class="flex items-center mb-2">
+                        <div class="flex text-yellow-400">
+                            ⭐⭐⭐⭐⭐
+                        </div>
+                        <span class="text-gray-600 text-sm ml-2">4.7 (156 avaliações)</span>
+                    </div>
+                    <p class="text-gray-600 text-sm mb-3">Comida mexicana • 20-30 min • R$ 7,90 entrega</p>
+                    <div class="flex items-center justify-between">
+                        <span class="text-red-600 font-bold">Mais Pedido</span>
+                        <button class="bg-orange-500 hover:bg-orange-600 text-white px-4 py-2 rounded-lg font-medium transition-colors">
+                            Ver Cardápio
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Restaurante 5 -->
+            <div class="bg-white rounded-xl shadow-lg overflow-hidden hover:shadow-xl transition-shadow cursor-pointer">
+                <div class="h-48 bg-gradient-to-r from-indigo-400 to-purple-500 flex items-center justify-center relative">
+                    <span class="text-6xl">🥗</span>
+                    <div class="absolute top-3 right-3 bg-green-500 text-white px-2 py-1 rounded-full text-xs font-bold">
+                        ABERTO
+                    </div>
+                </div>
+                <div class="p-4">
+                    <h3 class="text-xl font-bold text-gray-800 mb-2">Salad Bar</h3>
+                    <div class="flex items-center mb-2">
+                        <div class="flex text-yellow-400">
+                            ⭐⭐⭐⭐⭐
+                        </div>
+                        <span class="text-gray-600 text-sm ml-2">4.5 (94 avaliações)</span>
+                    </div>
+                    <p class="text-gray-600 text-sm mb-3">Comida saudável • 15-20 min • R$ 6,90 entrega</p>
+                    <div class="flex items-center justify-between">
+                        <span class="text-green-600 font-bold">Saudável</span>
+                        <button class="bg-orange-500 hover:bg-orange-600 text-white px-4 py-2 rounded-lg font-medium transition-colors">
+                            Ver Cardápio
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Restaurante 6 -->
+            <div class="bg-white rounded-xl shadow-lg overflow-hidden hover:shadow-xl transition-shadow cursor-pointer">
+                <div class="h-48 bg-gradient-to-r from-pink-400 to-red-500 flex items-center justify-center relative">
+                    <span class="text-6xl">🍰</span>
+                    <div class="absolute top-3 right-3 bg-green-500 text-white px-2 py-1 rounded-full text-xs font-bold">
+                        ABERTO
+                    </div>
+                </div>
+                <div class="p-4">
+                    <h3 class="text-xl font-bold text-gray-800 mb-2">Doce Mania</h3>
+                    <div class="flex items-center mb-2">
+                        <div class="flex text-yellow-400">
+                            ⭐⭐⭐⭐⭐
+                        </div>
+                        <span class="text-gray-600 text-sm ml-2">4.8 (178 avaliações)</span>
+                    </div>
+                    <p class="text-gray-600 text-sm mb-3">Sobremesas • 10-15 min • R$ 4,90 entrega</p>
+                    <div class="flex items-center justify-between">
+                        <span class="text-pink-600 font-bold">Sobremesas</span>
+                        <button class="bg-orange-500 hover:bg-orange-600 text-white px-4 py-2 rounded-lg font-medium transition-colors">
+                            Ver Cardápio
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Carrinho Flutuante -->
+    <div class="fixed bottom-6 right-6 bg-orange-500 text-white px-6 py-4 rounded-xl shadow-xl hover:bg-orange-600 transition-colors cursor-pointer z-50">
+        <div class="flex items-center space-x-3">
+            <div class="bg-white text-orange-500 px-2 py-1 rounded-full text-sm font-bold">3</div>
+            <div>
+                <p class="font-semibold">Ver Carrinho</p>
+                <p class="text-sm opacity-90">R$ 47,90</p>
+            </div>
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
+            </svg>
+        </div>
+    </div>
+
+    <!-- Botão Finalizar Pedido (Mobile) -->
+    <div class="md:hidden fixed bottom-0 left-0 right-0 bg-white border-t p-4 shadow-lg z-40">
+        <button class="w-full bg-orange-500 hover:bg-orange-600 text-white py-4 rounded-xl font-bold text-lg transition-colors">
+            Finalizar Pedido - R$ 47,90
+        </button>
+    </div>
+
+    <!-- Espaçamento para botão mobile -->
+    <div class="md:hidden h-20"></div>
+
+    <script>
+        // Funcionalidades interativas
+        document.querySelectorAll('button').forEach(btn => {
+            btn.addEventListener('click', function(e) {
+                e.preventDefault();
+                
+                if (this.textContent.includes('Ver Cardápio')) {
+                    const restaurante = this.closest('.bg-white').querySelector('h3').textContent;
+                    alert('Abrindo cardápio do ' + restaurante + '!\\n\\nVocê será redirecionado para ver todos os pratos disponíveis.');
+                } 
+                else if (this.textContent.includes('Finalizar') || this.textContent.includes('Ver Carrinho')) {
+                    alert('Redirecionando para o checkout...\\n\\n• 3 itens no carrinho\\n• Total: R$ 47,90\\n• Tempo estimado: 25-30 min');
+                }
+                else if (this.classList.contains('rounded-full')) {
+                    // Categorias
+                    document.querySelectorAll('.rounded-full').forEach(cat => {
+                        cat.classList.remove('bg-orange-500', 'text-white');
+                        cat.classList.add('bg-white', 'text-gray-700');
+                    });
+                    this.classList.remove('bg-white', 'text-gray-700');
+                    this.classList.add('bg-orange-500', 'text-white');
+                    
+                    const categoria = this.textContent.trim();
+                    alert('Filtrando por categoria: ' + categoria);
+                }
+            });
+        });
+
+        // Funcionalidade da barra de pesquisa
+        document.querySelector('input').addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                const termo = this.value;
+                if (termo) {
+                    alert('Pesquisando por: "' + termo + '"\\n\\nEncontrados 15 resultados!');
+                }
+            }
+        });
+
+        // Animação do carrinho flutuante
+        const carrinho = document.querySelector('.fixed.bottom-6.right-6');
+        carrinho.addEventListener('mouseenter', function() {
+            this.style.transform = 'scale(1.05)';
+        });
+        carrinho.addEventListener('mouseleave', function() {
+            this.style.transform = 'scale(1)';
+        });
+    </script>
+</body>
+</html>`
+  }
+  
   if (lowerPrompt.includes('financ') || lowerPrompt.includes('gestão') || lowerPrompt.includes('admin')) {
     return `<!DOCTYPE html>
 <html lang="pt-BR">
