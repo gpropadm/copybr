@@ -9,6 +9,18 @@ export async function POST(request: NextRequest) {
   let userPrompt = 'App personalizado'
   
   try {
+    // Check if API key is present
+    if (!process.env.ANTHROPIC_API_KEY) {
+      console.error('ANTHROPIC_API_KEY not found in environment variables')
+      return NextResponse.json({ 
+        error: 'Configuração da API não encontrada. Verifique as variáveis de ambiente.',
+        details: 'ANTHROPIC_API_KEY missing'
+      }, { status: 500 })
+    }
+
+    console.log('API Key present:', process.env.ANTHROPIC_API_KEY ? 'Yes' : 'No')
+    console.log('API Key length:', process.env.ANTHROPIC_API_KEY?.length || 0)
+
     const { prompt } = await request.json()
 
     if (!prompt || typeof prompt !== 'string') {
@@ -16,6 +28,7 @@ export async function POST(request: NextRequest) {
     }
     
     userPrompt = prompt
+    console.log('Processing prompt:', userPrompt.substring(0, 50) + '...')
 
     const message = await anthropic.messages.create({
       model: "claude-3-5-sonnet-20241022",
@@ -85,8 +98,28 @@ Responda APENAS com o código HTML, sem explicações adicionais.`
   } catch (error) {
     console.error('Erro na API Claude:', error)
     
+    // More specific error handling
+    if (error instanceof Error) {
+      console.error('Error message:', error.message)
+      console.error('Error stack:', error.stack)
+      
+      if (error.message.includes('401') || error.message.includes('authentication')) {
+        return NextResponse.json({ 
+          error: 'Erro de autenticação. Verifique se a chave da API Claude está correta.',
+          details: 'Authentication failed - invalid API key'
+        }, { status: 401 })
+      }
+      
+      if (error.message.includes('rate limit') || error.message.includes('429')) {
+        return NextResponse.json({ 
+          error: 'Limite de uso da API atingido. Tente novamente em alguns minutos.',
+          details: 'Rate limit exceeded'
+        }, { status: 429 })
+      }
+    }
+    
     return NextResponse.json({ 
-      error: 'Erro ao conectar com Claude API. Verifique sua chave API ou tente novamente.',
+      error: 'Erro ao conectar com Claude API. Tente novamente.',
       details: error instanceof Error ? error.message : 'Erro desconhecido'
     }, { status: 500 })
   }
