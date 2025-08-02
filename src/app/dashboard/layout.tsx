@@ -31,8 +31,7 @@ import {
   Sparkles,
   BookOpen,
   Copy,
-  Activity,
-  Smartphone
+  Activity
 } from 'lucide-react'
 import { ThemeProvider, useTheme } from '@/contexts/ThemeContext'
 import { useAuth } from '@/contexts/AuthContext'
@@ -130,8 +129,8 @@ function DashboardContent({
       color: 'text-purple-600'
     },
     {
-      icon: Smartphone,
-      label: 'App Builder IA',
+      icon: Code,
+      label: 'Code Generator',
       href: '/dashboard/app-builder',
       color: 'text-gradient-purple'
     },
