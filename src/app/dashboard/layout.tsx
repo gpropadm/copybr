@@ -31,7 +31,8 @@ import {
   Sparkles,
   BookOpen,
   Copy,
-  Activity
+  Activity,
+  Smartphone
 } from 'lucide-react'
 import { ThemeProvider, useTheme } from '@/contexts/ThemeContext'
 import { useAuth } from '@/contexts/AuthContext'
@@ -127,6 +128,12 @@ function DashboardContent({
       label: 'Imagem para Prompt',
       href: '/dashboard/image-to-prompt',
       color: 'text-purple-600'
+    },
+    {
+      icon: Smartphone,
+      label: 'App Builder IA',
+      href: '/dashboard/app-builder',
+      color: 'text-gradient-purple'
     },
     {
       icon: BookOpen,
