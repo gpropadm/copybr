@@ -6,12 +6,16 @@ const anthropic = new Anthropic({
 })
 
 export async function POST(request: NextRequest) {
+  let userPrompt = 'App personalizado'
+  
   try {
     const { prompt } = await request.json()
 
-    if (!prompt) {
+    if (!prompt || typeof prompt !== 'string') {
       return NextResponse.json({ error: 'Prompt é obrigatório' }, { status: 400 })
     }
+    
+    userPrompt = prompt
 
     const message = await anthropic.messages.create({
       model: "claude-3-5-sonnet-20241022",
@@ -67,7 +71,7 @@ Analise o briefing do cliente e crie um layout que impressione pela qualidade pr
       messages: [
         {
           role: "user",
-          content: `Crie um layout profissional para: ${prompt}
+          content: `Crie um layout profissional para: ${userPrompt}
 
 Por favor, gere um código HTML completo com Tailwind CSS que seja:
 - Visualmente impressionante
@@ -91,7 +95,7 @@ Por favor, gere um código HTML completo com Tailwind CSS que seja:
     console.error('Erro na API:', error)
     
     // Fallback: gerar código profissional baseado no prompt
-    const fallbackCode = generateFallbackCode(prompt)
+    const fallbackCode = generateFallbackCode(userPrompt)
     return NextResponse.json({ code: fallbackCode })
   }
 }
