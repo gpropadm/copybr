@@ -34,7 +34,8 @@ export default function CodeGenerator() {
     }
   }, [])
 
-  const generateMockCode = (message: string): string => {
+  // Função removida - agora usando Claude API
+  const generateMockCode_unused = (message: string): string => {
     const lowerMessage = message.toLowerCase()
     
     if (lowerMessage.includes('delivery') || lowerMessage.includes('restaurante') || lowerMessage.includes('comida')) {
@@ -465,11 +466,24 @@ export default function CodeGenerator() {
     
     setIsLoading(true)
     
-    // Simular delay da IA
-    setTimeout(() => {
-      const generatedCode = generateMockCode(userMessage)
+    try {
+      const response = await fetch('/api/generate-app', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ prompt: userMessage })
+      })
+
+      if (!response.ok) {
+        throw new Error('Erro ao gerar código')
+      }
+
+      const data = await response.json()
+      const generatedCode = data.code
+      
       const aiMessage: ChatMessage = {
-        message: 'Código gerado! Veja o resultado no preview.',
+        message: 'Layout profissional gerado com Claude AI! 🎉',
         type: 'ai',
         code: generatedCode
       }
@@ -481,7 +495,18 @@ export default function CodeGenerator() {
       
       // Salvar no localStorage
       localStorage.setItem('chatHistory', JSON.stringify(updatedHistory))
-    }, 2000)
+      
+    } catch (error) {
+      console.error('Erro:', error)
+      const errorMessage: ChatMessage = {
+        message: 'Erro ao gerar código. Tente novamente.',
+        type: 'ai'
+      }
+      
+      const updatedHistory = [...newHistory, errorMessage]
+      setChatHistory(updatedHistory)
+      setIsLoading(false)
+    }
   }
 
   const copyCode = () => {
