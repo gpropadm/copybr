@@ -37,6 +37,131 @@ export default function CodeGenerator() {
   const generateMockCode = (message: string): string => {
     const lowerMessage = message.toLowerCase()
     
+    if (lowerMessage.includes('delivery') || lowerMessage.includes('restaurante') || lowerMessage.includes('comida')) {
+      return `<!DOCTYPE html>
+<html>
+<head>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-50">
+    <!-- Header Colorido -->
+    <header class="bg-gradient-to-r from-orange-500 to-red-500 text-white p-4 shadow-lg">
+        <div class="max-w-6xl mx-auto flex items-center justify-between">
+            <h1 class="text-2xl font-bold">🍕 DeliveryApp</h1>
+            <div class="flex items-center space-x-4">
+                <span class="text-sm">📍 São Paulo, SP</span>
+                <div class="bg-white text-orange-500 px-3 py-1 rounded-full text-sm font-semibold">🛒 3 itens</div>
+            </div>
+        </div>
+    </header>
+
+    <!-- Barra de Pesquisa -->
+    <div class="max-w-6xl mx-auto p-4">
+        <div class="relative mb-6">
+            <input type="text" placeholder="Buscar restaurantes ou pratos..." class="w-full px-4 py-3 pl-12 border border-gray-200 rounded-xl focus:ring-2 focus:ring-orange-500 focus:border-transparent shadow-sm">
+            <svg class="absolute left-4 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
+            </svg>
+        </div>
+
+        <!-- Categorias -->
+        <div class="flex space-x-4 mb-8 overflow-x-auto pb-2">
+            <button class="bg-orange-500 text-white px-6 py-3 rounded-full whitespace-nowrap font-medium shadow-sm">🍕 Pizza</button>
+            <button class="bg-white text-gray-700 px-6 py-3 rounded-full whitespace-nowrap font-medium shadow-sm border">🍔 Burgers</button>
+            <button class="bg-white text-gray-700 px-6 py-3 rounded-full whitespace-nowrap font-medium shadow-sm border">🍜 Asiática</button>
+            <button class="bg-white text-gray-700 px-6 py-3 rounded-full whitespace-nowrap font-medium shadow-sm border">🥗 Saudável</button>
+            <button class="bg-white text-gray-700 px-6 py-3 rounded-full whitespace-nowrap font-medium shadow-sm border">🍰 Sobremesas</button>
+        </div>
+
+        <!-- Restaurantes -->
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            <!-- Restaurante 1 -->
+            <div class="bg-white rounded-xl shadow-lg overflow-hidden hover:shadow-xl transition-shadow">
+                <div class="h-48 bg-gradient-to-r from-red-400 to-pink-500 flex items-center justify-center">
+                    <span class="text-6xl">🍕</span>
+                </div>
+                <div class="p-4">
+                    <h3 class="text-xl font-bold text-gray-800 mb-2">Pizza Express</h3>
+                    <div class="flex items-center mb-2">
+                        <span class="text-yellow-400">⭐⭐⭐⭐⭐</span>
+                        <span class="text-gray-600 text-sm ml-2">4.8 (127 avaliações)</span>
+                    </div>
+                    <p class="text-gray-600 text-sm mb-3">Pizzas artesanais • 25-35 min • R$ 8,90 entrega</p>
+                    <button class="w-full bg-orange-500 hover:bg-orange-600 text-white py-2 rounded-lg font-medium transition-colors">Ver Cardápio</button>
+                </div>
+            </div>
+
+            <!-- Restaurante 2 -->
+            <div class="bg-white rounded-xl shadow-lg overflow-hidden hover:shadow-xl transition-shadow">
+                <div class="h-48 bg-gradient-to-r from-green-400 to-blue-500 flex items-center justify-center">
+                    <span class="text-6xl">🍔</span>
+                </div>
+                <div class="p-4">
+                    <h3 class="text-xl font-bold text-gray-800 mb-2">Burger King</h3>
+                    <div class="flex items-center mb-2">
+                        <span class="text-yellow-400">⭐⭐⭐⭐</span>
+                        <span class="text-gray-600 text-sm ml-2">4.2 (89 avaliações)</span>
+                    </div>
+                    <p class="text-gray-600 text-sm mb-3">Hamburguers gourmet • 15-25 min • R$ 5,90 entrega</p>
+                    <button class="w-full bg-orange-500 hover:bg-orange-600 text-white py-2 rounded-lg font-medium transition-colors">Ver Cardápio</button>
+                </div>
+            </div>
+
+            <!-- Restaurante 3 -->
+            <div class="bg-white rounded-xl shadow-lg overflow-hidden hover:shadow-xl transition-shadow">
+                <div class="h-48 bg-gradient-to-r from-purple-400 to-pink-500 flex items-center justify-center">
+                    <span class="text-6xl">🍜</span>
+                </div>
+                <div class="p-4">
+                    <h3 class="text-xl font-bold text-gray-800 mb-2">Sushi Zen</h3>
+                    <div class="flex items-center mb-2">
+                        <span class="text-yellow-400">⭐⭐⭐⭐⭐</span>
+                        <span class="text-gray-600 text-sm ml-2">4.9 (203 avaliações)</span>
+                    </div>
+                    <p class="text-gray-600 text-sm mb-3">Comida japonesa • 30-40 min • R$ 12,90 entrega</p>
+                    <button class="w-full bg-orange-500 hover:bg-orange-600 text-white py-2 rounded-lg font-medium transition-colors">Ver Cardápio</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Carrinho Flutuante -->
+    <div class="fixed bottom-6 right-6 bg-orange-500 text-white px-6 py-4 rounded-xl shadow-xl hover:bg-orange-600 transition-colors cursor-pointer">
+        <div class="flex items-center space-x-3">
+            <div class="bg-white text-orange-500 px-2 py-1 rounded-full text-sm font-bold">3</div>
+            <div>
+                <p class="font-semibold">Ver Carrinho</p>
+                <p class="text-sm opacity-90">R$ 47,90</p>
+            </div>
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
+            </svg>
+        </div>
+    </div>
+
+    <!-- Botão Finalizar (Mobile) -->
+    <div class="md:hidden fixed bottom-0 left-0 right-0 bg-white border-t p-4">
+        <button class="w-full bg-orange-500 hover:bg-orange-600 text-white py-4 rounded-xl font-bold text-lg transition-colors">
+            Finalizar Pedido - R$ 47,90
+        </button>
+    </div>
+
+    <script>
+        // Funcionalidade básica
+        document.querySelectorAll('button').forEach(btn => {
+            btn.addEventListener('click', function() {
+                if (this.textContent.includes('Ver Cardápio')) {
+                    alert('Abrindo cardápio do ' + this.closest('.bg-white').querySelector('h3').textContent + '!');
+                } else if (this.textContent.includes('Finalizar') || this.textContent.includes('Carrinho')) {
+                    alert('Redirecionando para o checkout...');
+                }
+            });
+        });
+    </script>
+</body>
+</html>`
+    }
+    
     if (lowerMessage.includes('botão') || lowerMessage.includes('button')) {
       return `<!DOCTYPE html>
 <html>
@@ -77,6 +202,206 @@ export default function CodeGenerator() {
             </button>
         </form>
     </div>
+</body>
+</html>`
+    }
+    
+    if (lowerMessage.includes('dashboard') || lowerMessage.includes('admin')) {
+      return `<!DOCTYPE html>
+<html>
+<head>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-100">
+    <div class="flex h-screen">
+        <!-- Sidebar -->
+        <div class="w-64 bg-gray-800 text-white">
+            <div class="p-6">
+                <h1 class="text-2xl font-bold">📊 Dashboard</h1>
+            </div>
+            <nav class="mt-6">
+                <a href="#" class="block px-6 py-3 bg-gray-700 text-white">🏠 Dashboard</a>
+                <a href="#" class="block px-6 py-3 hover:bg-gray-700">👥 Usuários</a>
+                <a href="#" class="block px-6 py-3 hover:bg-gray-700">📈 Relatórios</a>
+                <a href="#" class="block px-6 py-3 hover:bg-gray-700">⚙️ Configurações</a>
+            </nav>
+        </div>
+        
+        <!-- Main Content -->
+        <div class="flex-1 overflow-y-auto">
+            <header class="bg-white shadow-sm border-b px-6 py-4">
+                <h2 class="text-2xl font-bold text-gray-800">Dashboard Administrativo</h2>
+            </header>
+            
+            <main class="p-6">
+                <!-- Stats Cards -->
+                <div class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
+                    <div class="bg-white p-6 rounded-lg shadow">
+                        <h3 class="text-sm font-medium text-gray-500">Total Usuários</h3>
+                        <p class="text-3xl font-bold text-blue-600">1,234</p>
+                    </div>
+                    <div class="bg-white p-6 rounded-lg shadow">
+                        <h3 class="text-sm font-medium text-gray-500">Vendas</h3>
+                        <p class="text-3xl font-bold text-green-600">R$ 45,678</p>
+                    </div>
+                    <div class="bg-white p-6 rounded-lg shadow">
+                        <h3 class="text-sm font-medium text-gray-500">Pedidos</h3>
+                        <p class="text-3xl font-bold text-purple-600">567</p>
+                    </div>
+                    <div class="bg-white p-6 rounded-lg shadow">
+                        <h3 class="text-sm font-medium text-gray-500">Conversão</h3>
+                        <p class="text-3xl font-bold text-orange-600">23.5%</p>
+                    </div>
+                </div>
+                
+                <!-- Table -->
+                <div class="bg-white rounded-lg shadow overflow-hidden">
+                    <div class="px-6 py-4 border-b">
+                        <h3 class="text-lg font-semibold">Usuários Recentes</h3>
+                    </div>
+                    <table class="w-full">
+                        <thead class="bg-gray-50">
+                            <tr>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Nome</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Email</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Status</th>
+                            </tr>
+                        </thead>
+                        <tbody class="divide-y divide-gray-200">
+                            <tr><td class="px-6 py-4">João Silva</td><td class="px-6 py-4">joao@email.com</td><td class="px-6 py-4"><span class="bg-green-100 text-green-800 px-2 py-1 rounded-full text-xs">Ativo</span></td></tr>
+                            <tr><td class="px-6 py-4">Maria Santos</td><td class="px-6 py-4">maria@email.com</td><td class="px-6 py-4"><span class="bg-green-100 text-green-800 px-2 py-1 rounded-full text-xs">Ativo</span></td></tr>
+                            <tr><td class="px-6 py-4">Pedro Costa</td><td class="px-6 py-4">pedro@email.com</td><td class="px-6 py-4"><span class="bg-red-100 text-red-800 px-2 py-1 rounded-full text-xs">Inativo</span></td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </main>
+        </div>
+    </div>
+</body>
+</html>`
+    }
+    
+    if (lowerMessage.includes('landing') || lowerMessage.includes('hero')) {
+      return `<!DOCTYPE html>
+<html>
+<head>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-white">
+    <!-- Header -->
+    <header class="bg-white shadow-sm">
+        <nav class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex items-center justify-between h-16">
+                <div class="font-bold text-xl text-gray-900">🚀 StartupApp</div>
+                <div class="hidden md:flex space-x-8">
+                    <a href="#" class="text-gray-600 hover:text-gray-900">Recursos</a>
+                    <a href="#" class="text-gray-600 hover:text-gray-900">Preços</a>
+                    <a href="#" class="text-gray-600 hover:text-gray-900">Sobre</a>
+                    <button class="bg-blue-600 text-white px-4 py-2 rounded-lg">Começar</button>
+                </div>
+            </div>
+        </nav>
+    </header>
+    
+    <!-- Hero Section -->
+    <section class="bg-gradient-to-r from-blue-600 to-purple-600 text-white py-20">
+        <div class="max-w-7xl mx-auto px-4 text-center">
+            <h1 class="text-5xl font-bold mb-6">Transforme sua ideia em realidade</h1>
+            <p class="text-xl mb-8 max-w-2xl mx-auto">A plataforma mais fácil para criar, gerenciar e escalar seu negócio digital.</p>
+            <div class="space-x-4">
+                <button class="bg-white text-blue-600 px-8 py-3 rounded-lg font-semibold text-lg hover:bg-gray-100">Começar Grátis</button>
+                <button class="border-2 border-white text-white px-8 py-3 rounded-lg font-semibold text-lg hover:bg-white hover:text-blue-600">Ver Demo</button>
+            </div>
+        </div>
+    </section>
+    
+    <!-- Depoimentos -->
+    <section class="py-16 bg-gray-50">
+        <div class="max-w-7xl mx-auto px-4">
+            <h2 class="text-3xl font-bold text-center mb-12">O que nossos clientes dizem</h2>
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+                <div class="bg-white p-6 rounded-lg shadow">
+                    <p class="text-gray-600 mb-4">"Incrível! Consegui lançar meu produto em 2 semanas."</p>
+                    <div class="flex items-center">
+                        <div class="w-10 h-10 bg-blue-500 rounded-full flex items-center justify-center text-white font-bold">JS</div>
+                        <div class="ml-3">
+                            <p class="font-semibold">João Silva</p>
+                            <p class="text-gray-500 text-sm">CEO, TechStart</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="bg-white p-6 rounded-lg shadow">
+                    <p class="text-gray-600 mb-4">"A melhor plataforma que já usei. Recomendo!"</p>
+                    <div class="flex items-center">
+                        <div class="w-10 h-10 bg-green-500 rounded-full flex items-center justify-center text-white font-bold">MS</div>
+                        <div class="ml-3">
+                            <p class="font-semibold">Maria Santos</p>
+                            <p class="text-gray-500 text-sm">Fundadora, InnovaCorp</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="bg-white p-6 rounded-lg shadow">
+                    <p class="text-gray-600 mb-4">"Suporte excepcional e resultados fantásticos."</p>
+                    <div class="flex items-center">
+                        <div class="w-10 h-10 bg-purple-500 rounded-full flex items-center justify-center text-white font-bold">PC</div>
+                        <div class="ml-3">
+                            <p class="font-semibold">Pedro Costa</p>
+                            <p class="text-gray-500 text-sm">CTO, DigitalPro</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+    
+    <!-- Pricing -->
+    <section class="py-16">
+        <div class="max-w-7xl mx-auto px-4">
+            <h2 class="text-3xl font-bold text-center mb-12">Escolha seu plano</h2>
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+                <div class="border rounded-lg p-6 text-center">
+                    <h3 class="text-xl font-bold mb-4">Básico</h3>
+                    <p class="text-3xl font-bold mb-4">R$ 29<span class="text-lg text-gray-500">/mês</span></p>
+                    <ul class="text-gray-600 mb-6 space-y-2">
+                        <li>✅ 5 projetos</li>
+                        <li>✅ Suporte básico</li>
+                        <li>✅ 10GB storage</li>
+                    </ul>
+                    <button class="w-full bg-gray-900 text-white py-2 rounded-lg">Escolher</button>
+                </div>
+                <div class="border-2 border-blue-600 rounded-lg p-6 text-center relative">
+                    <div class="absolute -top-3 left-1/2 transform -translate-x-1/2 bg-blue-600 text-white px-4 py-1 rounded-full text-sm">Popular</div>
+                    <h3 class="text-xl font-bold mb-4">Pro</h3>
+                    <p class="text-3xl font-bold mb-4">R$ 99<span class="text-lg text-gray-500">/mês</span></p>
+                    <ul class="text-gray-600 mb-6 space-y-2">
+                        <li>✅ Projetos ilimitados</li>
+                        <li>✅ Suporte prioritário</li>
+                        <li>✅ 100GB storage</li>
+                    </ul>
+                    <button class="w-full bg-blue-600 text-white py-2 rounded-lg">Escolher</button>
+                </div>
+                <div class="border rounded-lg p-6 text-center">
+                    <h3 class="text-xl font-bold mb-4">Enterprise</h3>
+                    <p class="text-3xl font-bold mb-4">R$ 299<span class="text-lg text-gray-500">/mês</span></p>
+                    <ul class="text-gray-600 mb-6 space-y-2">
+                        <li>✅ Tudo do Pro</li>
+                        <li>✅ Suporte dedicado</li>
+                        <li>✅ Storage ilimitado</li>
+                    </ul>
+                    <button class="w-full bg-gray-900 text-white py-2 rounded-lg">Escolher</button>
+                </div>
+            </div>
+        </div>
+    </section>
+    
+    <!-- CTA Final -->
+    <section class="bg-blue-600 text-white py-16">
+        <div class="max-w-4xl mx-auto px-4 text-center">
+            <h2 class="text-3xl font-bold mb-4">Pronto para começar?</h2>
+            <p class="text-xl mb-8">Junte-se a milhares de empresas que já transformaram seus negócios.</p>
+            <button class="bg-white text-blue-600 px-8 py-3 rounded-lg font-semibold text-lg hover:bg-gray-100">Começar Grátis Agora</button>
+        </div>
+    </section>
 </body>
 </html>`
     }
