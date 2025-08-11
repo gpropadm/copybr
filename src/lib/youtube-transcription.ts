@@ -60,9 +60,11 @@ export async function downloadYouTubeAudio(url: string): Promise<string> {
     const videoId = extractVideoId(url)
     if (!videoId) throw new Error('URL inválida do YouTube')
     
-    // Criar diretório temporário se não existir
-    const tempDir = path.join(process.cwd(), 'temp')
-    await fs.mkdir(tempDir, { recursive: true })
+    // Usar diretório temporário do sistema (compatível com Vercel)
+    const tempDir = process.env.VERCEL ? '/tmp' : path.join(process.cwd(), 'temp')
+    if (!process.env.VERCEL) {
+      await fs.mkdir(tempDir, { recursive: true })
+    }
     
     // Nome do arquivo temporário
     const audioPath = path.join(tempDir, `${videoId}.mp3`)
