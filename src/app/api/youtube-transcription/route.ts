@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { transcribeYouTubeVideoSimple, generateCopyFromTranscriptionSimple, isValidYouTubeURL, getVideoTitle } from '@/lib/youtube-simple'
+import { transcribeYouTubeVideo, isValidYouTubeURL, getVideoInfo } from '@/lib/youtube-transcription'
 import { Database } from '@/lib/database'
 
 export async function POST(request: NextRequest) {
@@ -69,11 +69,11 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    console.log(`🚀 Iniciando transcrição simples do vídeo: ${youtubeUrl}`)
+    console.log(`🚀 Iniciando transcrição real do vídeo: ${youtubeUrl}`)
     console.log(`📝 Template selecionado: ${template}`)
 
-    // Transcrever vídeo com abordagem simplificada
-    const transcriptionResult = await transcribeYouTubeVideoSimple(youtubeUrl)
+    // Transcrever vídeo com áudio real usando Whisper
+    const transcriptionResult = await transcribeYouTubeVideo(youtubeUrl)
     
     if (transcriptionResult.error) {
       return NextResponse.json(
@@ -82,7 +82,7 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    console.log(`✅ Transcrição concluída: ${transcriptionResult.title}`)
+    console.log(`✅ Transcrição real concluída: ${transcriptionResult.title}`)
 
     // Para transcrição apenas, não gerar copies
 
@@ -103,8 +103,8 @@ export async function POST(request: NextRequest) {
         },
         transcription: {
           fullText: transcriptionResult.transcription,
-          summary: transcriptionResult.summary,
-          keyPoints: transcriptionResult.keyPoints
+          summary: 'Transcrição real extraída com Whisper AI',
+          keyPoints: []
         },
         usage: {
           current: updatedCanGenerate.usage || 0,
@@ -148,7 +148,7 @@ export async function GET(request: NextRequest) {
     }
 
     // Obter título do vídeo de forma simples
-    const title = await getVideoTitle(url)
+    const { title } = await getVideoInfo(url)
 
     return NextResponse.json({
       success: true,

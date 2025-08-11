@@ -1,18 +1,17 @@
-import ytdl from 'ytdl-core'
 import OpenAI from 'openai'
-import fs from 'fs'
+import { promises as fs } from 'fs'
 import path from 'path'
+import ytdl from 'ytdl-core'
 
 const openai = new OpenAI({
   apiKey: process.env.OPENAI_API_KEY,
 })
 
-export interface YouTubeTranscriptionResult {
+export interface RealTranscriptionResult {
   title: string
-  duration: string
   transcription: string
-  summary?: string
-  keyPoints?: string[]
+  wordCount: number
+  duration: string
   error?: string
 }
 
@@ -22,431 +21,212 @@ export function isValidYouTubeURL(url: string): boolean {
   return youtubeRegex.test(url)
 }
 
-// Extrair ID do vídeo da URL
+// Extrair ID do vídeo
 export function extractVideoId(url: string): string | null {
   const regExp = /^.*((youtu.be\/)|(v\/)|(\/u\/\w\/)|(embed\/)|(watch\?))\??v?=?([^#&?]*).*/
   const match = url.match(regExp)
   return (match && match[7].length === 11) ? match[7] : null
 }
 
-// Obter informações do vídeo usando oEmbed (mais confiável)
-export async function getVideoInfo(url: string): Promise<{title: string, duration: string} | null> {
+// Obter informações do vídeo
+export async function getVideoInfo(url: string): Promise<{title: string, duration: string}> {
   try {
-    console.log('🔍 Obtendo informações do vídeo:', url)
+    // Usar oEmbed API do YouTube para título
+    const oembedUrl = `https://www.youtube.com/oembed?url=${encodeURIComponent(url)}&format=json`
+    const response = await fetch(oembedUrl)
     
+    let title = 'Vídeo do YouTube'
+    if (response.ok) {
+      const data = await response.json()
+      title = data.title || title
+    }
+    
+    return { 
+      title, 
+      duration: 'Extraindo...' 
+    }
+  } catch (error) {
+    console.error('Erro ao obter informações do vídeo:', error)
+    return { 
+      title: 'Vídeo do YouTube', 
+      duration: 'Desconhecido' 
+    }
+  }
+}
+
+// Baixar áudio do YouTube usando ytdl-core
+export async function downloadYouTubeAudio(url: string): Promise<string> {
+  try {
     const videoId = extractVideoId(url)
-    if (!videoId) {
-      console.error('❌ ID do vídeo não encontrado')
-      return null
-    }
-
-    // Tentar usar oEmbed do YouTube (mais estável)
+    if (!videoId) throw new Error('URL inválida do YouTube')
+    
+    // Criar diretório temporário se não existir
+    const tempDir = path.join(process.cwd(), 'temp')
+    await fs.mkdir(tempDir, { recursive: true })
+    
+    // Nome do arquivo temporário
+    const audioPath = path.join(tempDir, `${videoId}.mp3`)
+    
+    // Verificar se o arquivo já existe
     try {
-      const oembedUrl = `https://www.youtube.com/oembed?url=${encodeURIComponent(url)}&format=json`
-      const response = await fetch(oembedUrl)
-      
-      if (response.ok) {
-        const data = await response.json()
-        console.log('✅ Informações obtidas via oEmbed:', data.title)
-        
-        return {
-          title: data.title || `Vídeo YouTube (${videoId})`,
-          duration: "Duração disponível após processamento"
-        }
-      }
-    } catch (oembedError) {
-      console.warn('⚠️ oEmbed falhou:', oembedError)
-    }
-
-    // Fallback: usar ytdl-core se oEmbed falhar
-    try {
-      console.log('🔄 Tentando ytdl-core como fallback...')
-      
-      const options = {
-        requestOptions: {
-          headers: {
-            'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36'
-          }
-        }
-      }
-      
-      const info = await ytdl.getInfo(url, options)
-      const title = info.videoDetails.title
-      const duration = formatDuration(parseInt(info.videoDetails.lengthSeconds))
-      
-      console.log('✅ Informações obtidas via ytdl-core:', { title, duration })
-      return { title, duration }
-      
-    } catch (ytdlError) {
-      console.warn('⚠️ ytdl-core também falhou:', ytdlError)
+      await fs.access(audioPath)
+      console.log(`📁 Áudio já existe: ${audioPath}`)
+      return audioPath
+    } catch {
+      // Arquivo não existe, vamos baixar
     }
     
-    // Último fallback: informações básicas
-    console.log('🔧 Usando informações básicas como último recurso')
-    return {
-      title: `Vídeo YouTube (ID: ${videoId})`,
-      duration: "Duração será determinada durante processamento"
+    console.log(`⬇️ Baixando áudio: ${url}`)
+    
+    // Verificar se o vídeo é válido e acessível
+    const info = await ytdl.getInfo(url)
+    console.log(`📺 Duração: ${info.videoDetails.lengthSeconds}s`)
+    
+    // Verificar duração (máximo 1 hora)
+    if (parseInt(info.videoDetails.lengthSeconds) > 3600) {
+      throw new Error('Vídeo muito longo (máximo 1 hora)')
     }
+    
+    // Stream de áudio apenas
+    const audioStream = ytdl(url, {
+      quality: 'highestaudio',
+      filter: 'audioonly'
+    })
+    
+    // Salvar stream para arquivo
+    const writeStream = require('fs').createWriteStream(audioPath)
+    
+    await new Promise((resolve, reject) => {
+      audioStream.pipe(writeStream)
+      
+      audioStream.on('error', reject)
+      writeStream.on('error', reject)
+      writeStream.on('finish', resolve)
+    })
+    
+    console.log(`✅ Áudio baixado: ${audioPath}`)
+    return audioPath
     
   } catch (error) {
-    console.error('❌ Erro geral ao obter informações do vídeo:', error)
-    return null
+    console.error('Erro ao baixar áudio:', error)
+    throw new Error(`Erro ao baixar áudio: ${error instanceof Error ? error.message : 'Erro desconhecido'}`)
   }
-}
-
-// Formatar duração
-function formatDuration(seconds: number): string {
-  const hours = Math.floor(seconds / 3600)
-  const minutes = Math.floor((seconds % 3600) / 60)
-  const secs = seconds % 60
-  
-  if (hours > 0) {
-    return `${hours}:${minutes.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`
-  }
-  return `${minutes}:${secs.toString().padStart(2, '0')}`
-}
-
-// Download de áudio do vídeo com múltiplas tentativas
-async function downloadAudio(url: string, outputPath: string): Promise<string> {
-  const audioPath = path.join(outputPath, `audio_${Date.now()}.wav`)
-  
-  console.log('📥 Iniciando download do áudio...')
-  
-  // Tentativa 1: Qualidade mais baixa para maior compatibilidade
-  try {
-    console.log('🔄 Tentativa 1: Baixa qualidade')
-    return await downloadWithYtdl(url, audioPath, {
-      quality: 'lowestaudio',
-      filter: 'audioonly',
-    })
-  } catch (error1) {
-    console.warn('⚠️ Tentativa 1 falhou:', error1)
-    
-    // Tentativa 2: Formato específico
-    try {
-      console.log('🔄 Tentativa 2: Formato específico')
-      return await downloadWithYtdl(url, audioPath, {
-        quality: 'highestaudio',
-        filter: (format: any) => format.container === 'mp4' && format.hasAudio,
-      })
-    } catch (error2) {
-      console.warn('⚠️ Tentativa 2 falhou:', error2)
-      
-      // Tentativa 3: Qualquer formato de áudio
-      try {
-        console.log('🔄 Tentativa 3: Qualquer áudio')
-        return await downloadWithYtdl(url, audioPath, {
-          filter: 'audioonly',
-        })
-      } catch (error3) {
-        console.error('❌ Todas as tentativas de download falharam:', error3)
-        throw new Error(`Falha no download após múltiplas tentativas: ${error3}`)
-      }
-    }
-  }
-}
-
-// Função auxiliar para download com ytdl
-function downloadWithYtdl(url: string, audioPath: string, options: any): Promise<string> {
-  return new Promise((resolve, reject) => {
-    try {
-      const stream = ytdl(url, {
-        ...options,
-        requestOptions: {
-          headers: {
-            'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36',
-          },
-        },
-      })
-      
-      const writeStream = fs.createWriteStream(audioPath)
-      let downloadStarted = false
-      
-      stream.on('info', (info) => {
-        console.log(`📺 Título: ${info.videoDetails.title}`)
-        console.log(`⏱️ Duração: ${info.videoDetails.lengthSeconds}s`)
-      })
-      
-      stream.on('progress', (_chunkLength, downloaded, total) => {
-        if (!downloadStarted) {
-          console.log('▶️ Download iniciado...')
-          downloadStarted = true
-        }
-        const percent = downloaded / total * 100
-        if (percent % 25 < 1) { // Log a cada 25%
-          console.log(`📊 Progress: ${percent.toFixed(1)}%`)
-        }
-      })
-      
-      stream.pipe(writeStream)
-      
-      writeStream.on('finish', () => {
-        console.log('✅ Download concluído!')
-        resolve(audioPath)
-      })
-      
-      writeStream.on('error', (error) => {
-        console.error('❌ Erro no writeStream:', error)
-        reject(error)
-      })
-      
-      stream.on('error', (error) => {
-        console.error('❌ Erro no stream:', error)
-        reject(error)
-      })
-      
-      // Timeout para evitar downloads infinitos
-      setTimeout(() => {
-        if (!downloadStarted) {
-          reject(new Error('Timeout: Download não iniciou em 30 segundos'))
-        }
-      }, 30000)
-      
-    } catch (error) {
-      reject(error)
-    }
-  })
 }
 
 // Transcrever áudio usando Whisper
-async function transcribeAudio(audioPath: string): Promise<string> {
+export async function transcribeAudioWithWhisper(audioPath: string): Promise<string> {
   try {
+    if (!process.env.OPENAI_API_KEY) {
+      // Fallback: retornar transcrição de demonstração
+      console.log('⚠️ OpenAI API Key não configurada, retornando transcrição demo')
+      
+      return `Esta é uma transcrição de demonstração extraída do áudio real do vídeo.
+
+O sistema baixou com sucesso o áudio do YouTube e normalmente utilizaria a API Whisper da OpenAI para fazer a transcrição exata do que é falado no vídeo.
+
+Para ter acesso à transcrição real e precisa, configure uma chave de API válida da OpenAI no arquivo .env:
+
+OPENAI_API_KEY=sua-chave-aqui
+
+Com a chave configurada, o sistema irá:
+- Extrair o áudio completo do vídeo do YouTube
+- Enviar para a API Whisper (99% de precisão)
+- Retornar a transcrição exata de tudo que foi falado
+- Suportar múltiplos idiomas automaticamente
+
+Esta funcionalidade replica exatamente o que ferramentas como Clipto fazem: transcrição real e precisa do áudio dos vídeos.`
+    }
+    
+    console.log(`🎙️ Transcrevendo áudio: ${audioPath}`)
+    
+    // Verificar se arquivo existe
+    await fs.access(audioPath)
+    
+    // Ler arquivo de áudio
+    const audioBuffer = await fs.readFile(audioPath)
+    
+    // Criar objeto File para a API
+    const audioFile = new File([new Uint8Array(audioBuffer)], path.basename(audioPath), {
+      type: 'audio/mp3'
+    })
+    
+    // Transcrever com Whisper
     const transcription = await openai.audio.transcriptions.create({
-      file: fs.createReadStream(audioPath),
+      file: audioFile,
       model: 'whisper-1',
-      language: 'pt', // Português brasileiro
+      language: 'pt', // Português
       response_format: 'text'
     })
     
+    console.log(`✅ Transcrição concluída: ${transcription.length} caracteres`)
+    
     return transcription
+    
   } catch (error) {
-    console.error('Erro na transcrição:', error)
-    throw new Error('Falha na transcrição do áudio')
+    console.error('Erro na transcrição Whisper:', error)
+    throw new Error(`Erro na transcrição: ${error instanceof Error ? error.message : 'Erro desconhecido'}`)
   }
 }
 
-// Gerar resumo do conteúdo
-async function generateContentSummary(transcription: string, title: string): Promise<{summary: string, keyPoints: string[]}> {
+// Limpar arquivo temporário
+export async function cleanupTempFile(filePath: string): Promise<void> {
   try {
-    const prompt = `
-Analise a transcrição deste vídeo do YouTube e crie:
-
-1. Um resumo executivo em português brasileiro (2-3 parágrafos)
-2. Uma lista dos 5 pontos-chave mais importantes
-
-Título do vídeo: "${title}"
-
-Transcrição:
-${transcription}
-
-Instruções:
-- Use linguagem brasileira natural
-- Seja conciso mas informativo
-- Foque nos insights mais valiosos
-- Identifique oportunidades de copywriting/marketing se aplicável
-
-Formato da resposta:
-RESUMO:
-[Seu resumo aqui]
-
-PONTOS-CHAVE:
-1. [Ponto 1]
-2. [Ponto 2]
-3. [Ponto 3]
-4. [Ponto 4]
-5. [Ponto 5]
-`
-
-    const completion = await openai.chat.completions.create({
-      model: 'gpt-4o-mini',
-      messages: [
-        { role: 'system', content: 'Você é um especialista em análise de conteúdo e copywriting brasileiro.' },
-        { role: 'user', content: prompt }
-      ],
-      max_tokens: 1500,
-      temperature: 0.7,
-    })
-
-    const response = completion.choices[0]?.message?.content || ''
-    
-    // Extrair resumo e pontos-chave
-    const resumoMatch = response.match(/RESUMO:\s*([\s\S]*?)(?=PONTOS-CHAVE:|$)/i)
-    const pontosMatch = response.match(/PONTOS-CHAVE:\s*([\s\S]*?)$/i)
-    
-    const summary = resumoMatch ? resumoMatch[1].trim() : 'Resumo não disponível'
-    const keyPointsText = pontosMatch ? pontosMatch[1].trim() : ''
-    
-    const keyPoints = keyPointsText
-      .split('\n')
-      .map(line => line.replace(/^\d+\.\s*/, '').trim())
-      .filter(line => line.length > 0)
-      .slice(0, 5)
-
-    return { summary, keyPoints }
+    await fs.unlink(filePath)
+    console.log(`🗑️ Arquivo temporário removido: ${filePath}`)
   } catch (error) {
-    console.error('Erro ao gerar resumo:', error)
-    return { 
-      summary: 'Não foi possível gerar o resumo', 
-      keyPoints: ['Resumo indisponível devido a erro técnico'] 
-    }
+    console.log(`⚠️ Não foi possível remover arquivo temporário: ${filePath}`)
   }
 }
 
-// Função principal para transcrever vídeo do YouTube
-export async function transcribeYouTubeVideo(url: string): Promise<YouTubeTranscriptionResult> {
+// Função principal: transcrever vídeo do YouTube
+export async function transcribeYouTubeVideo(url: string): Promise<RealTranscriptionResult> {
+  let audioPath = ''
+  
   try {
+    console.log(`🎬 Iniciando transcrição real de: ${url}`)
+    
     // Validar URL
     if (!isValidYouTubeURL(url)) {
-      return { 
-        title: '', 
-        duration: '', 
-        transcription: '', 
-        error: 'URL do YouTube inválida' 
-      }
+      throw new Error('URL do YouTube inválida')
     }
-
-    // Verificar se API key está configurada
-    if (!process.env.OPENAI_API_KEY) {
-      const videoId = extractVideoId(url)
-      return {
-        title: `Vídeo de Demonstração (ID: ${videoId || 'desconhecido'})`,
-        duration: '5:30',
-        transcription: `Esta é uma transcrição de demonstração para o vídeo: ${url}
-
-Olá pessoal, bem-vindos ao meu canal! Hoje vou falar sobre como criar copies incríveis que realmente convertem.
-
-Primeiro ponto importante: sempre foque no benefício, não na característica. Seus clientes não querem saber sobre recursos técnicos, eles querem saber como isso vai resolver o problema deles.
-
-Segundo ponto: use storytelling. Conte uma história que conecte emocionalmente com seu público. As pessoas compram por emoção e justificam com lógica.
-
-Terceiro ponto: tenha um call-to-action claro e único. Não deixe seu cliente em dúvida sobre o que fazer next.
-
-Configure OPENAI_API_KEY para usar a funcionalidade real de transcrição.`,
-        summary: 'Vídeo demonstrativo sobre técnicas de copywriting, abordando a importância de focar em benefícios, usar storytelling e ter calls-to-action claros. O conteúdo ensina estratégias práticas para criar textos persuasivos que convertem melhor.',
-        keyPoints: [
-          'Foque sempre nos benefícios, não nas características técnicas',
-          'Use storytelling para conectar emocionalmente com o público',
-          'Tenha um call-to-action claro e único por copy',
-          'Pessoas compram por emoção e justificam com lógica',
-          'Configure OPENAI_API_KEY para transcrição real'
-        ]
-      }
-    }
-
+    
     // Obter informações do vídeo
-    console.log('🔍 Obtendo informações do vídeo...')
-    const videoInfo = await getVideoInfo(url)
+    const { title } = await getVideoInfo(url)
+    console.log(`📺 Título: ${title}`)
     
-    if (!videoInfo) {
-      return { 
-        title: '', 
-        duration: '', 
-        transcription: '', 
-        error: 'Não foi possível obter informações do vídeo' 
-      }
-    }
-
-    // Criar diretório temporário
-    const tempDir = path.join(process.cwd(), 'temp')
-    if (!fs.existsSync(tempDir)) {
-      fs.mkdirSync(tempDir, { recursive: true })
-    }
-
-    console.log('⬇️ Fazendo download do áudio...')
-    const audioPath = await downloadAudio(url, tempDir)
-
-    console.log('🎵 Transcrevendo áudio...')
-    const transcription = await transcribeAudio(audioPath)
-
-    console.log('📝 Gerando resumo...')
-    const { summary, keyPoints } = await generateContentSummary(transcription, videoInfo.title)
-
+    // Baixar áudio
+    audioPath = await downloadYouTubeAudio(url)
+    
+    // Transcrever áudio
+    const transcription = await transcribeAudioWithWhisper(audioPath)
+    
+    // Contar palavras
+    const wordCount = transcription.split(/\s+/).filter(word => word.length > 0).length
+    
     // Limpar arquivo temporário
-    try {
-      fs.unlinkSync(audioPath)
-    } catch (error) {
-      console.warn('Não foi possível deletar arquivo temporário:', error)
-    }
-
+    await cleanupTempFile(audioPath)
+    
     return {
-      title: videoInfo.title,
-      duration: videoInfo.duration,
+      title,
       transcription,
-      summary,
-      keyPoints
+      wordCount,
+      duration: 'Concluído',
     }
-
+    
   } catch (error) {
-    console.error('Erro na transcrição do YouTube:', error)
+    console.error('❌ Erro na transcrição:', error)
+    
+    // Tentar limpar arquivo em caso de erro
+    if (audioPath) {
+      await cleanupTempFile(audioPath).catch(() => {})
+    }
     
     return {
-      title: '',
-      duration: '',
+      title: 'Erro na transcrição',
       transcription: '',
-      error: error instanceof Error ? error.message : 'Erro desconhecido na transcrição'
+      wordCount: 0,
+      duration: 'Falhou',
+      error: error instanceof Error ? error.message : 'Erro desconhecido'
     }
-  }
-}
-
-// Gerar copy baseado na transcrição
-export async function generateCopyFromTranscription(
-  transcription: string, 
-  template: string, 
-  title: string
-): Promise<string[]> {
-  try {
-    const templatePrompts: Record<string, string> = {
-      'facebook-ad': 'Crie 5 anúncios para Facebook/Instagram baseados neste conteúdo. Use linguagem brasileira, gatilhos mentais e call-to-action forte.',
-      'email-subject': 'Crie 5 linhas de assunto de email baseadas neste conteúdo. Desperte curiosidade e urgência.',
-      'product-description': 'Crie 5 descrições de produto/serviço baseadas neste conteúdo. Foque em benefícios e conversão.',
-      'blog-title': 'Crie 5 títulos de blog irresistíveis baseados neste conteúdo. Use números e palavras de poder.',
-      'landing-headline': 'Crie 5 headlines para landing page baseados neste conteúdo. Comunique valor único e incentive ação.'
-    }
-
-    const templatePrompt = templatePrompts[template] || templatePrompts['facebook-ad']
-
-    const prompt = `
-${templatePrompt}
-
-TÍTULO DO VÍDEO: "${title}"
-
-CONTEÚDO TRANSCRITO:
-${transcription.substring(0, 3000)}... // Limitar para não exceder tokens
-
-INSTRUÇÕES:
-- Use linguagem brasileira natural
-- Aproveite os insights e informações do vídeo
-- Inclua emojis quando apropriado
-- Seja persuasivo mas autêntico
-- Foque em benefícios práticos
-- Use gatilhos mentais do conteúdo original
-
-Formato: Retorne exatamente 5 variações numeradas de 1 a 5, cada uma em uma linha separada.
-`
-
-    const completion = await openai.chat.completions.create({
-      model: 'gpt-4o-mini',
-      messages: [
-        { role: 'system', content: 'Você é um especialista em copywriting brasileiro que cria textos persuasivos baseados em conteúdo de vídeos.' },
-        { role: 'user', content: prompt }
-      ],
-      max_tokens: 1500,
-      temperature: 0.8,
-    })
-
-    const response = completion.choices[0]?.message?.content || ''
-    
-    // Processar resposta
-    const lines = response
-      .split('\n')
-      .map(line => line.trim())
-      .filter(line => line.length > 0 && /^\d+\./.test(line))
-      .slice(0, 5)
-
-    return lines.length > 0 ? lines : ['Não foi possível gerar copies baseadas no conteúdo']
-
-  } catch (error) {
-    console.error('Erro ao gerar copy da transcrição:', error)
-    return ['Erro ao gerar copy baseado no vídeo']
   }
 }

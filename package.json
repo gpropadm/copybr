@@ -34,6 +34,7 @@
     "stripe": "^18.3.0",
     "tailwind-merge": "^3.3.1",
     "tesseract.js": "^6.0.1",
+    "yt-dlp-wrap": "^2.3.12",
     "ytdl-core": "^4.11.5"
   },
   "devDependencies": {
