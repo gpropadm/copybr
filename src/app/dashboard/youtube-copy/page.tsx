@@ -9,12 +9,6 @@ interface VideoInfo {
   url: string
 }
 
-interface TranscriptionData {
-  fullText: string
-  summary: string
-  keyPoints: string[]
-}
-
 interface PreviewResult {
   title: string
   preview: string
@@ -22,41 +16,21 @@ interface PreviewResult {
   url: string
 }
 
-interface CopyResult {
-  id: string
-  text: string
-  template: string
-  score: number
+interface FullTranscriptionResult {
+  title: string
+  fullText: string
+  wordCount: number
+  url: string
 }
 
-interface TranscriptionResult {
-  video: VideoInfo
-  transcription: TranscriptionData
-  copies: CopyResult[]
-  usage: {
-    current: number
-    limit: number
-    remaining: number
-  }
-}
-
-const templates = [
-  { id: 'facebook-ad', name: 'Anúncio Facebook/Instagram', icon: '📱' },
-  { id: 'email-subject', name: 'Assunto de Email', icon: '📧' },
-  { id: 'product-description', name: 'Descrição de Produto', icon: '🛍️' },
-  { id: 'blog-title', name: 'Título de Blog', icon: '📝' },
-  { id: 'landing-headline', name: 'Headline de Landing Page', icon: '🎯' }
-]
 
 export default function YouTubeCopyPage() {
   const [youtubeUrl, setYoutubeUrl] = useState('')
-  const [selectedTemplate, setSelectedTemplate] = useState('facebook-ad')
   const [isLoading, setIsLoading] = useState(false)
-  const [videoInfo, setVideoInfo] = useState<VideoInfo | null>(null)
-  const [result, setResult] = useState<TranscriptionResult | null>(null)
   const [previewResult, setPreviewResult] = useState<PreviewResult | null>(null)
+  const [fullResult, setFullResult] = useState<FullTranscriptionResult | null>(null)
   const [error, setError] = useState('')
-  const [step, setStep] = useState(1) // 1: Input, 2: Preview, 3: Processing, 4: Results
+  const [step, setStep] = useState(1) // 1: Input, 2: Preview, 3: Processing, 4: Full Transcription
 
   // Validar URL do YouTube
   const isValidYouTubeURL = (url: string): boolean => {
@@ -98,8 +72,8 @@ export default function YouTubeCopyPage() {
     }
   }
 
-  // Processar vídeo completo e gerar copies
-  const processVideo = async () => {
+  // Obter transcrição completa (estilo Clipto)
+  const getFullTranscription = async () => {
     if (!previewResult) return
 
     try {
@@ -114,7 +88,7 @@ export default function YouTubeCopyPage() {
         },
         body: JSON.stringify({
           youtubeUrl: previewResult.url,
-          template: selectedTemplate
+          template: 'transcription-only' // Apenas transcrição
         })
       })
 
@@ -124,8 +98,14 @@ export default function YouTubeCopyPage() {
         throw new Error(data.error || 'Erro ao processar vídeo')
       }
 
-      setResult(data.data)
-      setStep(4) // Results
+      // Extrair a transcrição completa
+      setFullResult({
+        title: data.data.video.title,
+        fullText: data.data.transcription.fullText,
+        wordCount: data.data.transcription.fullText.split(' ').length,
+        url: previewResult.url
+      })
+      setStep(4) // Full transcription results
     } catch (error) {
       setError(error instanceof Error ? error.message : 'Erro desconhecido')
       setStep(2) // Back to preview
@@ -137,9 +117,8 @@ export default function YouTubeCopyPage() {
   // Reset para nova busca
   const resetForm = () => {
     setYoutubeUrl('')
-    setVideoInfo(null)
-    setResult(null)
     setPreviewResult(null)
+    setFullResult(null)
     setError('')
     setStep(1)
   }
@@ -163,8 +142,8 @@ export default function YouTubeCopyPage() {
             <Youtube className="w-6 h-6 text-red-600" />
           </div>
           <div>
-            <h1 className="text-3xl font-bold text-gray-900">Copy do YouTube</h1>
-            <p className="text-gray-600">Transforme qualquer vídeo do YouTube em copies persuasivos</p>
+            <h1 className="text-3xl font-bold text-gray-900">Transcrição do YouTube</h1>
+            <p className="text-gray-600">Extraia toda a fala de qualquer vídeo do YouTube em texto</p>
           </div>
         </div>
       </div>
@@ -252,36 +231,15 @@ export default function YouTubeCopyPage() {
             </div>
           </div>
 
-          {/* Seleção de Template para Upgrade */}
+          {/* Upgrade para Transcrição Completa */}
           <div className="bg-white rounded-xl p-6 shadow-sm border">
             <h3 className="text-lg font-semibold mb-4 flex items-center gap-2">
-              <Target className="w-5 h-5 text-blue-600" />
-              Gerar Copies Profissionais
+              <FileText className="w-5 h-5 text-blue-600" />
+              Transcrição Completa
             </h3>
-            
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3 mb-6">
-              {templates.map((template) => (
-                <button
-                  key={template.id}
-                  onClick={() => setSelectedTemplate(template.id)}
-                  className={`p-4 rounded-lg border-2 text-left transition-all ${
-                    selectedTemplate === template.id
-                      ? 'border-blue-500 bg-blue-50'
-                      : 'border-gray-200 hover:border-gray-300'
-                  }`}
-                >
-                  <div className="flex items-center gap-3">
-                    <span className="text-2xl">{template.icon}</span>
-                    <div>
-                      <p className="font-medium text-gray-900">{template.name}</p>
-                    </div>
-                  </div>
-                </button>
-              ))}
-            </div>
 
             <div className="bg-blue-50 border-2 border-blue-200 rounded-lg p-6 mb-6">
-              <h4 className="text-lg font-semibold text-blue-900 mb-2">🚀 Desbloqueie o Poder Completo!</h4>
+              <h4 className="text-lg font-semibold text-blue-900 mb-2">🔓 Desbloqueie o Texto Completo!</h4>
               <div className="space-y-2 text-blue-800">
                 <p className="flex items-center gap-2">
                   <CheckCircle className="w-4 h-4" />
@@ -289,21 +247,21 @@ export default function YouTubeCopyPage() {
                 </p>
                 <p className="flex items-center gap-2">
                   <CheckCircle className="w-4 h-4" />
-                  5 copies profissionais personalizadas
+                  Todo o texto falado no vídeo com 99% de precisão
                 </p>
                 <p className="flex items-center gap-2">
                   <CheckCircle className="w-4 h-4" />
-                  Resumo executivo e pontos-chave
+                  Texto copiável e pesquisável
                 </p>
                 <p className="flex items-center gap-2">
                   <CheckCircle className="w-4 h-4" />
-                  Análise completa para seus projetos
+                  Processamento em segundos
                 </p>
               </div>
             </div>
 
             <button
-              onClick={processVideo}
+              onClick={getFullTranscription}
               disabled={isLoading}
               className="w-full px-6 py-4 bg-blue-600 text-white text-lg font-semibold rounded-lg hover:bg-blue-700 disabled:bg-gray-300 disabled:cursor-not-allowed flex items-center justify-center gap-2"
             >
@@ -312,7 +270,7 @@ export default function YouTubeCopyPage() {
               ) : (
                 <FileText className="w-5 h-5" />
               )}
-              Gerar Copies Completas - Usar 1 Credit
+              Ver Transcrição Completa - Usar 1 Credit
             </button>
           </div>
         </div>
@@ -326,43 +284,46 @@ export default function YouTubeCopyPage() {
           </div>
           
           <h2 className="text-2xl font-semibold text-gray-900 mb-2">
-            Processando seu vídeo...
+            Transcrevendo o vídeo...
           </h2>
           
           <p className="text-gray-600 max-w-md mx-auto">
-            Estamos transcrevendo o áudio e gerando copies personalizados baseados no conteúdo. 
+            Estamos extraindo todo o texto falado no vídeo. 
             Isso pode levar alguns minutos.
           </p>
           
           <div className="mt-8 space-y-2 max-w-sm mx-auto">
             <div className="flex items-center gap-3 text-sm text-gray-600">
               <CheckCircle className="w-4 h-4 text-green-600" />
-              Download do áudio concluído
+              Vídeo analisado com sucesso
             </div>
             <div className="flex items-center gap-3 text-sm text-gray-600">
               <Loader2 className="w-4 h-4 animate-spin" />
-              Transcrevendo com IA...
+              Transcrevendo áudio com IA...
             </div>
             <div className="flex items-center gap-3 text-sm text-gray-400">
               <div className="w-4 h-4 rounded-full border-2 border-gray-300"></div>
-              Gerando copies
+              Finalizando texto
             </div>
           </div>
         </div>
       )}
 
-      {/* Etapa 4: Resultados */}
-      {step === 4 && result && (
+      {/* Etapa 4: Transcrição Completa */}
+      {step === 4 && fullResult && (
         <div className="space-y-6">
           {/* Header dos Resultados */}
           <div className="bg-white rounded-xl p-6 shadow-sm border">
             <div className="flex items-start justify-between mb-4">
               <div>
                 <h2 className="text-xl font-semibold text-gray-900 mb-2">
-                  Copies Gerados
+                  Transcrição Completa
                 </h2>
                 <p className="text-gray-600">
-                  Baseado no vídeo: <strong>{result.video.title}</strong>
+                  <strong>{fullResult.title}</strong>
+                </p>
+                <p className="text-sm text-gray-500 mt-1">
+                  {fullResult.wordCount} palavras transcritas
                 </p>
               </div>
               
@@ -370,86 +331,50 @@ export default function YouTubeCopyPage() {
                 onClick={resetForm}
                 className="px-4 py-2 text-blue-600 hover:bg-blue-50 rounded-lg transition-colors"
               >
-                Novo Vídeo
+                Nova Transcrição
               </button>
             </div>
 
-            {/* Uso da API */}
-            <div className="bg-gray-50 rounded-lg p-4">
-              <p className="text-sm text-gray-600">
-                <strong>Uso atual:</strong> {result.usage.current}/{result.usage.limit === -1 ? '∞' : result.usage.limit} copies este mês
+            <div className="bg-green-50 border border-green-200 rounded-lg p-4">
+              <p className="text-green-700 text-sm flex items-center gap-2">
+                <CheckCircle className="w-4 h-4" />
+                <strong>Sucesso!</strong> Todo o texto falado no vídeo foi extraído com precisão.
               </p>
             </div>
-          </div>
-
-          {/* Resumo do Vídeo */}
-          <div className="bg-white rounded-xl p-6 shadow-sm border">
-            <h3 className="text-lg font-semibold mb-4">Resumo do Conteúdo</h3>
-            
-            <div className="space-y-4">
-              <div>
-                <h4 className="font-medium text-gray-900 mb-2">Resumo:</h4>
-                <p className="text-gray-700 leading-relaxed">
-                  {result.transcription.summary}
-                </p>
-              </div>
-              
-              {result.transcription.keyPoints && result.transcription.keyPoints.length > 0 && (
-                <div>
-                  <h4 className="font-medium text-gray-900 mb-2">Pontos-chave:</h4>
-                  <ul className="space-y-1">
-                    {result.transcription.keyPoints.map((point, index) => (
-                      <li key={index} className="flex items-start gap-2 text-gray-700">
-                        <span className="w-1.5 h-1.5 bg-blue-600 rounded-full mt-2 flex-shrink-0"></span>
-                        {point}
-                      </li>
-                    ))}
-                  </ul>
-                </div>
-              )}
-            </div>
-          </div>
-
-          {/* Copies Gerados */}
-          <div className="space-y-4">
-            {result.copies.map((copy, index) => (
-              <div key={copy.id} className="bg-white rounded-xl p-6 shadow-sm border">
-                <div className="flex items-start justify-between mb-4">
-                  <div>
-                    <h4 className="font-semibold text-gray-900">
-                      Variação {index + 1}
-                    </h4>
-                    <p className="text-sm text-gray-600">
-                      Score: {copy.score}/100
-                    </p>
-                  </div>
-                  
-                  <button
-                    onClick={() => copyToClipboard(copy.text)}
-                    className="px-3 py-1.5 text-sm text-blue-600 hover:bg-blue-50 rounded-lg transition-colors"
-                  >
-                    Copiar
-                  </button>
-                </div>
-                
-                <p className="text-gray-800 leading-relaxed">
-                  {copy.text}
-                </p>
-              </div>
-            ))}
           </div>
 
           {/* Transcrição Completa */}
-          <details className="bg-white rounded-xl shadow-sm border">
-            <summary className="p-6 cursor-pointer font-semibold text-gray-900 hover:bg-gray-50">
-              Ver Transcrição Completa
-            </summary>
-            <div className="px-6 pb-6">
-              <p className="text-gray-700 leading-relaxed whitespace-pre-wrap">
-                {result.transcription.fullText}
+          <div className="bg-white rounded-xl p-6 shadow-sm border">
+            <div className="flex items-center justify-between mb-4">
+              <h3 className="text-lg font-semibold text-gray-900">Texto Completo</h3>
+              <button
+                onClick={() => copyToClipboard(fullResult.fullText)}
+                className="px-4 py-2 bg-blue-600 text-white text-sm rounded-lg hover:bg-blue-700 transition-colors flex items-center gap-2"
+              >
+                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" />
+                </svg>
+                Copiar Texto
+              </button>
+            </div>
+            
+            <div className="bg-gray-50 rounded-lg p-4 max-h-96 overflow-y-auto">
+              <p className="text-gray-800 leading-relaxed whitespace-pre-wrap font-mono text-sm">
+                {fullResult.fullText}
               </p>
             </div>
-          </details>
+          </div>
+
+          {/* Informações Adicionais */}
+          <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
+            <h4 className="text-blue-900 font-medium mb-2">💡 Dicas para usar sua transcrição:</h4>
+            <ul className="text-blue-800 text-sm space-y-1">
+              <li>• Use Ctrl+F (ou Cmd+F) para pesquisar palavras específicas</li>
+              <li>• Copie trechos importantes para suas anotações</li>
+              <li>• Use o texto para criar resumos e extrair insights</li>
+              <li>• Ideal para acessibilidade e revisão de conteúdo</li>
+            </ul>
+          </div>
         </div>
       )}
     </div>

@@ -131,7 +131,7 @@ function DashboardContent({
     },
     {
       icon: Video,
-      label: 'Copy do YouTube',
+      label: 'Transcrição YouTube',
       href: '/dashboard/youtube-copy',
       color: 'text-red-600'
     },

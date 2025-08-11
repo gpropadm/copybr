@@ -61,11 +61,10 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    // Verificar se o template existe
-    const validTemplates = ['facebook-ad', 'email-subject', 'product-description', 'blog-title', 'landing-headline']
-    if (!validTemplates.includes(template)) {
+    // Para transcrição apenas, não precisa validar template específico
+    if (template !== 'transcription-only') {
       return NextResponse.json(
-        { error: 'Template inválido' },
+        { error: 'Esta API suporta apenas transcrição completa' },
         { status: 400 }
       )
     }
@@ -85,14 +84,7 @@ export async function POST(request: NextRequest) {
 
     console.log(`✅ Transcrição concluída: ${transcriptionResult.title}`)
 
-    // Gerar copies baseadas na transcrição
-    const copies = await generateCopyFromTranscriptionSimple(
-      transcriptionResult.transcription,
-      template,
-      transcriptionResult.title
-    )
-
-    console.log(`📱 ${copies.length} copies geradas`)
+    // Para transcrição apenas, não gerar copies
 
     // Incrementar uso do usuário (conta como uma geração)
     await Database.incrementUsage(userId, 1);
@@ -100,7 +92,7 @@ export async function POST(request: NextRequest) {
     // Buscar dados atualizados
     const updatedCanGenerate = await Database.canGenerateCopy(userId);
 
-    // Retornar resultado completo
+    // Retornar apenas a transcrição completa
     return NextResponse.json({ 
       success: true,
       data: {
@@ -114,12 +106,6 @@ export async function POST(request: NextRequest) {
           summary: transcriptionResult.summary,
           keyPoints: transcriptionResult.keyPoints
         },
-        copies: copies.map((copy, index) => ({
-          id: `youtube-copy-${Date.now()}-${index}`,
-          text: copy.replace(/^\d+\.\s*/, ''), // Remove numeração
-          template,
-          score: Math.floor(Math.random() * 30) + 70 // Score simulado
-        })),
         usage: {
           current: updatedCanGenerate.usage || 0,
           limit: updatedCanGenerate.limit || 0,
