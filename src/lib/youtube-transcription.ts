@@ -106,32 +106,101 @@ function formatDuration(seconds: number): string {
   return `${minutes}:${secs.toString().padStart(2, '0')}`
 }
 
-// Download de áudio do vídeo
+// Download de áudio do vídeo com múltiplas tentativas
 async function downloadAudio(url: string, outputPath: string): Promise<string> {
-  return new Promise((resolve, reject) => {
-    const audioPath = path.join(outputPath, `audio_${Date.now()}.wav`)
+  const audioPath = path.join(outputPath, `audio_${Date.now()}.wav`)
+  
+  console.log('📥 Iniciando download do áudio...')
+  
+  // Tentativa 1: Qualidade mais baixa para maior compatibilidade
+  try {
+    console.log('🔄 Tentativa 1: Baixa qualidade')
+    return await downloadWithYtdl(url, audioPath, {
+      quality: 'lowestaudio',
+      filter: 'audioonly',
+    })
+  } catch (error1) {
+    console.warn('⚠️ Tentativa 1 falhou:', error1)
     
+    // Tentativa 2: Formato específico
+    try {
+      console.log('🔄 Tentativa 2: Formato específico')
+      return await downloadWithYtdl(url, audioPath, {
+        quality: 'highestaudio',
+        filter: format => format.container === 'mp4' && format.hasAudio,
+      })
+    } catch (error2) {
+      console.warn('⚠️ Tentativa 2 falhou:', error2)
+      
+      // Tentativa 3: Qualquer formato de áudio
+      try {
+        console.log('🔄 Tentativa 3: Qualquer áudio')
+        return await downloadWithYtdl(url, audioPath, {
+          filter: 'audioonly',
+        })
+      } catch (error3) {
+        console.error('❌ Todas as tentativas de download falharam:', error3)
+        throw new Error(`Falha no download após múltiplas tentativas: ${error3}`)
+      }
+    }
+  }
+}
+
+// Função auxiliar para download com ytdl
+function downloadWithYtdl(url: string, audioPath: string, options: any): Promise<string> {
+  return new Promise((resolve, reject) => {
     try {
       const stream = ytdl(url, {
-        quality: 'lowestaudio',
-        filter: 'audioonly',
+        ...options,
+        requestOptions: {
+          headers: {
+            'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36',
+          },
+        },
       })
       
       const writeStream = fs.createWriteStream(audioPath)
+      let downloadStarted = false
+      
+      stream.on('info', (info) => {
+        console.log(`📺 Título: ${info.videoDetails.title}`)
+        console.log(`⏱️ Duração: ${info.videoDetails.lengthSeconds}s`)
+      })
+      
+      stream.on('progress', (chunkLength, downloaded, total) => {
+        if (!downloadStarted) {
+          console.log('▶️ Download iniciado...')
+          downloadStarted = true
+        }
+        const percent = downloaded / total * 100
+        if (percent % 25 < 1) { // Log a cada 25%
+          console.log(`📊 Progress: ${percent.toFixed(1)}%`)
+        }
+      })
       
       stream.pipe(writeStream)
       
       writeStream.on('finish', () => {
+        console.log('✅ Download concluído!')
         resolve(audioPath)
       })
       
       writeStream.on('error', (error) => {
+        console.error('❌ Erro no writeStream:', error)
         reject(error)
       })
       
       stream.on('error', (error) => {
+        console.error('❌ Erro no stream:', error)
         reject(error)
       })
+      
+      // Timeout para evitar downloads infinitos
+      setTimeout(() => {
+        if (!downloadStarted) {
+          reject(new Error('Timeout: Download não iniciou em 30 segundos'))
+        }
+      }, 30000)
       
     } catch (error) {
       reject(error)

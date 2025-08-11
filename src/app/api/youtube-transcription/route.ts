@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { transcribeYouTubeVideo, generateCopyFromTranscription, isValidYouTubeURL } from '@/lib/youtube-transcription'
+import { transcribeYouTubeVideoSimple, generateCopyFromTranscriptionSimple, isValidYouTubeURL, getVideoTitle } from '@/lib/youtube-simple'
 import { Database } from '@/lib/database'
 
 export async function POST(request: NextRequest) {
@@ -70,11 +70,11 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    console.log(`🚀 Iniciando transcrição do vídeo: ${youtubeUrl}`)
+    console.log(`🚀 Iniciando transcrição simples do vídeo: ${youtubeUrl}`)
     console.log(`📝 Template selecionado: ${template}`)
 
-    // Transcrever vídeo
-    const transcriptionResult = await transcribeYouTubeVideo(youtubeUrl)
+    // Transcrever vídeo com abordagem simplificada
+    const transcriptionResult = await transcribeYouTubeVideoSimple(youtubeUrl)
     
     if (transcriptionResult.error) {
       return NextResponse.json(
@@ -86,7 +86,7 @@ export async function POST(request: NextRequest) {
     console.log(`✅ Transcrição concluída: ${transcriptionResult.title}`)
 
     // Gerar copies baseadas na transcrição
-    const copies = await generateCopyFromTranscription(
+    const copies = await generateCopyFromTranscriptionSimple(
       transcriptionResult.transcription,
       template,
       transcriptionResult.title
@@ -106,7 +106,7 @@ export async function POST(request: NextRequest) {
       data: {
         video: {
           title: transcriptionResult.title,
-          duration: transcriptionResult.duration,
+          duration: "Processamento completo",
           url: youtubeUrl
         },
         transcription: {
@@ -161,22 +161,14 @@ export async function GET(request: NextRequest) {
       )
     }
 
-    // Importar função para obter info do vídeo
-    const { getVideoInfo } = await import('@/lib/youtube-transcription')
-    const videoInfo = await getVideoInfo(url)
-
-    if (!videoInfo) {
-      return NextResponse.json(
-        { error: 'Não foi possível obter informações do vídeo' },
-        { status: 400 }
-      )
-    }
+    // Obter título do vídeo de forma simples
+    const title = await getVideoTitle(url)
 
     return NextResponse.json({
       success: true,
       data: {
-        title: videoInfo.title,
-        duration: videoInfo.duration,
+        title,
+        duration: "Duração disponível após processamento",
         url
       }
     })
