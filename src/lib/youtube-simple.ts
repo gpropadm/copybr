@@ -201,9 +201,9 @@ PONTOS-CHAVE:
 
     const response = completion.choices[0]?.message?.content || ''
     
-    // Extrair resumo e pontos
-    const resumoMatch = response.match(/RESUMO:\s*(.*?)(?=PONTOS-CHAVE:|$)/s)
-    const pontosMatch = response.match(/PONTOS-CHAVE:\s*([\s\S]*?)$/s)
+    // Extrair resumo e pontos (sem flag 's' para compatibilidade)
+    const resumoMatch = response.match(/RESUMO:\s*([\s\S]*?)(?=PONTOS-CHAVE:|$)/)
+    const pontosMatch = response.match(/PONTOS-CHAVE:\s*([\s\S]*?)$/)
     
     const summary = resumoMatch ? resumoMatch[1].trim() : 'Resumo não disponível'
     const keyPointsText = pontosMatch ? pontosMatch[1].trim() : ''
