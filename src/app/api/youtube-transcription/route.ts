@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { transcribeYouTubeVideo, isValidYouTubeURL, getVideoInfo } from '@/lib/youtube-transcription'
+import { transcribeYouTubeSimple, isValidYouTubeURL } from '@/lib/simple-whisper'
 import { Database } from '@/lib/database'
 
 export async function POST(request: NextRequest) {
@@ -69,20 +69,19 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    console.log(`🚀 Iniciando transcrição com Whisper: ${youtubeUrl}`)
-    console.log(`📝 Template selecionado: ${template}`)
+    console.log(`🚀 TRANSCRIÇÃO SIMPLES: ${youtubeUrl}`)
 
-    // Transcrever vídeo com Whisper OpenAI (que você já tem crédito)
-    const transcriptionResult = await transcribeYouTubeVideo(youtubeUrl)
+    // Usar nova implementação simples
+    const result = await transcribeYouTubeSimple(youtubeUrl)
     
-    if (transcriptionResult.error) {
+    if (result.error) {
       return NextResponse.json(
-        { error: transcriptionResult.error },
+        { error: result.error },
         { status: 400 }
       )
     }
 
-    console.log(`✅ Transcrição Whisper concluída: ${transcriptionResult.title}`)
+    console.log(`✅ SUCESSO: ${result.title} - ${result.wordCount} palavras`)
 
     // Para transcrição apenas, não gerar copies
 
@@ -92,18 +91,18 @@ export async function POST(request: NextRequest) {
     // Buscar dados atualizados
     const updatedCanGenerate = await Database.canGenerateCopy(userId);
 
-    // Retornar apenas a transcrição completa
+    // Retornar transcrição real
     return NextResponse.json({ 
       success: true,
       data: {
         video: {
-          title: transcriptionResult.title,
-          duration: "Processamento completo",
+          title: result.title,
+          duration: "Transcrito com sucesso",
           url: youtubeUrl
         },
         transcription: {
-          fullText: transcriptionResult.transcription,
-          summary: 'Transcrição real extraída com Whisper AI',
+          fullText: result.transcription,
+          summary: `Transcrição real - ${result.wordCount} palavras extraídas`,
           keyPoints: []
         },
         usage: {
@@ -147,8 +146,11 @@ export async function GET(request: NextRequest) {
       )
     }
 
-    // Obter título do vídeo de forma simples
-    const { title } = await getVideoInfo(url)
+    // Usar função simples para título
+    const oembedUrl = `https://www.youtube.com/oembed?url=${encodeURIComponent(url)}&format=json`
+    const response = await fetch(oembedUrl)
+    const data = response.ok ? await response.json() : {}
+    const title = data.title || 'Vídeo do YouTube'
 
     return NextResponse.json({
       success: true,
