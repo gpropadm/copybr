@@ -3,9 +3,7 @@ import { promises as fs } from 'fs'
 import path from 'path'
 import ytdl from '@distube/ytdl-core'
 
-const openai = new OpenAI({
-  apiKey: process.env.OPENAI_API_KEY,
-})
+// Inicialização do OpenAI será feita dentro da função para usar a chave validada
 
 export interface RealTranscriptionResult {
   title: string
@@ -123,40 +121,35 @@ export async function transcribeAudioWithWhisper(audioPath: string): Promise<str
     console.log(`🌍 Environment: ${process.env.VERCEL ? 'VERCEL' : 'LOCAL'}`)
     
     if (!apiKey || apiKey.length < 20) {
-      // Fallback: retornar transcrição de demonstração
-      console.log('⚠️ OpenAI API Key não configurada, retornando transcrição demo')
-      
-      return `Esta é uma transcrição de demonstração extraída do áudio real do vídeo.
-
-O sistema baixou com sucesso o áudio do YouTube e normalmente utilizaria a API Whisper da OpenAI para fazer a transcrição exata do que é falado no vídeo.
-
-Para ter acesso à transcrição real e precisa, configure uma chave de API válida da OpenAI no arquivo .env:
-
-OPENAI_API_KEY=sua-chave-aqui
-
-Com a chave configurada, o sistema irá:
-- Extrair o áudio completo do vídeo do YouTube
-- Enviar para a API Whisper (99% de precisão)
-- Retornar a transcrição exata de tudo que foi falado
-- Suportar múltiplos idiomas automaticamente
-
-Esta funcionalidade replica exatamente o que ferramentas como Clipto fazem: transcrição real e precisa do áudio dos vídeos.`
+      throw new Error('OpenAI API Key não configurada corretamente. Verifique as variáveis de ambiente no Vercel.')
     }
+    
+    // Criar cliente OpenAI com a chave validada
+    const openai = new OpenAI({
+      apiKey: apiKey,
+    })
     
     console.log(`🎙️ Transcrevendo áudio: ${audioPath}`)
     
     // Verificar se arquivo existe
+    console.log(`📁 Verificando se arquivo existe...`)
     await fs.access(audioPath)
+    console.log(`✅ Arquivo encontrado`)
     
     // Ler arquivo de áudio
+    console.log(`📖 Lendo arquivo de áudio...`)
     const audioBuffer = await fs.readFile(audioPath)
+    console.log(`✅ Arquivo lido: ${audioBuffer.length} bytes`)
     
     // Criar objeto File para a API
+    console.log(`📦 Preparando arquivo para upload...`)
     const audioFile = new File([new Uint8Array(audioBuffer)], path.basename(audioPath), {
       type: 'audio/mp3'
     })
+    console.log(`✅ Arquivo preparado: ${audioFile.size} bytes`)
     
     // Transcrever com Whisper
+    console.log(`🚀 Enviando para Whisper API...`)
     const transcription = await openai.audio.transcriptions.create({
       file: audioFile,
       model: 'whisper-1',
@@ -165,6 +158,7 @@ Esta funcionalidade replica exatamente o que ferramentas como Clipto fazem: tran
     })
     
     console.log(`✅ Transcrição concluída: ${transcription.length} caracteres`)
+    console.log(`📝 Primeiros 100 chars: ${transcription.substring(0, 100)}...`)
     
     return transcription
     
