@@ -127,7 +127,7 @@ async function downloadAudio(url: string, outputPath: string): Promise<string> {
       console.log('🔄 Tentativa 2: Formato específico')
       return await downloadWithYtdl(url, audioPath, {
         quality: 'highestaudio',
-        filter: format => format.container === 'mp4' && format.hasAudio,
+        filter: (format: any) => format.container === 'mp4' && format.hasAudio,
       })
     } catch (error2) {
       console.warn('⚠️ Tentativa 2 falhou:', error2)
@@ -167,7 +167,7 @@ function downloadWithYtdl(url: string, audioPath: string, options: any): Promise
         console.log(`⏱️ Duração: ${info.videoDetails.lengthSeconds}s`)
       })
       
-      stream.on('progress', (chunkLength, downloaded, total) => {
+      stream.on('progress', (_chunkLength, downloaded, total) => {
         if (!downloadStarted) {
           console.log('▶️ Download iniciado...')
           downloadStarted = true
