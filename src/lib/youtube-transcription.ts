@@ -118,10 +118,11 @@ export async function downloadYouTubeAudio(url: string): Promise<string> {
 // Transcrever áudio usando Whisper
 export async function transcribeAudioWithWhisper(audioPath: string): Promise<string> {
   try {
-    const apiKey = process.env.OPENAI_API_KEY
-    console.log(`🔑 API Key status: ${apiKey ? 'CONFIGURADA' : 'NÃO CONFIGURADA'}`)
+    const apiKey = process.env.OPENAI_API_KEY?.trim()
+    console.log(`🔑 API Key status: ${apiKey ? 'CONFIGURADA (' + apiKey.substring(0, 10) + '...)' : 'NÃO CONFIGURADA'}`)
+    console.log(`🌍 Environment: ${process.env.VERCEL ? 'VERCEL' : 'LOCAL'}`)
     
-    if (!apiKey) {
+    if (!apiKey || apiKey.length < 20) {
       // Fallback: retornar transcrição de demonstração
       console.log('⚠️ OpenAI API Key não configurada, retornando transcrição demo')
       

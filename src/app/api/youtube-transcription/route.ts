@@ -69,10 +69,10 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    console.log(`🚀 Iniciando transcrição real do vídeo: ${youtubeUrl}`)
+    console.log(`🚀 Iniciando transcrição com Whisper: ${youtubeUrl}`)
     console.log(`📝 Template selecionado: ${template}`)
 
-    // Transcrever vídeo com áudio real usando Whisper
+    // Transcrever vídeo com Whisper OpenAI (que você já tem crédito)
     const transcriptionResult = await transcribeYouTubeVideo(youtubeUrl)
     
     if (transcriptionResult.error) {
@@ -82,7 +82,7 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    console.log(`✅ Transcrição real concluída: ${transcriptionResult.title}`)
+    console.log(`✅ Transcrição Whisper concluída: ${transcriptionResult.title}`)
 
     // Para transcrição apenas, não gerar copies
 
