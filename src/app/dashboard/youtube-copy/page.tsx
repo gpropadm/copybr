@@ -15,6 +15,13 @@ interface TranscriptionData {
   keyPoints: string[]
 }
 
+interface PreviewResult {
+  title: string
+  preview: string
+  wordCount: number
+  url: string
+}
+
 interface CopyResult {
   id: string
   text: string
@@ -47,8 +54,9 @@ export default function YouTubeCopyPage() {
   const [isLoading, setIsLoading] = useState(false)
   const [videoInfo, setVideoInfo] = useState<VideoInfo | null>(null)
   const [result, setResult] = useState<TranscriptionResult | null>(null)
+  const [previewResult, setPreviewResult] = useState<PreviewResult | null>(null)
   const [error, setError] = useState('')
-  const [step, setStep] = useState(1) // 1: Input, 2: Processing, 3: Results
+  const [step, setStep] = useState(1) // 1: Input, 2: Preview, 3: Processing, 4: Results
 
   // Validar URL do YouTube
   const isValidYouTubeURL = (url: string): boolean => {
@@ -56,8 +64,8 @@ export default function YouTubeCopyPage() {
     return youtubeRegex.test(url)
   }
 
-  // Obter informações do vídeo
-  const fetchVideoInfo = async () => {
+  // Obter preview do vídeo (estilo Clipto)
+  const fetchVideoPreview = async () => {
     if (!youtubeUrl || !isValidYouTubeURL(youtubeUrl)) {
       setError('Por favor, insira uma URL válida do YouTube')
       return
@@ -67,14 +75,22 @@ export default function YouTubeCopyPage() {
       setError('')
       setIsLoading(true)
 
-      const response = await fetch(`/api/youtube-transcription?url=${encodeURIComponent(youtubeUrl)}`)
+      const response = await fetch('/api/youtube-preview', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ youtubeUrl })
+      })
+      
       const data = await response.json()
 
       if (!response.ok) {
-        throw new Error(data.error || 'Erro ao obter informações do vídeo')
+        throw new Error(data.error || 'Erro ao obter preview do vídeo')
       }
 
-      setVideoInfo(data.data)
+      setPreviewResult(data.data)
+      setStep(2) // Ir para step de preview
     } catch (error) {
       setError(error instanceof Error ? error.message : 'Erro desconhecido')
     } finally {
@@ -82,13 +98,13 @@ export default function YouTubeCopyPage() {
     }
   }
 
-  // Processar vídeo e gerar copies
+  // Processar vídeo completo e gerar copies
   const processVideo = async () => {
-    if (!videoInfo) return
+    if (!previewResult) return
 
     try {
       setIsLoading(true)
-      setStep(2)
+      setStep(3) // Processing
       setError('')
 
       const response = await fetch('/api/youtube-transcription', {
@@ -97,7 +113,7 @@ export default function YouTubeCopyPage() {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
-          youtubeUrl: videoInfo.url,
+          youtubeUrl: previewResult.url,
           template: selectedTemplate
         })
       })
@@ -109,10 +125,10 @@ export default function YouTubeCopyPage() {
       }
 
       setResult(data.data)
-      setStep(3)
+      setStep(4) // Results
     } catch (error) {
       setError(error instanceof Error ? error.message : 'Erro desconhecido')
-      setStep(1)
+      setStep(2) // Back to preview
     } finally {
       setIsLoading(false)
     }
@@ -123,6 +139,7 @@ export default function YouTubeCopyPage() {
     setYoutubeUrl('')
     setVideoInfo(null)
     setResult(null)
+    setPreviewResult(null)
     setError('')
     setStep(1)
   }
@@ -176,7 +193,7 @@ export default function YouTubeCopyPage() {
                     className="flex-1 px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                   />
                   <button
-                    onClick={fetchVideoInfo}
+                    onClick={fetchVideoPreview}
                     disabled={isLoading || !youtubeUrl}
                     className="px-6 py-3 bg-red-600 text-white rounded-lg hover:bg-red-700 disabled:bg-gray-300 disabled:cursor-not-allowed flex items-center gap-2 whitespace-nowrap"
                   >
@@ -185,7 +202,7 @@ export default function YouTubeCopyPage() {
                     ) : (
                       <Play className="w-4 h-4" />
                     )}
-                    Analisar
+                    Ver Preview
                   </button>
                 </div>
                 
@@ -196,75 +213,113 @@ export default function YouTubeCopyPage() {
             </div>
           </div>
 
-          {/* Informações do Vídeo */}
-          {videoInfo && (
-            <div className="bg-white rounded-xl p-6 shadow-sm border">
-              <h3 className="text-lg font-semibold mb-4 flex items-center gap-2">
-                <CheckCircle className="w-5 h-5 text-green-600" />
-                Vídeo Encontrado
-              </h3>
-              
-              <div className="space-y-3">
-                <div>
-                  <span className="text-sm font-medium text-gray-500">Título:</span>
-                  <p className="text-gray-900">{videoInfo.title}</p>
-                </div>
-                <div>
-                  <span className="text-sm font-medium text-gray-500">Duração:</span>
-                  <p className="text-gray-900">{videoInfo.duration}</p>
-                </div>
-              </div>
-            </div>
-          )}
-
-          {/* Seleção de Template */}
-          {videoInfo && (
-            <div className="bg-white rounded-xl p-6 shadow-sm border">
-              <h3 className="text-lg font-semibold mb-4 flex items-center gap-2">
-                <Target className="w-5 h-5 text-blue-600" />
-                Tipo de Copy
-              </h3>
-              
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
-                {templates.map((template) => (
-                  <button
-                    key={template.id}
-                    onClick={() => setSelectedTemplate(template.id)}
-                    className={`p-4 rounded-lg border-2 text-left transition-all ${
-                      selectedTemplate === template.id
-                        ? 'border-blue-500 bg-blue-50'
-                        : 'border-gray-200 hover:border-gray-300'
-                    }`}
-                  >
-                    <div className="flex items-center gap-3">
-                      <span className="text-2xl">{template.icon}</span>
-                      <div>
-                        <p className="font-medium text-gray-900">{template.name}</p>
-                      </div>
-                    </div>
-                  </button>
-                ))}
-              </div>
-
-              <button
-                onClick={processVideo}
-                disabled={isLoading}
-                className="w-full mt-6 px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:bg-gray-300 disabled:cursor-not-allowed flex items-center justify-center gap-2"
-              >
-                {isLoading ? (
-                  <Loader2 className="w-4 h-4 animate-spin" />
-                ) : (
-                  <FileText className="w-4 h-4" />
-                )}
-                Gerar Copies
-              </button>
-            </div>
-          )}
         </div>
       )}
 
-      {/* Etapa 2: Processamento */}
-      {step === 2 && (
+      {/* Etapa 2: Preview (estilo Clipto) */}
+      {step === 2 && previewResult && (
+        <div className="space-y-6">
+          {/* Header do Preview */}
+          <div className="bg-white rounded-xl p-6 shadow-sm border">
+            <div className="flex items-start justify-between mb-4">
+              <div>
+                <h2 className="text-xl font-semibold text-gray-900 mb-2">
+                  Preview da Transcrição
+                </h2>
+                <p className="text-gray-600">
+                  <strong>{previewResult.title}</strong>
+                </p>
+                <p className="text-sm text-gray-500">
+                  {previewResult.wordCount} palavras transcritas
+                </p>
+              </div>
+              
+              <button
+                onClick={resetForm}
+                className="px-4 py-2 text-blue-600 hover:bg-blue-50 rounded-lg transition-colors"
+              >
+                Novo Vídeo
+              </button>
+            </div>
+          </div>
+
+          {/* Preview da Transcrição (estilo Clipto) */}
+          <div className="bg-white rounded-xl p-6 shadow-sm border">
+            <div className="prose max-w-none">
+              <pre className="whitespace-pre-wrap text-gray-700 leading-relaxed font-sans">
+                {previewResult.preview}
+              </pre>
+            </div>
+          </div>
+
+          {/* Seleção de Template para Upgrade */}
+          <div className="bg-white rounded-xl p-6 shadow-sm border">
+            <h3 className="text-lg font-semibold mb-4 flex items-center gap-2">
+              <Target className="w-5 h-5 text-blue-600" />
+              Gerar Copies Profissionais
+            </h3>
+            
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3 mb-6">
+              {templates.map((template) => (
+                <button
+                  key={template.id}
+                  onClick={() => setSelectedTemplate(template.id)}
+                  className={`p-4 rounded-lg border-2 text-left transition-all ${
+                    selectedTemplate === template.id
+                      ? 'border-blue-500 bg-blue-50'
+                      : 'border-gray-200 hover:border-gray-300'
+                  }`}
+                >
+                  <div className="flex items-center gap-3">
+                    <span className="text-2xl">{template.icon}</span>
+                    <div>
+                      <p className="font-medium text-gray-900">{template.name}</p>
+                    </div>
+                  </div>
+                </button>
+              ))}
+            </div>
+
+            <div className="bg-blue-50 border-2 border-blue-200 rounded-lg p-6 mb-6">
+              <h4 className="text-lg font-semibold text-blue-900 mb-2">🚀 Desbloqueie o Poder Completo!</h4>
+              <div className="space-y-2 text-blue-800">
+                <p className="flex items-center gap-2">
+                  <CheckCircle className="w-4 h-4" />
+                  Transcrição completa com mais de {previewResult.wordCount} palavras
+                </p>
+                <p className="flex items-center gap-2">
+                  <CheckCircle className="w-4 h-4" />
+                  5 copies profissionais personalizadas
+                </p>
+                <p className="flex items-center gap-2">
+                  <CheckCircle className="w-4 h-4" />
+                  Resumo executivo e pontos-chave
+                </p>
+                <p className="flex items-center gap-2">
+                  <CheckCircle className="w-4 h-4" />
+                  Análise completa para seus projetos
+                </p>
+              </div>
+            </div>
+
+            <button
+              onClick={processVideo}
+              disabled={isLoading}
+              className="w-full px-6 py-4 bg-blue-600 text-white text-lg font-semibold rounded-lg hover:bg-blue-700 disabled:bg-gray-300 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+            >
+              {isLoading ? (
+                <Loader2 className="w-5 h-5 animate-spin" />
+              ) : (
+                <FileText className="w-5 h-5" />
+              )}
+              Gerar Copies Completas - Usar 1 Credit
+            </button>
+          </div>
+        </div>
+      )}
+
+      {/* Etapa 3: Processamento */}
+      {step === 3 && (
         <div className="text-center py-12">
           <div className="inline-flex items-center justify-center w-16 h-16 bg-blue-100 rounded-full mb-6">
             <Loader2 className="w-8 h-8 text-blue-600 animate-spin" />
@@ -296,8 +351,8 @@ export default function YouTubeCopyPage() {
         </div>
       )}
 
-      {/* Etapa 3: Resultados */}
-      {step === 3 && result && (
+      {/* Etapa 4: Resultados */}
+      {step === 4 && result && (
         <div className="space-y-6">
           {/* Header dos Resultados */}
           <div className="bg-white rounded-xl p-6 shadow-sm border">
