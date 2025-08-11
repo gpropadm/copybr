@@ -29,16 +29,67 @@ export function extractVideoId(url: string): string | null {
   return (match && match[7].length === 11) ? match[7] : null
 }
 
-// Obter informações do vídeo
+// Obter informações do vídeo usando oEmbed (mais confiável)
 export async function getVideoInfo(url: string): Promise<{title: string, duration: string} | null> {
   try {
-    const info = await ytdl.getInfo(url)
-    const title = info.videoDetails.title
-    const duration = formatDuration(parseInt(info.videoDetails.lengthSeconds))
+    console.log('🔍 Obtendo informações do vídeo:', url)
     
-    return { title, duration }
+    const videoId = extractVideoId(url)
+    if (!videoId) {
+      console.error('❌ ID do vídeo não encontrado')
+      return null
+    }
+
+    // Tentar usar oEmbed do YouTube (mais estável)
+    try {
+      const oembedUrl = `https://www.youtube.com/oembed?url=${encodeURIComponent(url)}&format=json`
+      const response = await fetch(oembedUrl)
+      
+      if (response.ok) {
+        const data = await response.json()
+        console.log('✅ Informações obtidas via oEmbed:', data.title)
+        
+        return {
+          title: data.title || `Vídeo YouTube (${videoId})`,
+          duration: "Duração disponível após processamento"
+        }
+      }
+    } catch (oembedError) {
+      console.warn('⚠️ oEmbed falhou:', oembedError)
+    }
+
+    // Fallback: usar ytdl-core se oEmbed falhar
+    try {
+      console.log('🔄 Tentando ytdl-core como fallback...')
+      
+      const options = {
+        requestOptions: {
+          headers: {
+            'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36'
+          }
+        }
+      }
+      
+      const info = await ytdl.getInfo(url, options)
+      const title = info.videoDetails.title
+      const duration = formatDuration(parseInt(info.videoDetails.lengthSeconds))
+      
+      console.log('✅ Informações obtidas via ytdl-core:', { title, duration })
+      return { title, duration }
+      
+    } catch (ytdlError) {
+      console.warn('⚠️ ytdl-core também falhou:', ytdlError)
+    }
+    
+    // Último fallback: informações básicas
+    console.log('🔧 Usando informações básicas como último recurso')
+    return {
+      title: `Vídeo YouTube (ID: ${videoId})`,
+      duration: "Duração será determinada durante processamento"
+    }
+    
   } catch (error) {
-    console.error('Erro ao obter informações do vídeo:', error)
+    console.error('❌ Erro geral ao obter informações do vídeo:', error)
     return null
   }
 }
@@ -187,15 +238,28 @@ export async function transcribeYouTubeVideo(url: string): Promise<YouTubeTransc
 
     // Verificar se API key está configurada
     if (!process.env.OPENAI_API_KEY) {
+      const videoId = extractVideoId(url)
       return {
-        title: 'Demo Video',
+        title: `Vídeo de Demonstração (ID: ${videoId || 'desconhecido'})`,
         duration: '5:30',
-        transcription: 'Esta é uma transcrição de demonstração. Configure OPENAI_API_KEY para usar a funcionalidade real.',
-        summary: 'Resumo de demonstração do conteúdo do vídeo.',
+        transcription: `Esta é uma transcrição de demonstração para o vídeo: ${url}
+
+Olá pessoal, bem-vindos ao meu canal! Hoje vou falar sobre como criar copies incríveis que realmente convertem.
+
+Primeiro ponto importante: sempre foque no benefício, não na característica. Seus clientes não querem saber sobre recursos técnicos, eles querem saber como isso vai resolver o problema deles.
+
+Segundo ponto: use storytelling. Conte uma história que conecte emocionalmente com seu público. As pessoas compram por emoção e justificam com lógica.
+
+Terceiro ponto: tenha um call-to-action claro e único. Não deixe seu cliente em dúvida sobre o que fazer next.
+
+Configure OPENAI_API_KEY para usar a funcionalidade real de transcrição.`,
+        summary: 'Vídeo demonstrativo sobre técnicas de copywriting, abordando a importância de focar em benefícios, usar storytelling e ter calls-to-action claros. O conteúdo ensina estratégias práticas para criar textos persuasivos que convertem melhor.',
         keyPoints: [
-          'Este é um ponto-chave de exemplo',
-          'Configure a API para funcionalidade completa',
-          'A transcrição real será muito mais detalhada'
+          'Foque sempre nos benefícios, não nas características técnicas',
+          'Use storytelling para conectar emocionalmente com o público',
+          'Tenha um call-to-action claro e único por copy',
+          'Pessoas compram por emoção e justificam com lógica',
+          'Configure OPENAI_API_KEY para transcrição real'
         ]
       }
     }
