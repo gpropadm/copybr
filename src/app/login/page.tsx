@@ -165,6 +165,18 @@ export default function LoginPage() {
                 {isLoading ? 'Entrando...' : 'Entrar'}
               </Button>
 
+              {/* Credenciais de Teste */}
+              <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 mt-4">
+                <h4 className="text-sm font-medium text-blue-800 mb-2">🧪 Credenciais de Teste:</h4>
+                <div className="space-y-1 text-xs text-blue-700">
+                  <p><strong>Email:</strong> admin@copybr.com</p>
+                  <p><strong>Senha:</strong> 123456</p>
+                </div>
+                <p className="text-xs text-blue-600 mt-2 italic">
+                  Use estas credenciais para testar a nova funcionalidade do YouTube!
+                </p>
+              </div>
+
               <div className="text-center mt-6 pt-6 border-t border-gray-200">
                 <p className="text-sm text-gray-600">
                   Não tem uma conta?{' '}

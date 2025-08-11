@@ -39,3 +39,9 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+# temp files for YouTube processing
+/temp/
+*.wav
+*.mp3
+*.mp4
